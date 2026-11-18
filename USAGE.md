@@ -32,3 +32,25 @@ your own overrides — override the tokens instead.
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
 tabs, accordion).
+
+### button
+
+`UrUi.Components.button/1` — the primary action trigger (shadcn `Button`).
+
+- `<.button>Save</.button>` for form submits and actions; prefer `type:`
+  `:submit` inside forms.
+- With `href` it renders an `<a>` instead (navigation, external links).
+- Use `variant: :destructive` only for irreversible actions; `:ghost` and
+  `:link` for low-emphasis actions (toolbars, inline actions).
+- `:icon` sizes are square and expect a single icon as content.
+
+Attr       | Type      | Default    | Notes
+-----------|-----------|------------|------
+`variant`  | atom      | `:default` | `:default`, `:destructive`, `:outline`, `:secondary`, `:ghost`, `:link`
+`size`     | atom      | `:default` | `:default`, `:xs`, `:sm`, `:lg`, `:icon`, `:icon_xs`, `:icon_sm`, `:icon_lg`
+`type`     | string    | `"button"` | ignored when `href` is given
+`href`     | string    | `nil`      | renders `<a>` when given
+`disabled` | boolean   | `false`    | `disabled` on `<button>`, `aria-disabled` on `<a>`
+`class`    | string    | `nil`      | appended to base classes
+`rest`     | global    | —          | `id`, `aria-*`, `phx-*`, `data-*` pass through
+slot `:inner_block` | slot | required | button content
