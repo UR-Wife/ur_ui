@@ -196,4 +196,127 @@ defmodule UrUi.Components do
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
+
+  @doc """
+  Avatar (shadcn `Avatar`) — user image with fallback.
+
+  Compose `avatar_image/1` and `avatar_fallback/1` inside the root;
+  `avatar_badge/1`, `avatar_group/1` and `avatar_group_count/1` cover the
+  accessory parts.
+
+  ## Sizes
+
+  `:default`, `:sm`, `:lg`
+  """
+  attr :size, :atom, default: :default, values: [:default, :sm, :lg], doc: "avatar size"
+  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
+  attr :rest, :global
+  slot :inner_block
+
+  def avatar(assigns) do
+    assigns = assign(assigns, :classes, avatar_classes(assigns))
+
+    ~H"""
+    <div class={@classes} data-size={@size} {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc """
+  Avatar image (shadcn `AvatarImage`) — the user photo, inside `avatar/1`.
+  """
+  attr :src, :string, default: nil, doc: "image URL"
+  attr :alt, :string, default: "", doc: "alternative text"
+  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
+  attr :rest, :global
+
+  def avatar_image(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-avatar__image", assigns))
+
+    ~H"""
+    <img src={@src} alt={@alt} class={@classes} {@rest} />
+    """
+  end
+
+  @doc """
+  Avatar fallback (shadcn `AvatarFallback`) — initials shown when the image
+  is missing, inside `avatar/1`.
+  """
+  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def avatar_fallback(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-avatar__fallback", assigns))
+
+    ~H"""
+    <span class={@classes} {@rest}>
+      {render_slot(@inner_block)}
+    </span>
+    """
+  end
+
+  @doc """
+  Avatar badge (shadcn `AvatarBadge`) — status marker on the avatar corner.
+  """
+  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def avatar_badge(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-avatar__badge", assigns))
+
+    ~H"""
+    <span class={@classes} {@rest}>
+      {render_slot(@inner_block)}
+    </span>
+    """
+  end
+
+  @doc """
+  Avatar group (shadcn `AvatarGroup`) — overlapping avatars.
+  """
+  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def avatar_group(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-avatar-group", assigns))
+
+    ~H"""
+    <div class={@classes} {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc """
+  Avatar group count (shadcn `AvatarGroupCount`) — the "+N" bubble in a group.
+  """
+  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def avatar_group_count(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-avatar-group__count", assigns))
+
+    ~H"""
+    <div class={@classes} {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  defp avatar_classes(assigns) do
+    ["ur-avatar", "ur-avatar--size-#{assigns.size}", assigns[:class]]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
+  defp part_classes(base, assigns) do
+    [base, assigns[:class]]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
 end

@@ -114,4 +114,25 @@ Attr    | Type   | Default | Notes
 `rest`  | global | —       | `id`, `aria-*`, `phx-*`, `data-*` pass through
 slot `:inner_block` | slot | optional | rarely needed
 
+### avatar
+
+`UrUi.Components.avatar/1` — user image with fallback (shadcn `Avatar`).
+
+- Compose: put `avatar_image/1` and `avatar_fallback/1` inside the root;
+  the fallback (initials) shows when the image fails or is absent.
+- `avatar_badge/1` for status markers, `avatar_group/1` +
+  `avatar_group_count/1` for stacked teams.
+
+Attr   | Type | Default    | Notes
+-------|------|------------|------
+`size` | atom | `:default` | `:default`, `:sm`, `:lg`
+`class`| string | `nil`    | appended to base classes
+`rest` | global | —        | `id`, `aria-*`, `phx-*`, `data-*` pass through
+slot `:inner_block` | slot | optional | image/fallback/badge parts
+
+Parts: `avatar_image/1` (`src`, `alt`, `class`, `rest`), `avatar_fallback/1`,
+`avatar_badge/1`, `avatar_group/1`, `avatar_group_count/1` — each takes
+`class`, `rest` and a `:inner_block` slot.
+
+
 

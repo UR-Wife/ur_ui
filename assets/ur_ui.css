@@ -245,5 +245,95 @@
   }
 }
 
+/* ---------------------------------------------------------------- */
+/* avatar                                                            */
+/* ---------------------------------------------------------------- */
+
+.ur-avatar {
+  position: relative;
+  display: flex;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 9999px;
+  user-select: none;
+}
+
+.ur-avatar--size-sm {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.ur-avatar--size-lg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.ur-avatar__image {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.ur-avatar__fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--ur-wifes-muted);
+  color: var(--ur-wifes-muted-fg);
+  font-size: 0.875rem;
+}
+
+.ur-avatar--size-sm .ur-avatar__fallback {
+  font-size: 0.75rem;
+}
+
+.ur-avatar__badge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--ur-wifes-primary);
+  color: var(--ur-wifes-primary-fg);
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.ur-avatar-group {
+  display: flex;
+  align-items: center;
+}
+
+.ur-avatar-group > .ur-avatar {
+  margin-left: -0.5rem;
+}
+
+.ur-avatar-group > .ur-avatar:first-child {
+  margin-left: 0;
+}
+
+.ur-avatar-group__count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-left: -0.5rem;
+  border-radius: 9999px;
+  background: var(--ur-wifes-muted);
+  color: var(--ur-wifes-muted-fg);
+  font-size: 0.875rem;
+}
+
+
 
 
