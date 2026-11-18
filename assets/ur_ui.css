@@ -1,8 +1,8 @@
 /*
  * ur_ui design tokens — the ONLY place hardcoded colors may appear.
  * Every component rule references tokens via var(--ur-wifes-*).
- * Forbidden everywhere in this file and in lib/: style=, box-shadow,
- * text-shadow, filter, backdrop-filter. Focus states use outline only.
+ * Forbidden everywhere in this file and in lib/: inline style attributes,
+ * shadow and filter properties. Focus states use outline only.
  */
 
 :root {
