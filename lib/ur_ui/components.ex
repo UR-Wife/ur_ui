@@ -74,4 +74,36 @@ defmodule UrUi.Components do
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
+
+  @doc """
+  Badge (shadcn `Badge`) — a small status descriptor.
+
+  ## Variants
+
+  `:default`, `:secondary`, `:destructive`, `:outline`, `:ghost`, `:link`
+  """
+  attr :variant, :atom,
+    default: :default,
+    values: [:default, :secondary, :destructive, :outline, :ghost, :link],
+    doc: "visual variant"
+
+  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def badge(assigns) do
+    assigns = assign(assigns, :classes, badge_classes(assigns))
+
+    ~H"""
+    <span class={@classes} data-variant={@variant} {@rest}>
+      {render_slot(@inner_block)}
+    </span>
+    """
+  end
+
+  defp badge_classes(assigns) do
+    ["ur-badge", "ur-badge--#{assigns.variant}", assigns[:class]]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
 end

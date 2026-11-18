@@ -54,3 +54,19 @@ Attr       | Type      | Default    | Notes
 `class`    | string    | `nil`      | appended to base classes
 `rest`     | global    | —          | `id`, `aria-*`, `phx-*`, `data-*` pass through
 slot `:inner_block` | slot | required | button content
+
+### badge
+
+`UrUi.Components.badge/1` — small status descriptor (shadcn `Badge`).
+
+- Use for counts, statuses and category tags; never as a button.
+- `:destructive` for error/failed states, `:outline` for neutral tags,
+  `:link` when the badge itself navigates.
+- Keep content to one or two words.
+
+Attr       | Type   | Default    | Notes
+-----------|--------|------------|------
+`variant`  | atom   | `:default` | `:default`, `:secondary`, `:destructive`, `:outline`, `:ghost`, `:link`
+`class`    | string | `nil`      | appended to base classes
+`rest`     | global | —          | `id`, `aria-*`, `phx-*`, `data-*` pass through
+slot `:inner_block` | slot | required | badge content
