@@ -84,3 +84,20 @@ Attr   | Type   | Default | Notes
 `class`| string | `nil`   | appended to base classes
 `rest` | global | —       | `id`, `aria-*`, `phx-*`, `data-*` pass through
 slot `:inner_block` | slot | required | label caption
+
+### separator
+
+`UrUi.Components.separator/1` — visual or semantic divider (shadcn `Separator`).
+
+- Decorative by default: a horizontal rule between content sections.
+- `decorative: false` when the separation is meaningful (e.g. a toolbar
+  divider announced to screen readers) — then it exposes
+  `role="separator"` with `aria-orientation`.
+
+Attr          | Type    | Default       | Notes
+--------------|---------|---------------|------
+`orientation` | atom    | `:horizontal` | `:horizontal`, `:vertical`
+`decorative`  | boolean | `true`        | `false` exposes role=separator
+`class`       | string  | `nil`         | appended to base classes
+`rest`        | global  | —             | `id`, `aria-*`, `phx-*`, `data-*` pass through
+

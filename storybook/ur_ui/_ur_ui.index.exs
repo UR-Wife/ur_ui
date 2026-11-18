@@ -6,4 +6,5 @@ defmodule Storybook.UrUi do
   def entry("button"), do: [icon: {:fa, "rectangle-ad", :thin}]
   def entry("badge"), do: [icon: {:fa, "tag", :thin}]
   def entry("label"), do: [icon: {:fa, "font", :thin}]
+  def entry("separator"), do: [icon: {:fa, "minus", :thin}]
 end

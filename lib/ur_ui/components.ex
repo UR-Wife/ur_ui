@@ -130,4 +130,45 @@ defmodule UrUi.Components do
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
+
+  @doc """
+  Separator (shadcn `Separator`) — visual or semantic divider.
+
+  `decorative: true` (default) marks it as pure decoration
+  (`role="none"`, hidden from the accessibility tree); `decorative: false`
+  exposes it as `role="separator"` with `aria-orientation`.
+  """
+  attr :orientation, :atom,
+    default: :horizontal,
+    values: [:horizontal, :vertical],
+    doc: "line direction"
+
+  attr :decorative, :boolean,
+    default: true,
+    doc: "true = decoration only (role none)"
+
+  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
+  attr :rest, :global
+
+  def separator(assigns) do
+    assigns = assign(assigns, :classes, separator_classes(assigns))
+
+    ~H"""
+    <div
+      class={@classes}
+      data-orientation={@orientation}
+      role={if @decorative, do: "none", else: "separator"}
+      aria-hidden={if @decorative, do: "true", else: nil}
+      aria-orientation={if @decorative, do: nil, else: @orientation}
+      {@rest}
+    >
+    </div>
+    """
+  end
+
+  defp separator_classes(assigns) do
+    ["ur-separator", "ur-separator--#{assigns.orientation}", assigns[:class]]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
 end

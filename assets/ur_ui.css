@@ -205,3 +205,24 @@
   outline-offset: 2px;
 }
 
+/* ---------------------------------------------------------------- */
+/* separator                                                         */
+/* ---------------------------------------------------------------- */
+
+.ur-separator {
+  flex-shrink: 0;
+  background: var(--ur-wifes-border);
+}
+
+.ur-separator--horizontal {
+  height: 1px;
+  width: 100%;
+}
+
+.ur-separator--vertical {
+  width: 1px;
+  height: 100%;
+  min-height: 1.5rem;
+}
+
+
