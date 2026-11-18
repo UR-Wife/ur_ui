@@ -171,4 +171,29 @@ defmodule UrUi.Components do
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
+
+  @doc """
+  Skeleton (shadcn `Skeleton`) — loading placeholder.
+
+  Size and shape it through `class` (e.g. `class: "h-4 w-32"`).
+  """
+  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
+  attr :rest, :global
+  slot :inner_block
+
+  def skeleton(assigns) do
+    assigns = assign(assigns, :classes, skeleton_classes(assigns))
+
+    ~H"""
+    <div class={@classes} {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  defp skeleton_classes(assigns) do
+    ["ur-skeleton", assigns[:class]]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
 end

@@ -225,4 +225,25 @@
   min-height: 1.5rem;
 }
 
+/* ---------------------------------------------------------------- */
+/* skeleton                                                          */
+/* ---------------------------------------------------------------- */
+
+.ur-skeleton {
+  border-radius: 0.375rem;
+  min-height: 1rem;
+  background: var(--ur-wifes-muted);
+  animation: ur-skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes ur-skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+
 

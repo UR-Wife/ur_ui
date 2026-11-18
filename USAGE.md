@@ -101,3 +101,17 @@ Attr          | Type    | Default       | Notes
 `class`       | string  | `nil`         | appended to base classes
 `rest`        | global  | —             | `id`, `aria-*`, `phx-*`, `data-*` pass through
 
+### skeleton
+
+`UrUi.Components.skeleton/1` — loading placeholder (shadcn `Skeleton`).
+
+- Show while content loads; mirror the shape of the content it replaces.
+- Size it via `class` (`class: "h-4 w-32"`); it pulses via CSS keyframes.
+
+Attr    | Type   | Default | Notes
+--------|--------|---------|------
+`class` | string | `nil`   | appended to base classes (sizing lives here)
+`rest`  | global | —       | `id`, `aria-*`, `phx-*`, `data-*` pass through
+slot `:inner_block` | slot | optional | rarely needed
+
+
