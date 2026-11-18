@@ -70,3 +70,17 @@ Attr       | Type   | Default    | Notes
 `class`    | string | `nil`      | appended to base classes
 `rest`     | global | —          | `id`, `aria-*`, `phx-*`, `data-*` pass through
 slot `:inner_block` | slot | required | badge content
+
+### label
+
+`UrUi.Components.label/1` — caption for a form field (shadcn `Label`).
+
+- Always pair with a form control; pass `for:` pointing at the control id.
+- Do not use as plain text — it is a form caption.
+
+Attr   | Type   | Default | Notes
+-------|--------|---------|------
+`for`  | string | `nil`   | id of the labelled control
+`class`| string | `nil`   | appended to base classes
+`rest` | global | —       | `id`, `aria-*`, `phx-*`, `data-*` pass through
+slot `:inner_block` | slot | required | label caption

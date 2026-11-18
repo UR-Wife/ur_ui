@@ -106,4 +106,28 @@ defmodule UrUi.Components do
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
+
+  @doc """
+  Label (shadcn `Label`) — caption for a form field.
+  """
+  attr :for, :string, default: nil, doc: "id of the labelled control"
+  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def label(assigns) do
+    assigns = assign(assigns, :classes, label_classes(assigns))
+
+    ~H"""
+    <label for={@for} class={@classes} {@rest}>
+      {render_slot(@inner_block)}
+    </label>
+    """
+  end
+
+  defp label_classes(assigns) do
+    ["ur-label", assigns[:class]]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
 end
