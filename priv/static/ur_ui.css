@@ -1,0 +1,30 @@
+/*
+ * ur_ui design tokens — the ONLY place hardcoded colors may appear.
+ * Every component rule references tokens via var(--ur-wifes-*).
+ * Forbidden everywhere in this file and in lib/: style=, box-shadow,
+ * text-shadow, filter, backdrop-filter. Focus states use outline only.
+ */
+
+:root {
+  /* palette (UR black / red / white) */
+  --ur-wifes-black: #000000;
+  --ur-wifes-red: #c8102e;
+  --ur-wifes-white: #ffffff;
+
+  /* semantic tokens */
+  --ur-wifes-bg: var(--ur-wifes-white);
+  --ur-wifes-fg: var(--ur-wifes-black);
+  --ur-wifes-primary: var(--ur-wifes-red);
+  --ur-wifes-primary-fg: var(--ur-wifes-white);
+  --ur-wifes-secondary: var(--ur-wifes-white);
+  --ur-wifes-secondary-fg: var(--ur-wifes-black);
+  --ur-wifes-muted: var(--ur-wifes-white);
+  --ur-wifes-muted-fg: var(--ur-wifes-black);
+  --ur-wifes-destructive: var(--ur-wifes-black);
+  --ur-wifes-destructive-fg: var(--ur-wifes-white);
+  --ur-wifes-border: var(--ur-wifes-black);
+  --ur-wifes-input: var(--ur-wifes-black);
+  --ur-wifes-ring: var(--ur-wifes-red);
+  --ur-wifes-accent: var(--ur-wifes-white);
+  --ur-wifes-accent-fg: var(--ur-wifes-black);
+}
