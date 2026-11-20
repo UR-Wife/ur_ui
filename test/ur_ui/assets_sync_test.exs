@@ -44,4 +44,14 @@ defmodule UrUi.AssetsSyncTest do
     assert length(String.split(tokens, "--ur-wifes-")) >= 15,
            "expected at least 14 --ur-wifes-* tokens in the :root block"
   end
+
+  test "semantic tokens implement the UR black background and white foreground" do
+    css = File.read!(@canonical)
+    [_prefix, rest] = String.split(css, ":root {", parts: 2)
+    [tokens, _suffix] = String.split(rest, "}", parts: 2)
+
+    assert tokens =~ "--ur-wifes-bg: var(--ur-wifes-black);"
+    assert tokens =~ "--ur-wifes-fg: var(--ur-wifes-white);"
+    assert tokens =~ "--ur-wifes-primary: var(--ur-wifes-red);"
+  end
 end

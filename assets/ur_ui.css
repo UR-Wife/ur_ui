@@ -12,18 +12,18 @@
   --ur-wifes-white: #ffffff;
 
   /* semantic tokens */
-  --ur-wifes-bg: var(--ur-wifes-white);
-  --ur-wifes-fg: var(--ur-wifes-black);
+  --ur-wifes-bg: var(--ur-wifes-black);
+  --ur-wifes-fg: var(--ur-wifes-white);
   --ur-wifes-primary: var(--ur-wifes-red);
   --ur-wifes-primary-fg: var(--ur-wifes-white);
   --ur-wifes-secondary: var(--ur-wifes-white);
   --ur-wifes-secondary-fg: var(--ur-wifes-black);
   --ur-wifes-muted: var(--ur-wifes-white);
   --ur-wifes-muted-fg: var(--ur-wifes-black);
-  --ur-wifes-destructive: var(--ur-wifes-black);
+  --ur-wifes-destructive: var(--ur-wifes-red);
   --ur-wifes-destructive-fg: var(--ur-wifes-white);
-  --ur-wifes-border: var(--ur-wifes-black);
-  --ur-wifes-input: var(--ur-wifes-black);
+  --ur-wifes-border: var(--ur-wifes-white);
+  --ur-wifes-input: var(--ur-wifes-white);
   --ur-wifes-ring: var(--ur-wifes-red);
   --ur-wifes-accent: var(--ur-wifes-white);
   --ur-wifes-accent-fg: var(--ur-wifes-black);
