@@ -403,7 +403,15 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def card(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+          assigns
+        )
+      )
 
     ~H"""
     <div class={@classes} data-slot="card" {@rest}>
@@ -418,7 +426,15 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def card_header(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__header", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
+          assigns
+        )
+      )
 
     ~H"""
     <div class={@classes} data-slot="card-header" {@rest}>
@@ -433,7 +449,7 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def card_title(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__title", assigns))
+    assigns = assign(assigns, :classes, part_classes("leading-none font-semibold", assigns))
 
     ~H"""
     <div class={@classes} data-slot="card-title" {@rest}>
@@ -448,7 +464,7 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def card_description(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__description", assigns))
+    assigns = assign(assigns, :classes, part_classes("text-muted-foreground text-sm", assigns))
 
     ~H"""
     <div class={@classes} data-slot="card-description" {@rest}>
@@ -463,7 +479,12 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def card_action(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__action", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes("col-start-2 row-span-2 row-start-1 self-start justify-self-end", assigns)
+      )
 
     ~H"""
     <div class={@classes} data-slot="card-action" {@rest}>
@@ -478,7 +499,7 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def card_content(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__content", assigns))
+    assigns = assign(assigns, :classes, part_classes("px-6", assigns))
 
     ~H"""
     <div class={@classes} data-slot="card-content" {@rest}>
@@ -493,7 +514,8 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def card_footer(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__footer", assigns))
+    assigns =
+      assign(assigns, :classes, part_classes("flex items-center px-6 [.border-t]:pt-6", assigns))
 
     ~H"""
     <div class={@classes} data-slot="card-footer" {@rest}>
