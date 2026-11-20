@@ -158,14 +158,17 @@ defmodule UrUi.Components do
     assigns = assign(assigns, :classes, label_classes(assigns))
 
     ~H"""
-    <label for={@for} class={@classes} {@rest}>
+    <label for={@for} class={@classes} data-slot="label" {@rest}>
       {render_slot(@inner_block)}
     </label>
     """
   end
 
   defp label_classes(assigns) do
-    ["ur-label", assigns[:class]]
+    [
+      "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+      assigns[:class]
+    ]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
