@@ -1,0 +1,17 @@
+# Build artifacts
+_build/
+deps/
+doc/
+.fetch
+
+# Crash dumps
+erl_crash.dump
+
+# Editor / tooling
+.elixir_ls/
+.lexical/
+.vscode/
+.idea/
+
+# OS
+.DS_Store

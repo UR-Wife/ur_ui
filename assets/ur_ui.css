@@ -1,0 +1,339 @@
+/*
+ * ur_ui design tokens — the ONLY place hardcoded colors may appear.
+ * Every component rule references tokens via var(--ur-wifes-*).
+ * Forbidden everywhere in this file and in lib/: inline style attributes,
+ * shadow and filter properties. Focus states use outline only.
+ */
+
+:root {
+  /* palette (UR black / red / white) */
+  --ur-wifes-black: #000000;
+  --ur-wifes-red: #c8102e;
+  --ur-wifes-white: #ffffff;
+
+  /* semantic tokens */
+  --ur-wifes-bg: var(--ur-wifes-black);
+  --ur-wifes-fg: var(--ur-wifes-white);
+  --ur-wifes-primary: var(--ur-wifes-red);
+  --ur-wifes-primary-fg: var(--ur-wifes-white);
+  --ur-wifes-secondary: var(--ur-wifes-white);
+  --ur-wifes-secondary-fg: var(--ur-wifes-black);
+  --ur-wifes-muted: var(--ur-wifes-white);
+  --ur-wifes-muted-fg: var(--ur-wifes-black);
+  --ur-wifes-destructive: var(--ur-wifes-red);
+  --ur-wifes-destructive-fg: var(--ur-wifes-white);
+  --ur-wifes-border: var(--ur-wifes-white);
+  --ur-wifes-input: var(--ur-wifes-white);
+  --ur-wifes-ring: var(--ur-wifes-red);
+  --ur-wifes-accent: var(--ur-wifes-white);
+  --ur-wifes-accent-fg: var(--ur-wifes-black);
+}
+
+/* ---------------------------------------------------------------- */
+/* button                                                            */
+/* ---------------------------------------------------------------- */
+
+.ur-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  padding: 0 1rem;
+  height: 2.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--ur-wifes-primary);
+  color: var(--ur-wifes-primary-fg);
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.ur-btn:hover {
+  opacity: 0.9;
+}
+
+.ur-btn:focus-visible {
+  outline: 2px solid var(--ur-wifes-ring);
+  outline-offset: 2px;
+}
+
+.ur-btn[disabled],
+.ur-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ur-btn--destructive {
+  background: var(--ur-wifes-destructive);
+  color: var(--ur-wifes-destructive-fg);
+}
+
+.ur-btn--outline {
+  background: transparent;
+  color: var(--ur-wifes-fg);
+  border-color: var(--ur-wifes-border);
+}
+
+.ur-btn--secondary {
+  background: var(--ur-wifes-secondary);
+  color: var(--ur-wifes-secondary-fg);
+}
+
+.ur-btn--ghost {
+  background: transparent;
+  color: var(--ur-wifes-fg);
+}
+
+.ur-btn--link {
+  background: transparent;
+  color: var(--ur-wifes-primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.ur-btn--size-default {
+  height: 2.5rem;
+  padding: 0 1rem;
+}
+
+.ur-btn--size-xs {
+  height: 1.75rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.ur-btn--size-sm {
+  height: 2.25rem;
+  padding: 0 0.75rem;
+}
+
+.ur-btn--size-lg {
+  height: 2.75rem;
+  padding: 0 1.5rem;
+  font-size: 1rem;
+}
+
+.ur-btn--size-icon,
+.ur-btn--size-icon_xs,
+.ur-btn--size-icon_sm,
+.ur-btn--size-icon_lg {
+  padding: 0;
+  aspect-ratio: 1 / 1;
+}
+
+.ur-btn--size-icon { height: 2.5rem; }
+.ur-btn--size-icon_xs { height: 1.75rem; }
+.ur-btn--size-icon_sm { height: 2.25rem; }
+.ur-btn--size-icon_lg { height: 2.75rem; }
+
+/* ---------------------------------------------------------------- */
+/* badge                                                             */
+/* ---------------------------------------------------------------- */
+
+.ur-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: fit-content;
+  white-space: nowrap;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  background: var(--ur-wifes-primary);
+  color: var(--ur-wifes-primary-fg);
+}
+
+.ur-badge:focus-visible {
+  outline: 2px solid var(--ur-wifes-ring);
+  outline-offset: 2px;
+}
+
+.ur-badge--secondary {
+  background: var(--ur-wifes-secondary);
+  color: var(--ur-wifes-secondary-fg);
+}
+
+.ur-badge--destructive {
+  background: var(--ur-wifes-destructive);
+  color: var(--ur-wifes-destructive-fg);
+}
+
+.ur-badge--outline {
+  background: transparent;
+  color: var(--ur-wifes-fg);
+  border-color: var(--ur-wifes-border);
+}
+
+.ur-badge--ghost {
+  background: transparent;
+  color: var(--ur-wifes-fg);
+}
+
+.ur-badge--link {
+  background: transparent;
+  color: var(--ur-wifes-primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---------------------------------------------------------------- */
+/* label                                                             */
+/* ---------------------------------------------------------------- */
+
+.ur-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  user-select: none;
+  color: var(--ur-wifes-fg);
+}
+
+.ur-label:focus-visible {
+  outline: 2px solid var(--ur-wifes-ring);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- */
+/* separator                                                         */
+/* ---------------------------------------------------------------- */
+
+.ur-separator {
+  flex-shrink: 0;
+  background: var(--ur-wifes-border);
+}
+
+.ur-separator--horizontal {
+  height: 1px;
+  width: 100%;
+}
+
+.ur-separator--vertical {
+  width: 1px;
+  height: 100%;
+  min-height: 1.5rem;
+}
+
+/* ---------------------------------------------------------------- */
+/* skeleton                                                          */
+/* ---------------------------------------------------------------- */
+
+.ur-skeleton {
+  border-radius: 0.375rem;
+  min-height: 1rem;
+  background: var(--ur-wifes-muted);
+  animation: ur-skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes ur-skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ---------------------------------------------------------------- */
+/* avatar                                                            */
+/* ---------------------------------------------------------------- */
+
+.ur-avatar {
+  position: relative;
+  display: flex;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 9999px;
+  user-select: none;
+}
+
+.ur-avatar--size-sm {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.ur-avatar--size-lg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.ur-avatar__image {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.ur-avatar__fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--ur-wifes-muted);
+  color: var(--ur-wifes-muted-fg);
+  font-size: 0.875rem;
+}
+
+.ur-avatar--size-sm .ur-avatar__fallback {
+  font-size: 0.75rem;
+}
+
+.ur-avatar__badge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--ur-wifes-primary);
+  color: var(--ur-wifes-primary-fg);
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.ur-avatar-group {
+  display: flex;
+  align-items: center;
+}
+
+.ur-avatar-group > .ur-avatar {
+  margin-left: -0.5rem;
+}
+
+.ur-avatar-group > .ur-avatar:first-child {
+  margin-left: 0;
+}
+
+.ur-avatar-group__count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-left: -0.5rem;
+  border-radius: 9999px;
+  background: var(--ur-wifes-muted);
+  color: var(--ur-wifes-muted-fg);
+  font-size: 0.875rem;
+}
+
+
+
+
