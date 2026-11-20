@@ -1,7 +1,7 @@
 defmodule UrUi.Components do
   @moduledoc """
-  UR UI function components — shadcn structure and behaviour ported to
-  Phoenix, styled by `assets/ur_ui.css` (`var(--ur-wifes-*)` tokens only).
+  UR UI function components — shadcn/ui new-york-v4 ported to Phoenix.
+  Styling uses shadcn's neutral theme and Tailwind v4 utility classes.
 
   Conventions:
 
@@ -9,11 +9,33 @@ defmodule UrUi.Components do
   - `class` extends, never replaces, the base classes
   - optional attrs have defaults; missing optional attrs never crash
   - global attributes (`id`, `aria-*`, `phx-*`, `data-*`) pass through
-  - focus styling is outline-only (see the CSS)
   """
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
+
+  @button_base "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+  @button_variants %{
+    default: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+    destructive:
+      "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+    outline:
+      "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+    secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
+    ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+    link: "text-primary underline-offset-4 hover:underline"
+  }
+  @button_sizes %{
+    default: "h-9 px-4 py-2 has-[>svg]:px-3",
+    xs:
+      "h-6 gap-1.5 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+    sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
+    lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+    icon: "size-9",
+    icon_xs: "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+    icon_sm: "size-8",
+    icon_lg: "size-10"
+  }
 
   @doc """
   Button (shadcn `Button`).
@@ -29,28 +51,30 @@ defmodule UrUi.Components do
 
   `:default`, `:xs`, `:sm`, `:lg`, `:icon`, `:icon_xs`, `:icon_sm`, `:icon_lg`
   """
-  attr :variant, :atom,
+  attr(:variant, :atom,
     default: :default,
     values: [:default, :destructive, :outline, :secondary, :ghost, :link],
     doc: "visual variant"
+  )
 
-  attr :size, :atom,
+  attr(:size, :atom,
     default: :default,
     values: [:default, :xs, :sm, :lg, :icon, :icon_xs, :icon_sm, :icon_lg],
     doc: "size variant"
+  )
 
-  attr :type, :string, default: "button", doc: "button type; ignored when href is given"
-  attr :href, :string, default: nil, doc: "renders an <a> when given"
-  attr :disabled, :boolean, default: false, doc: "disables the button"
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:type, :string, default: "button", doc: "button type; ignored when href is given")
+  attr(:href, :string, default: nil, doc: "renders an <a> when given")
+  attr(:disabled, :boolean, default: false, doc: "disables the button")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def button(%{href: href} = assigns) when is_binary(href) do
     assigns = assign(assigns, :classes, button_classes(assigns))
 
     ~H"""
-    <a href={@href} class={@classes} data-variant={@variant} data-size={@size} aria-disabled={@disabled} {@rest}>
+    <a href={@href} class={@classes} data-slot="button" data-variant={@variant} data-size={@size} aria-disabled={@disabled} {@rest}>
       {render_slot(@inner_block)}
     </a>
     """
@@ -60,7 +84,7 @@ defmodule UrUi.Components do
     assigns = assign(assigns, :classes, button_classes(assigns))
 
     ~H"""
-    <button type={@type} class={@classes} data-variant={@variant} data-size={@size} disabled={@disabled} {@rest}>
+    <button type={@type} class={@classes} data-slot="button" data-variant={@variant} data-size={@size} disabled={@disabled} {@rest}>
       {render_slot(@inner_block)}
     </button>
     """
@@ -68,9 +92,9 @@ defmodule UrUi.Components do
 
   defp button_classes(assigns) do
     [
-      "ur-btn",
-      "ur-btn--#{assigns.variant}",
-      "ur-btn--size-#{assigns.size}",
+      @button_base,
+      @button_variants[assigns.variant],
+      @button_sizes[assigns.size],
       assigns[:class]
     ]
     |> Enum.reject(&is_nil/1)
@@ -84,14 +108,15 @@ defmodule UrUi.Components do
 
   `:default`, `:secondary`, `:destructive`, `:outline`, `:ghost`, `:link`
   """
-  attr :variant, :atom,
+  attr(:variant, :atom,
     default: :default,
     values: [:default, :secondary, :destructive, :outline, :ghost, :link],
     doc: "visual variant"
+  )
 
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def badge(assigns) do
     assigns = assign(assigns, :classes, badge_classes(assigns))
@@ -112,10 +137,10 @@ defmodule UrUi.Components do
   @doc """
   Label (shadcn `Label`) — caption for a form field.
   """
-  attr :for, :string, default: nil, doc: "id of the labelled control"
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:for, :string, default: nil, doc: "id of the labelled control")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def label(assigns) do
     assigns = assign(assigns, :classes, label_classes(assigns))
@@ -140,17 +165,19 @@ defmodule UrUi.Components do
   (`role="none"`, hidden from the accessibility tree); `decorative: false`
   exposes it as `role="separator"` with `aria-orientation`.
   """
-  attr :orientation, :atom,
+  attr(:orientation, :atom,
     default: :horizontal,
     values: [:horizontal, :vertical],
     doc: "line direction"
+  )
 
-  attr :decorative, :boolean,
+  attr(:decorative, :boolean,
     default: true,
     doc: "true = decoration only (role none)"
+  )
 
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
 
   def separator(assigns) do
     assigns = assign(assigns, :classes, separator_classes(assigns))
@@ -179,9 +206,9 @@ defmodule UrUi.Components do
 
   Size and shape it through `class` (e.g. `class: "h-4 w-32"`).
   """
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def skeleton(assigns) do
     assigns = assign(assigns, :classes, skeleton_classes(assigns))
@@ -210,10 +237,10 @@ defmodule UrUi.Components do
 
   `:default`, `:sm`, `:lg`
   """
-  attr :size, :atom, default: :default, values: [:default, :sm, :lg], doc: "avatar size"
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block
+  attr(:size, :atom, default: :default, values: [:default, :sm, :lg], doc: "avatar size")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def avatar(assigns) do
     assigns = assign(assigns, :classes, avatar_classes(assigns))
@@ -228,10 +255,10 @@ defmodule UrUi.Components do
   @doc """
   Avatar image (shadcn `AvatarImage`) — the user photo, inside `avatar/1`.
   """
-  attr :src, :string, default: nil, doc: "image URL"
-  attr :alt, :string, default: "", doc: "alternative text"
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
+  attr(:src, :string, default: nil, doc: "image URL")
+  attr(:alt, :string, default: "", doc: "alternative text")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
 
   def avatar_image(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-avatar__image", assigns))
@@ -245,9 +272,9 @@ defmodule UrUi.Components do
   Avatar fallback (shadcn `AvatarFallback`) — initials shown when the image
   is missing, inside `avatar/1`.
   """
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def avatar_fallback(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-avatar__fallback", assigns))
@@ -262,9 +289,9 @@ defmodule UrUi.Components do
   @doc """
   Avatar badge (shadcn `AvatarBadge`) — status marker on the avatar corner.
   """
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def avatar_badge(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-avatar__badge", assigns))
@@ -279,9 +306,9 @@ defmodule UrUi.Components do
   @doc """
   Avatar group (shadcn `AvatarGroup`) — overlapping avatars.
   """
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def avatar_group(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-avatar-group", assigns))
@@ -296,9 +323,9 @@ defmodule UrUi.Components do
   @doc """
   Avatar group count (shadcn `AvatarGroupCount`) — the "+N" bubble in a group.
   """
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def avatar_group_count(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-avatar-group__count", assigns))
@@ -317,9 +344,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Card surface with composable shadcn-compatible parts."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-card", assigns))
@@ -332,9 +359,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Card header; reserves a trailing column when card_action is present."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_header(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-card__header", assigns))
@@ -347,9 +374,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Card heading."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_title(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-card__title", assigns))
@@ -362,9 +389,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Supporting card copy."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_description(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-card__description", assigns))
@@ -377,9 +404,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Action placed at the trailing edge of card_header."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_action(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-card__action", assigns))
@@ -392,9 +419,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Main card body."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_content(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-card__content", assigns))
@@ -407,9 +434,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Card footer for actions or metadata."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_footer(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-card__footer", assigns))
@@ -422,10 +449,10 @@ defmodule UrUi.Components do
   end
 
   @doc "Status message with default and destructive variants."
-  attr :variant, :atom, values: [:default, :destructive], default: :default
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:variant, :atom, values: [:default, :destructive], default: :default)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def alert(assigns) do
     assigns = assign(assigns, :classes, alert_classes(assigns))
@@ -444,9 +471,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Alert heading."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def alert_title(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-alert__title", assigns))
@@ -459,9 +486,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Alert supporting copy."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def alert_description(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-alert__description", assigns))
@@ -474,9 +501,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Responsive table wrapped in an overflow container."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-table", assigns))
@@ -491,9 +518,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Table heading rows."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_header(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-table__header", assigns))
@@ -506,9 +533,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Table body rows."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_body(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-table__body", assigns))
@@ -521,9 +548,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Table summary rows."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_footer(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-table__footer", assigns))
@@ -536,9 +563,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Table row; pass data-state=selected through rest when selected."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_row(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-table__row", assigns))
@@ -551,10 +578,10 @@ defmodule UrUi.Components do
   end
 
   @doc "Column heading cell."
-  attr :scope, :string, default: "col"
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:scope, :string, default: "col")
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_head(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-table__head", assigns))
@@ -567,9 +594,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Table data cell."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_cell(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-table__cell", assigns))
@@ -582,9 +609,9 @@ defmodule UrUi.Components do
   end
 
   @doc "Accessible table caption."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_caption(assigns) do
     assigns = assign(assigns, :classes, part_classes("ur-table__caption", assigns))
@@ -597,14 +624,14 @@ defmodule UrUi.Components do
   end
 
   @doc "Native input with Phoenix form-field and changeset-error support."
-  attr :field, Phoenix.HTML.FormField, default: nil
-  attr :id, :string, default: nil
-  attr :name, :string, default: nil
-  attr :value, :any, default: nil
-  attr :type, :string, default: "text"
-  attr :errors, :any, default: nil
-  attr :class, :string, default: nil
-  attr :rest, :global
+  attr(:field, Phoenix.HTML.FormField, default: nil)
+  attr(:id, :string, default: nil)
+  attr(:name, :string, default: nil)
+  attr(:value, :any, default: nil)
+  attr(:type, :string, default: "text")
+  attr(:errors, :any, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
 
   def input(assigns) do
     field = assigns[:field]
@@ -612,7 +639,11 @@ defmodule UrUi.Components do
     name = assigns[:name] || (field && field.name)
     value = if assigns[:value] != nil, do: assigns[:value], else: field && field.value
     errors = assigns[:errors] || (field && field.errors) || []
-    value = if assigns[:type] == "file", do: nil, else: Phoenix.HTML.Form.normalize_value(assigns[:type], value)
+
+    value =
+      if assigns[:type] == "file",
+        do: nil,
+        else: Phoenix.HTML.Form.normalize_value(assigns[:type], value)
 
     assigns =
       assign(assigns,
@@ -662,18 +693,18 @@ defmodule UrUi.Components do
   defp input_error_message(message) when is_binary(message), do: message
 
   @doc "Accessible tabs with matching trigger and content slots."
-  attr :id, :string, required: true
-  attr :default_value, :string, default: nil
-  attr :class, :string, default: nil
-  attr :rest, :global
+  attr(:id, :string, required: true)
+  attr(:default_value, :string, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
 
   slot :trigger do
-    attr :value, :string, required: true
-    attr :disabled, :boolean
+    attr(:value, :string, required: true)
+    attr(:disabled, :boolean)
   end
 
   slot :content do
-    attr :value, :string, required: true
+    attr(:value, :string, required: true)
   end
 
   def tabs(assigns) do
@@ -785,19 +816,19 @@ defmodule UrUi.Components do
   Opening and closing runs client-side through `Phoenix.LiveView.JS`; Enter
   and Space toggle an item through the native button.
   """
-  attr :id, :string, required: true
-  attr :type, :atom, default: :single, values: [:single, :multiple]
-  attr :default_value, :any, default: nil
-  attr :class, :string, default: nil
-  attr :rest, :global
+  attr(:id, :string, required: true)
+  attr(:type, :atom, default: :single, values: [:single, :multiple])
+  attr(:default_value, :any, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
 
   slot :trigger do
-    attr :value, :string, required: true
-    attr :disabled, :boolean
+    attr(:value, :string, required: true)
+    attr(:disabled, :boolean)
   end
 
   slot :content do
-    attr :value, :string, required: true
+    attr(:value, :string, required: true)
   end
 
   def accordion(assigns) do
@@ -901,7 +932,10 @@ defmodule UrUi.Components do
 
   defp alert_classes(assigns) do
     variant = assigns[:variant] || :default
-    ["ur-alert", "ur-alert--#{variant}", assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
+
+    ["ur-alert", "ur-alert--#{variant}", assigns[:class]]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
   end
 
   defp part_classes(base, assigns) do
