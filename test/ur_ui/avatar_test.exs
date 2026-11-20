@@ -5,6 +5,13 @@ defmodule UrUi.AvatarTest do
 
   alias UrUi.Components
 
+  @avatar_base "group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6"
+  @image_base "aspect-square size-full"
+  @fallback_base "bg-muted flex size-full items-center justify-center rounded-full text-sm group-data-[size=sm]/avatar:text-xs"
+  @badge_base "bg-primary text-primary-foreground ring-background absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full ring-2 select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2 [&>svg]:size-2.5"
+  @group_base "[--avatar-group-spacing:0.5rem] group/avatar-group -space-x-[var(--avatar-group-spacing)] flex items-center [&_[data-slot=avatar]]:ring-background [&_[data-slot=avatar]]:ring-2"
+  @count_base "bg-muted text-muted-foreground ring-background relative flex size-8 shrink-0 items-center justify-center rounded-full text-sm ring-2 group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3"
+
   defp render_avatar(assigns), do: render_component(&Components.avatar/1, assigns)
   defp render_image(assigns), do: render_component(&Components.avatar_image/1, assigns)
   defp render_fallback(assigns), do: render_component(&Components.avatar_fallback/1, assigns)
@@ -15,35 +22,39 @@ defmodule UrUi.AvatarTest do
   defp inner(content),
     do: %{__slot__: :inner_block, inner_block: fn _changed, _arg -> content end}
 
+  defp assert_classes(html, slot, base, custom \\ nil) do
+    expected = [base, custom] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
+    [avatar] = Floki.parse_fragment!(html) |> Floki.find("[data-slot='#{slot}']")
+    assert Floki.attribute(avatar, "class") == [expected]
+  end
+
   describe "avatar root" do
     test "defaults to :default size with classes and marker" do
       html = render_avatar(%{inner_block: inner("AB")})
-      assert html =~ "ur-avatar"
-      assert html =~ "ur-avatar--size-default"
+      assert_classes(html, "avatar", @avatar_base)
       assert html =~ ~s(data-size="default")
     end
 
     test "size :sm renders sm classes and marker" do
       html = render_avatar(%{size: :sm, inner_block: inner("AB")})
-      assert html =~ "ur-avatar--size-sm"
+      assert_classes(html, "avatar", @avatar_base)
       assert html =~ ~s(data-size="sm")
     end
 
     test "size :lg renders lg classes and marker" do
       html = render_avatar(%{size: :lg, inner_block: inner("AB")})
-      assert html =~ "ur-avatar--size-lg"
+      assert_classes(html, "avatar", @avatar_base)
       assert html =~ ~s(data-size="lg")
     end
 
     test "renders without any attrs at all" do
       html = render_avatar(%{})
-      assert html =~ "ur-avatar"
+      assert_classes(html, "avatar", @avatar_base)
     end
 
     test "class extends base classes" do
       html = render_avatar(%{class: "ring-2", inner_block: inner("AB")})
-      assert html =~ "ur-avatar"
-      assert html =~ "ring-2"
+      assert_classes(html, "avatar", @avatar_base, "ring-2")
     end
 
     test "global attributes pass through" do
@@ -58,7 +69,7 @@ defmodule UrUi.AvatarTest do
       assert html =~ "<img"
       assert html =~ ~s(src="/u.png")
       assert html =~ ~s(alt="Ada")
-      assert html =~ "ur-avatar__image"
+      assert_classes(html, "avatar-image", @image_base)
     end
 
     test "alt defaults to empty string" do
@@ -68,8 +79,7 @@ defmodule UrUi.AvatarTest do
 
     test "class extends base classes" do
       html = render_image(%{src: "/u.png", class: "grayscale"})
-      assert html =~ "ur-avatar__image"
-      assert html =~ "grayscale"
+      assert_classes(html, "avatar-image", @image_base, "grayscale")
     end
   end
 
@@ -77,14 +87,13 @@ defmodule UrUi.AvatarTest do
     test "renders span with content" do
       html = render_fallback(%{inner_block: inner("AB")})
       assert html =~ "<span"
-      assert html =~ "ur-avatar__fallback"
+      assert_classes(html, "avatar-fallback", @fallback_base)
       assert html =~ "AB"
     end
 
     test "class extends base classes" do
       html = render_fallback(%{class: "text-xs", inner_block: inner("AB")})
-      assert html =~ "ur-avatar__fallback"
-      assert html =~ "text-xs"
+      assert_classes(html, "avatar-fallback", @fallback_base, "text-xs")
     end
   end
 
@@ -92,7 +101,7 @@ defmodule UrUi.AvatarTest do
     test "renders span with content" do
       html = render_badge(%{inner_block: inner("*")})
       assert html =~ "<span"
-      assert html =~ "ur-avatar__badge"
+      assert_classes(html, "avatar-badge", @badge_base)
       assert html =~ "*"
     end
   end
@@ -101,7 +110,7 @@ defmodule UrUi.AvatarTest do
     test "renders div with content" do
       html = render_group(%{inner_block: inner("x")})
       assert html =~ "<div"
-      assert html =~ "ur-avatar-group"
+      assert_classes(html, "avatar-group", @group_base)
       assert html =~ "x"
     end
   end
@@ -109,7 +118,7 @@ defmodule UrUi.AvatarTest do
   describe "avatar_group_count" do
     test "renders div with content" do
       html = render_count(%{inner_block: inner("+3")})
-      assert html =~ "ur-avatar-group__count"
+      assert_classes(html, "avatar-group-count", @count_base)
       assert html =~ "+3"
     end
   end

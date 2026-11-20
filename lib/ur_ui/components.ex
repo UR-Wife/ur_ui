@@ -265,7 +265,7 @@ defmodule UrUi.Components do
     assigns = assign(assigns, :classes, avatar_classes(assigns))
 
     ~H"""
-    <div class={@classes} data-size={@size} {@rest}>
+    <div class={@classes} data-slot="avatar" data-size={@size} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
@@ -280,10 +280,10 @@ defmodule UrUi.Components do
   attr(:rest, :global)
 
   def avatar_image(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-avatar__image", assigns))
+    assigns = assign(assigns, :classes, part_classes("aspect-square size-full", assigns))
 
     ~H"""
-    <img src={@src} alt={@alt} class={@classes} {@rest} />
+    <img src={@src} alt={@alt} class={@classes} data-slot="avatar-image" {@rest} />
     """
   end
 
@@ -296,10 +296,18 @@ defmodule UrUi.Components do
   slot(:inner_block, required: true)
 
   def avatar_fallback(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-avatar__fallback", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "bg-muted flex size-full items-center justify-center rounded-full text-sm group-data-[size=sm]/avatar:text-xs",
+          assigns
+        )
+      )
 
     ~H"""
-    <span class={@classes} {@rest}>
+    <span class={@classes} data-slot="avatar-fallback" {@rest}>
       {render_slot(@inner_block)}
     </span>
     """
@@ -313,10 +321,18 @@ defmodule UrUi.Components do
   slot(:inner_block, required: true)
 
   def avatar_badge(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-avatar__badge", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "bg-primary text-primary-foreground ring-background absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full ring-2 select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2 [&>svg]:size-2.5",
+          assigns
+        )
+      )
 
     ~H"""
-    <span class={@classes} {@rest}>
+    <span class={@classes} data-slot="avatar-badge" {@rest}>
       {render_slot(@inner_block)}
     </span>
     """
@@ -330,10 +346,18 @@ defmodule UrUi.Components do
   slot(:inner_block, required: true)
 
   def avatar_group(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-avatar-group", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "[--avatar-group-spacing:0.5rem] group/avatar-group -space-x-[var(--avatar-group-spacing)] flex items-center [&_[data-slot=avatar]]:ring-background [&_[data-slot=avatar]]:ring-2",
+          assigns
+        )
+      )
 
     ~H"""
-    <div class={@classes} {@rest}>
+    <div class={@classes} data-slot="avatar-group" {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
@@ -347,17 +371,28 @@ defmodule UrUi.Components do
   slot(:inner_block, required: true)
 
   def avatar_group_count(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-avatar-group__count", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "bg-muted text-muted-foreground ring-background relative flex size-8 shrink-0 items-center justify-center rounded-full text-sm ring-2 group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
+          assigns
+        )
+      )
 
     ~H"""
-    <div class={@classes} {@rest}>
+    <div class={@classes} data-slot="avatar-group-count" {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
   end
 
   defp avatar_classes(assigns) do
-    ["ur-avatar", "ur-avatar--size-#{assigns.size}", assigns[:class]]
+    [
+      "group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6",
+      assigns[:class]
+    ]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
