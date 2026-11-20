@@ -419,6 +419,63 @@ defmodule UrUi.Components do
     """
   end
 
+  @doc "Status message with default and destructive variants."
+  attr :variant, :atom, values: [:default, :destructive], default: :default
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def alert(assigns) do
+    assigns = assign(assigns, :classes, alert_classes(assigns))
+
+    ~H"""
+    <div
+      role="alert"
+      class={@classes}
+      data-slot="alert"
+      data-variant={@variant}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Alert heading."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def alert_title(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-alert__title", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="alert-title" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Alert supporting copy."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def alert_description(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-alert__description", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="alert-description" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  defp alert_classes(assigns) do
+    variant = assigns[:variant] || :default
+    ["ur-alert", "ur-alert--#{variant}", assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
+  end
+
   defp part_classes(base, assigns) do
     [base, assigns[:class]]
     |> Enum.reject(&is_nil/1)

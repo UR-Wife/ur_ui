@@ -160,4 +160,26 @@ root adds `data-slot="card"` and each part exposes its corresponding slot.
 There are no card variants or sizes in shadcn; size through `class` or the
 surrounding layout. All seven functions render safely with no optional attrs.
 
+### alert
+
+`UrUi.Components.alert/1` — an assertive status message (shadcn `Alert`), with
+`role="alert"` by default. Attrs: `variant` (`:default`, `:destructive`;
+default `:default`), `class`, `rest`. Its optional `:inner_block` may contain
+an icon marked `data-slot="alert-icon"` and the composable title/description.
+
+Use `alert_title/1` and `alert_description/1` for the two content slots. Both
+accept `class`, `rest` and optional `:inner_block`. Add `aria-live="polite"`
+through `rest` when the message is not urgent.
+
+```heex
+<.alert variant={:destructive}>
+  <span data-slot="alert-icon" aria-hidden="true">!</span>
+  <.alert_title>Delete failed</.alert_title>
+  <.alert_description>Check your permissions and try again.</.alert_description>
+</.alert>
+```
+
+The destructive variant uses the UR red border/text token. Icons are optional;
+there are no sizes in shadcn.
+
 
