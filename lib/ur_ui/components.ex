@@ -834,21 +834,23 @@ defmodule UrUi.Components do
     assigns =
       assign(assigns,
         selected_value: tabs_selected_value(assigns),
-        classes: part_classes("ur-tabs", assigns)
+        classes:
+          part_classes("group/tabs flex gap-2 data-[orientation=horizontal]:flex-col", assigns)
       )
 
     ~H"""
-    <div id={@id} class={@classes} data-slot="tabs" {@rest}>
-      <div class="ur-tabs__list" data-slot="tabs-list" role="tablist">
+    <div id={@id} class={@classes} data-slot="tabs" data-orientation="horizontal" {@rest}>
+      <div class={tabs_list_classes()} data-slot="tabs-list" data-variant="default" role="tablist">
         <div
           :for={{trigger, index} <- Enum.with_index(@trigger)}
           id={"#{@id}-trigger-wrap-#{index}"}
-          class="ur-tabs__trigger"
+          class={tabs_trigger_classes()}
+          data-slot="tabs-trigger-surface"
           data-state={if(trigger.value == @selected_value, do: "active", else: "inactive")}
         >
           <input
             id={"#{@id}-trigger-#{index}"}
-            class="ur-tabs__input"
+            class="absolute inset-0 m-0 cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
             type="radio"
             name={"#{@id}-values"}
             value={trigger.value}
@@ -863,11 +865,7 @@ defmodule UrUi.Components do
             data-state={if(trigger.value == @selected_value, do: "active", else: "inactive")}
             phx-change={tabs_select_js(@id, @trigger, @content, trigger.value)}
           />
-          <label
-            id={"#{@id}-label-#{index}"}
-            for={"#{@id}-trigger-#{index}"}
-            class="ur-tabs__label"
-          >
+          <label id={"#{@id}-label-#{index}"} for={"#{@id}-trigger-#{index}"}>
             {render_slot(trigger)}
           </label>
         </div>
@@ -879,13 +877,28 @@ defmodule UrUi.Components do
         aria-labelledby={"#{@id}-trigger-#{index}"}
         aria-hidden={to_string(content.value != @selected_value)}
         hidden={content.value != @selected_value}
-        class="ur-tabs__content"
+        class="flex-1 outline-none"
         data-slot="tabs-content"
       >
         {render_slot(content)}
       </div>
     </div>
     """
+  end
+
+  defp tabs_list_classes do
+    "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col data-[variant=line]:rounded-none bg-muted"
+  end
+
+  defp tabs_trigger_classes do
+    [
+      "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+      "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
+      "data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground",
+      "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100",
+      "has-[:focus-visible]:border-ring has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50 has-[:focus-visible]:outline-1 has-[:focus-visible]:outline-ring has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50"
+    ]
+    |> Enum.join(" ")
   end
 
   defp tabs_select_js(id, triggers, contents, selected_value) do
