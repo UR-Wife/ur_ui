@@ -134,5 +134,30 @@ Parts: `avatar_image/1` (`src`, `alt`, `class`, `rest`), `avatar_fallback/1`,
 `avatar_badge/1`, `avatar_group/1`, `avatar_group_count/1` — each takes
 `class`, `rest` and a `:inner_block` slot.
 
+### card
+
+`UrUi.Components.card/1` — a bounded content surface (shadcn `Card`). Use for
+grouping related content and actions, not for every block of page copy.
+
+Compose `card_header/1`, `card_title/1`, `card_description/1`,
+`card_action/1`, `card_content/1` and `card_footer/1` inside the root. Put the
+action inside the header to align it at the trailing edge. Every part accepts
+`class` (appended), `rest` globals and an optional `:inner_block` slot; the
+root adds `data-slot="card"` and each part exposes its corresponding slot.
+
+```heex
+<.card>
+  <.card_header>
+    <.card_title>Workspace</.card_title>
+    <.card_description>Manage workspace members.</.card_description>
+    <.card_action><.button size={:sm}>Edit</.button></.card_action>
+  </.card_header>
+  <.card_content>Three active members.</.card_content>
+  <.card_footer><.button>Save</.button></.card_footer>
+</.card>
+```
+
+There are no card variants or sizes in shadcn; size through `class` or the
+surrounding layout. All seven functions render safely with no optional attrs.
 
 

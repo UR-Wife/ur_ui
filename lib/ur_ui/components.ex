@@ -314,6 +314,111 @@ defmodule UrUi.Components do
     |> Enum.join(" ")
   end
 
+  @doc "Card surface with composable shadcn-compatible parts."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Card header; reserves a trailing column when card_action is present."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_header(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__header", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-header" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Card heading."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_title(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__title", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-title" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Supporting card copy."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_description(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__description", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-description" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Action placed at the trailing edge of card_header."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_action(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__action", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-action" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Main card body."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_content(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__content", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-content" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Card footer for actions or metadata."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_footer(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__footer", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-footer" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
   defp part_classes(base, assigns) do
     [base, assigns[:class]]
     |> Enum.reject(&is_nil/1)

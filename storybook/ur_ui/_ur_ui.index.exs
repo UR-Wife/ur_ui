@@ -9,4 +9,5 @@ defmodule Storybook.UrUi do
   def entry("separator"), do: [icon: {:fa, "minus", :thin}]
   def entry("skeleton"), do: [icon: {:fa, "square-dashed", :thin}]
   def entry("avatar"), do: [icon: {:fa, "circle-user", :thin}]
+  def entry("card"), do: [icon: {:fa, "square", :thin}]
 end
