@@ -1,8 +1,7 @@
 # ur_ui usage
 
-Shadcn-style components ported to Phoenix function components in the UR
-black/red/white design. fam, Tongue Medicine and the agency can depend on
-this library.
+shadcn/ui `new-york-v4` components ported to Phoenix function components,
+using shadcn's default neutral theme in light and dark modes.
 
 ## Installation
 
@@ -14,10 +13,17 @@ Add to your `mix.exs`:
 
 ## Styling
 
-Serve `assets/ur_ui.css` (or copy it into your asset pipeline). It is the
-single source of truth for the `--ur-wifes-*` design tokens; all component
-classes reference tokens via `var(--ur-wifes-*)`. Never hardcode colors in
-your own overrides — override the tokens instead.
+Import the theme and tell Tailwind v4 to scan this dependency by adding these
+lines to the consuming Phoenix application's `assets/css/app.css`:
+
+```css
+@import "../../deps/ur_ui/assets/ur_ui.css";
+@source "../../deps/ur_ui";
+```
+
+The stylesheet defines shadcn's neutral tokens in `:root` and `.dark`, with
+Tailwind v4 `@theme` mappings. Apply the `dark` class to an ancestor for dark
+mode. Override shadcn tokens rather than hardcoding one-off colors.
 
 ## Conventions
 
@@ -25,7 +31,7 @@ your own overrides — override the tokens instead.
 - Variants and sizes are atoms (`variant: :destructive`, `size: :sm`).
 - `class` is always accepted to extend, never replace, base classes.
 - Missing optional attrs never crash; every attr has a default.
-- Focus styling is outline-only, driven by `:focus-visible`.
+- Focus styling follows shadcn's `:focus-visible` utility classes.
 
 ## Components
 
@@ -179,8 +185,8 @@ through `rest` when the message is not urgent.
 </.alert>
 ```
 
-The destructive variant uses the UR red border/text token. Icons are optional;
-there are no sizes in shadcn.
+The destructive variant uses shadcn's destructive color utilities. Icons are
+optional; there are no sizes in shadcn.
 
 ### table
 
@@ -257,8 +263,8 @@ checked radio carries `role="tab"` with `aria-selected`; panels are
 `role="tabpanel"` linked with `aria-controls`/`aria-labelledby`, ARIA as in
 shadcn. The `class` attr extends the tab list container and globals pass
 through the root. A trigger renders `disabled` when its slot carries
-`disabled`. The active tab is marked `data-state="active"` on the trigger
-surface and the label underlines through `--ur-wifes-primary`.
+`disabled`. The active tab is marked `data-state="active"` on both the native
+trigger and its styled surface, which carries shadcn's trigger classes.
 
 ### accordion
 

@@ -9,7 +9,7 @@ defmodule UrUi.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      description: "UR black/red/white UI components as Phoenix function components",
+      description: "shadcn/ui new-york-v4 components as Phoenix function components",
       package: package(),
       docs: [main: "usage", extras: ["USAGE.md"]]
     ]
