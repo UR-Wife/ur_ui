@@ -772,11 +772,11 @@ defmodule UrUi.Components do
         errors: errors,
         error_id: if(errors != [] and id, do: "#{id}-errors"),
         invalid: if(errors != [], do: "true"),
-        classes: input_classes(assigns, errors)
+        classes: input_classes(assigns)
       )
 
     ~H"""
-    <div class="ur-input-field" data-slot="input-field">
+    <div data-slot="input-field">
       <input
         id={@id}
         name={@name}
@@ -789,8 +789,8 @@ defmodule UrUi.Components do
         aria-describedby={@error_id}
         {@rest}
       />
-      <div :if={@errors != []} id={@error_id} class="ur-input-errors">
-        <p :for={error <- @errors} class="ur-input-error" data-slot="input-error">
+      <div :if={@errors != []} id={@error_id} class="grid gap-1">
+        <p :for={error <- @errors} class="text-destructive text-sm" data-slot="input-error">
           {input_error_message(error)}
         </p>
       </div>
@@ -798,9 +798,13 @@ defmodule UrUi.Components do
     """
   end
 
-  defp input_classes(assigns, errors) do
-    invalid = if errors != [], do: "ur-input--invalid"
-    ["ur-input", invalid, assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
+  defp input_classes(assigns) do
+    [
+      "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+      assigns[:class]
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
   end
 
   defp input_error_message({message, options}) do

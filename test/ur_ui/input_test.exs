@@ -4,6 +4,13 @@ defmodule UrUi.InputTest do
   import Phoenix.LiveViewTest
 
   @component UrUi.Components
+  @base "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+
+  defp assert_input_classes(html, custom \\ nil) do
+    expected = [@base, custom] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
+    [input] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=input]")
+    assert Floki.attribute(input, "class") == [expected]
+  end
 
   defp render_input(assigns \\ %{}) do
     render_component(Function.capture(@component, :input, 1), Map.new(assigns))
@@ -15,8 +22,8 @@ defmodule UrUi.InputTest do
     assert html =~ "<input"
     assert html =~ ~s(type="text")
     assert html =~ ~s(data-slot="input")
-    assert html =~ "ur-input"
-    refute html =~ "ur-input--invalid"
+    assert_input_classes(html)
+    refute html =~ "ur-input"
   end
 
   test "input passes through shadcn-supported native input types" do
@@ -37,7 +44,7 @@ defmodule UrUi.InputTest do
         disabled: true
       })
 
-    assert html =~ "ur-input extra"
+    assert_input_classes(html, "extra")
     assert html =~ ~s(id="email")
     assert html =~ ~s(name="email")
     assert html =~ ~s(placeholder="you@example.com")
@@ -70,7 +77,8 @@ defmodule UrUi.InputTest do
     html = render_input(%{field: form[:email]})
 
     assert html =~ "is invalid"
-    assert html =~ "ur-input--invalid"
+    assert_input_classes(html)
+    assert html =~ "text-destructive text-sm"
     assert html =~ ~s(aria-invalid="true")
     assert html =~ ~s(aria-describedby="user_email-errors")
     assert html =~ ~s(id="user_email-errors")
