@@ -552,7 +552,12 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def alert_title(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-alert__title", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes("col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight", assigns)
+      )
 
     ~H"""
     <div class={@classes} data-slot="alert-title" {@rest}>
@@ -567,7 +572,15 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def alert_description(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-alert__description", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
+          assigns
+        )
+      )
 
     ~H"""
     <div class={@classes} data-slot="alert-description" {@rest}>
@@ -1007,9 +1020,20 @@ defmodule UrUi.Components do
   end
 
   defp alert_classes(assigns) do
-    variant = assigns[:variant] || :default
+    variant =
+      case assigns[:variant] || :default do
+        :default ->
+          "bg-card text-card-foreground"
 
-    ["ur-alert", "ur-alert--#{variant}", assigns[:class]]
+        :destructive ->
+          "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90"
+      end
+
+    [
+      "relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
+      variant,
+      assigns[:class]
+    ]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
