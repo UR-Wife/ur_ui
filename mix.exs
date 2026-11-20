@@ -40,7 +40,8 @@ defmodule UrUi.MixProject do
       {:bandit, "~> 1.14.1", only: :dev},
       {:phoenix_storybook, "~> 1.3", only: :dev},
       {:jason, "~> 1.4", only: [:dev, :test]},
-      {:phoenix_ecto, "~> 4.6", only: [:dev, :test]}
+      {:phoenix_ecto, "~> 4.6", only: [:dev, :test]},
+      {:floki, "~> 0.38", only: [:dev, :test]}
     ]
   end
 end

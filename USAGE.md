@@ -235,3 +235,27 @@ The `class` attr extends the input itself; native globals such as `placeholder`,
 are no shadcn variants or sizes; use native `type` values instead.
 
 
+
+### tabs
+
+`UrUi.Components.tabs/1` — accessible tabs (shadcn `Tabs`) built on native
+radio inputs. Attrs: `id` (required), `default_value`, `class` and `rest`;
+the `:trigger` and `:content` slots pair by `value`. Switching runs
+client-side through `Phoenix.LiveView.JS` commands — no server round-trip.
+
+```heex
+<.tabs id="account-tabs" default_value="general">
+  <:trigger value="general">General</:trigger>
+  <:trigger value="security">Security</:trigger>
+  <:content value="general">Manage your profile and contact details.</:content>
+  <:content value="security">Password and two-factor authentication.</:content>
+</.tabs>
+```
+
+Arrow keys move between tabs through the native radio group, and the
+checked radio carries `role="tab"` with `aria-selected`; panels are
+`role="tabpanel"` linked with `aria-controls`/`aria-labelledby`, ARIA as in
+shadcn. The `class` attr extends the tab list container and globals pass
+through the root. A trigger renders `disabled` when its slot carries
+`disabled`. The active tab is marked `data-state="active"` on the trigger
+surface and the label underlines through `--ur-wifes-primary`.

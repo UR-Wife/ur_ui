@@ -13,6 +13,8 @@ defmodule UrUi.Components do
   """
   use Phoenix.Component
 
+  alias Phoenix.LiveView.JS
+
   @doc """
   Button (shadcn `Button`).
 
@@ -658,6 +660,122 @@ defmodule UrUi.Components do
   end
 
   defp input_error_message(message) when is_binary(message), do: message
+
+  @doc "Accessible tabs with matching trigger and content slots."
+  attr :id, :string, required: true
+  attr :default_value, :string, default: nil
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  slot :trigger do
+    attr :value, :string, required: true
+    attr :disabled, :boolean
+  end
+
+  slot :content do
+    attr :value, :string, required: true
+  end
+
+  def tabs(assigns) do
+    assigns =
+      assign(assigns,
+        selected_value: tabs_selected_value(assigns),
+        classes: part_classes("ur-tabs", assigns)
+      )
+
+    ~H"""
+    <div id={@id} class={@classes} data-slot="tabs" {@rest}>
+      <div class="ur-tabs__list" data-slot="tabs-list" role="tablist">
+        <div
+          :for={{trigger, index} <- Enum.with_index(@trigger)}
+          id={"#{@id}-trigger-wrap-#{index}"}
+          class="ur-tabs__trigger"
+          data-state={if(trigger.value == @selected_value, do: "active", else: "inactive")}
+        >
+          <input
+            id={"#{@id}-trigger-#{index}"}
+            class="ur-tabs__input"
+            type="radio"
+            name={"#{@id}-values"}
+            value={trigger.value}
+            checked={trigger.value == @selected_value}
+            disabled={trigger[:disabled]}
+            role="tab"
+            aria-selected={to_string(trigger.value == @selected_value)}
+            aria-controls={"#{@id}-panel-#{index}"}
+            aria-labelledby={"#{@id}-label-#{index}"}
+            tabindex={if(trigger.value == @selected_value, do: 0, else: -1)}
+            data-slot="tabs-trigger"
+            data-state={if(trigger.value == @selected_value, do: "active", else: "inactive")}
+            phx-change={tabs_select_js(@id, @trigger, @content, trigger.value)}
+          />
+          <label
+            id={"#{@id}-label-#{index}"}
+            for={"#{@id}-trigger-#{index}"}
+            class="ur-tabs__label"
+          >
+            {render_slot(trigger)}
+          </label>
+        </div>
+      </div>
+      <div
+        :for={{content, index} <- Enum.with_index(@content)}
+        id={"#{@id}-panel-#{index}"}
+        role="tabpanel"
+        aria-labelledby={"#{@id}-trigger-#{index}"}
+        aria-hidden={to_string(content.value != @selected_value)}
+        hidden={content.value != @selected_value}
+        class="ur-tabs__content"
+        data-slot="tabs-content"
+      >
+        {render_slot(content)}
+      </div>
+    </div>
+    """
+  end
+
+  defp tabs_select_js(id, triggers, contents, selected_value) do
+    js = %JS{}
+
+    js =
+      triggers
+      |> Enum.with_index()
+      |> Enum.reduce(js, fn {trigger, index}, commands ->
+        selected = trigger.value == selected_value
+        target = "##{Phoenix.HTML.css_escape("#{id}-trigger-#{index}")}"
+        wrap_target = "##{Phoenix.HTML.css_escape("#{id}-trigger-wrap-#{index}")}"
+        state = if selected, do: "active", else: "inactive"
+
+        commands
+        |> JS.set_attribute({"aria-selected", to_string(selected)}, to: target)
+        |> JS.set_attribute({"tabindex", if(selected, do: "0", else: "-1")}, to: target)
+        |> JS.set_attribute({"data-state", state}, to: target)
+        |> JS.set_attribute({"data-state", state}, to: wrap_target)
+      end)
+
+    contents
+    |> Enum.with_index()
+    |> Enum.reduce(js, fn {content, index}, commands ->
+      selected = content.value == selected_value
+      target = "##{Phoenix.HTML.css_escape("#{id}-panel-#{index}")}"
+      state = if selected, do: "active", else: "inactive"
+
+      commands = JS.set_attribute(commands, {"aria-hidden", to_string(!selected)}, to: target)
+      commands = JS.set_attribute(commands, {"data-state", state}, to: target)
+
+      if selected do
+        JS.remove_attribute(commands, "hidden", to: target)
+      else
+        JS.set_attribute(commands, {"hidden", "hidden"}, to: target)
+      end
+    end)
+  end
+
+  defp tabs_selected_value(assigns) do
+    values = Enum.map(assigns[:trigger] || [], & &1.value)
+    default = assigns[:default_value]
+    if default in values, do: default, else: List.first(values)
+  end
 
   defp alert_classes(assigns) do
     variant = assigns[:variant] || :default

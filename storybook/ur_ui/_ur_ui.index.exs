@@ -13,4 +13,5 @@ defmodule Storybook.UrUi do
   def entry("alert"), do: [icon: {:fa, "bell", :thin}]
   def entry("table"), do: [icon: {:fa, "table", :thin}]
   def entry("input"), do: [icon: {:fa, "keyboard", :thin}]
+  def entry("tabs"), do: [icon: {:fa, "table-columns", :thin}]
 end

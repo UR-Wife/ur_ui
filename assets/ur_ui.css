@@ -578,3 +578,62 @@
 
 
 
+
+/* ---------------------------------------------------------------- */
+/* tabs */
+/* ---------------------------------------------------------------- */
+
+.ur-tabs__list {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--ur-wifes-border);
+}
+
+.ur-tabs__trigger {
+  position: relative;
+  display: inline-flex;
+}
+
+.ur-tabs__input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  appearance: none;
+  cursor: pointer;
+}
+
+.ur-tabs__label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ur-wifes-muted-fg);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.ur-tabs__trigger[data-state="active"] .ur-tabs__label {
+  color: var(--ur-wifes-primary);
+  border-bottom-color: var(--ur-wifes-primary);
+}
+
+.ur-tabs__input:focus-visible + .ur-tabs__label {
+  outline: 2px solid var(--ur-wifes-ring);
+  outline-offset: -2px;
+}
+
+.ur-tabs__input:disabled + .ur-tabs__label {
+  color: var(--ur-wifes-muted-fg);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ur-tabs__content {
+  padding: 1rem 0.25rem;
+  font-size: 0.875rem;
+  color: var(--ur-wifes-fg);
+}
