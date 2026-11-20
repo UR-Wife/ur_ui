@@ -13,6 +13,8 @@ defmodule UrUi.Components do
   """
   use Phoenix.Component
 
+  alias Phoenix.LiveView.JS
+
   @doc """
   Button (shadcn `Button`).
 
@@ -312,6 +314,594 @@ defmodule UrUi.Components do
     ["ur-avatar", "ur-avatar--size-#{assigns.size}", assigns[:class]]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
+  end
+
+  @doc "Card surface with composable shadcn-compatible parts."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Card header; reserves a trailing column when card_action is present."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_header(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__header", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-header" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Card heading."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_title(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__title", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-title" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Supporting card copy."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_description(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__description", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-description" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Action placed at the trailing edge of card_header."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_action(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__action", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-action" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Main card body."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_content(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__content", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-content" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Card footer for actions or metadata."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def card_footer(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-card__footer", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="card-footer" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Status message with default and destructive variants."
+  attr :variant, :atom, values: [:default, :destructive], default: :default
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def alert(assigns) do
+    assigns = assign(assigns, :classes, alert_classes(assigns))
+
+    ~H"""
+    <div
+      role="alert"
+      class={@classes}
+      data-slot="alert"
+      data-variant={@variant}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Alert heading."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def alert_title(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-alert__title", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="alert-title" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Alert supporting copy."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def alert_description(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-alert__description", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="alert-description" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Responsive table wrapped in an overflow container."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table", assigns))
+
+    ~H"""
+    <div class="ur-table-container" data-slot="table-container">
+      <table class={@classes} data-slot="table" {@rest}>
+        {render_slot(@inner_block)}
+      </table>
+    </div>
+    """
+  end
+
+  @doc "Table heading rows."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_header(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__header", assigns))
+
+    ~H"""
+    <thead class={@classes} data-slot="table-header" {@rest}>
+      {render_slot(@inner_block)}
+    </thead>
+    """
+  end
+
+  @doc "Table body rows."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_body(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__body", assigns))
+
+    ~H"""
+    <tbody class={@classes} data-slot="table-body" {@rest}>
+      {render_slot(@inner_block)}
+    </tbody>
+    """
+  end
+
+  @doc "Table summary rows."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_footer(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__footer", assigns))
+
+    ~H"""
+    <tfoot class={@classes} data-slot="table-footer" {@rest}>
+      {render_slot(@inner_block)}
+    </tfoot>
+    """
+  end
+
+  @doc "Table row; pass data-state=selected through rest when selected."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_row(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__row", assigns))
+
+    ~H"""
+    <tr class={@classes} data-slot="table-row" {@rest}>
+      {render_slot(@inner_block)}
+    </tr>
+    """
+  end
+
+  @doc "Column heading cell."
+  attr :scope, :string, default: "col"
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_head(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__head", assigns))
+
+    ~H"""
+    <th scope={@scope} class={@classes} data-slot="table-head" {@rest}>
+      {render_slot(@inner_block)}
+    </th>
+    """
+  end
+
+  @doc "Table data cell."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_cell(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__cell", assigns))
+
+    ~H"""
+    <td class={@classes} data-slot="table-cell" {@rest}>
+      {render_slot(@inner_block)}
+    </td>
+    """
+  end
+
+  @doc "Accessible table caption."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_caption(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__caption", assigns))
+
+    ~H"""
+    <caption class={@classes} data-slot="table-caption" {@rest}>
+      {render_slot(@inner_block)}
+    </caption>
+    """
+  end
+
+  @doc "Native input with Phoenix form-field and changeset-error support."
+  attr :field, Phoenix.HTML.FormField, default: nil
+  attr :id, :string, default: nil
+  attr :name, :string, default: nil
+  attr :value, :any, default: nil
+  attr :type, :string, default: "text"
+  attr :errors, :any, default: nil
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  def input(assigns) do
+    field = assigns[:field]
+    id = assigns[:id] || (field && field.id)
+    name = assigns[:name] || (field && field.name)
+    value = if assigns[:value] != nil, do: assigns[:value], else: field && field.value
+    errors = assigns[:errors] || (field && field.errors) || []
+    value = if assigns[:type] == "file", do: nil, else: Phoenix.HTML.Form.normalize_value(assigns[:type], value)
+
+    assigns =
+      assign(assigns,
+        id: id,
+        name: name,
+        value: value,
+        errors: errors,
+        error_id: if(errors != [] and id, do: "#{id}-errors"),
+        invalid: if(errors != [], do: "true"),
+        classes: input_classes(assigns, errors)
+      )
+
+    ~H"""
+    <div class="ur-input-field" data-slot="input-field">
+      <input
+        id={@id}
+        name={@name}
+        type={@type}
+        value={@value}
+        class={@classes}
+        data-slot="input"
+        data-invalid={@invalid}
+        aria-invalid={@invalid}
+        aria-describedby={@error_id}
+        {@rest}
+      />
+      <div :if={@errors != []} id={@error_id} class="ur-input-errors">
+        <p :for={error <- @errors} class="ur-input-error" data-slot="input-error">
+          {input_error_message(error)}
+        </p>
+      </div>
+    </div>
+    """
+  end
+
+  defp input_classes(assigns, errors) do
+    invalid = if errors != [], do: "ur-input--invalid"
+    ["ur-input", invalid, assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
+  end
+
+  defp input_error_message({message, options}) do
+    Enum.reduce(options, message, fn {key, value}, text ->
+      String.replace(text, "%{#{key}}", to_string(value))
+    end)
+  end
+
+  defp input_error_message(message) when is_binary(message), do: message
+
+  @doc "Accessible tabs with matching trigger and content slots."
+  attr :id, :string, required: true
+  attr :default_value, :string, default: nil
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  slot :trigger do
+    attr :value, :string, required: true
+    attr :disabled, :boolean
+  end
+
+  slot :content do
+    attr :value, :string, required: true
+  end
+
+  def tabs(assigns) do
+    assigns =
+      assign(assigns,
+        selected_value: tabs_selected_value(assigns),
+        classes: part_classes("ur-tabs", assigns)
+      )
+
+    ~H"""
+    <div id={@id} class={@classes} data-slot="tabs" {@rest}>
+      <div class="ur-tabs__list" data-slot="tabs-list" role="tablist">
+        <div
+          :for={{trigger, index} <- Enum.with_index(@trigger)}
+          id={"#{@id}-trigger-wrap-#{index}"}
+          class="ur-tabs__trigger"
+          data-state={if(trigger.value == @selected_value, do: "active", else: "inactive")}
+        >
+          <input
+            id={"#{@id}-trigger-#{index}"}
+            class="ur-tabs__input"
+            type="radio"
+            name={"#{@id}-values"}
+            value={trigger.value}
+            checked={trigger.value == @selected_value}
+            disabled={trigger[:disabled]}
+            role="tab"
+            aria-selected={to_string(trigger.value == @selected_value)}
+            aria-controls={"#{@id}-panel-#{index}"}
+            aria-labelledby={"#{@id}-label-#{index}"}
+            tabindex={if(trigger.value == @selected_value, do: 0, else: -1)}
+            data-slot="tabs-trigger"
+            data-state={if(trigger.value == @selected_value, do: "active", else: "inactive")}
+            phx-change={tabs_select_js(@id, @trigger, @content, trigger.value)}
+          />
+          <label
+            id={"#{@id}-label-#{index}"}
+            for={"#{@id}-trigger-#{index}"}
+            class="ur-tabs__label"
+          >
+            {render_slot(trigger)}
+          </label>
+        </div>
+      </div>
+      <div
+        :for={{content, index} <- Enum.with_index(@content)}
+        id={"#{@id}-panel-#{index}"}
+        role="tabpanel"
+        aria-labelledby={"#{@id}-trigger-#{index}"}
+        aria-hidden={to_string(content.value != @selected_value)}
+        hidden={content.value != @selected_value}
+        class="ur-tabs__content"
+        data-slot="tabs-content"
+      >
+        {render_slot(content)}
+      </div>
+    </div>
+    """
+  end
+
+  defp tabs_select_js(id, triggers, contents, selected_value) do
+    js = %JS{}
+
+    js =
+      triggers
+      |> Enum.with_index()
+      |> Enum.reduce(js, fn {trigger, index}, commands ->
+        selected = trigger.value == selected_value
+        target = "##{Phoenix.HTML.css_escape("#{id}-trigger-#{index}")}"
+        wrap_target = "##{Phoenix.HTML.css_escape("#{id}-trigger-wrap-#{index}")}"
+        state = if selected, do: "active", else: "inactive"
+
+        commands
+        |> JS.set_attribute({"aria-selected", to_string(selected)}, to: target)
+        |> JS.set_attribute({"tabindex", if(selected, do: "0", else: "-1")}, to: target)
+        |> JS.set_attribute({"data-state", state}, to: target)
+        |> JS.set_attribute({"data-state", state}, to: wrap_target)
+      end)
+
+    contents
+    |> Enum.with_index()
+    |> Enum.reduce(js, fn {content, index}, commands ->
+      selected = content.value == selected_value
+      target = "##{Phoenix.HTML.css_escape("#{id}-panel-#{index}")}"
+      state = if selected, do: "active", else: "inactive"
+
+      commands = JS.set_attribute(commands, {"aria-hidden", to_string(!selected)}, to: target)
+      commands = JS.set_attribute(commands, {"data-state", state}, to: target)
+
+      if selected do
+        JS.remove_attribute(commands, "hidden", to: target)
+      else
+        JS.set_attribute(commands, {"hidden", "hidden"}, to: target)
+      end
+    end)
+  end
+
+  defp tabs_selected_value(assigns) do
+    values = Enum.map(assigns[:trigger] || [], & &1.value)
+    default = assigns[:default_value]
+    if default in values, do: default, else: List.first(values)
+  end
+
+  @doc """
+  Accessible accordion with matching trigger and content slots (shadcn `Accordion`).
+
+  `type: :single` (the default) keeps at most one item open — opening an item
+  closes the others; `type: :multiple` toggles every item independently.
+  Opening and closing runs client-side through `Phoenix.LiveView.JS`; Enter
+  and Space toggle an item through the native button.
+  """
+  attr :id, :string, required: true
+  attr :type, :atom, default: :single, values: [:single, :multiple]
+  attr :default_value, :any, default: nil
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  slot :trigger do
+    attr :value, :string, required: true
+    attr :disabled, :boolean
+  end
+
+  slot :content do
+    attr :value, :string, required: true
+  end
+
+  def accordion(assigns) do
+    assigns =
+      assign(assigns,
+        items: accordion_items(assigns),
+        classes: part_classes("ur-accordion", assigns)
+      )
+
+    ~H"""
+    <div id={@id} class={@classes} data-slot="accordion" {@rest}>
+      <div
+        :for={item <- @items}
+        id={"#{@id}-item-#{item.index}"}
+        class="ur-accordion__item"
+        data-slot="accordion-item"
+        data-state={if(item.open, do: "open", else: "closed")}
+      >
+        <h3 class="ur-accordion__header">
+          <button
+            type="button"
+            id={"#{@id}-trigger-#{item.index}"}
+            class="ur-accordion__trigger"
+            aria-expanded={to_string(item.open)}
+            aria-controls={"#{@id}-panel-#{item.index}"}
+            data-slot="accordion-trigger"
+            data-state={if(item.open, do: "open", else: "closed")}
+            disabled={item.trigger[:disabled]}
+            phx-click={if(item.trigger[:disabled], do: nil, else: item.toggle_js)}
+          >
+            {render_slot(item.trigger)}
+          </button>
+        </h3>
+        <div
+          id={"#{@id}-panel-#{item.index}"}
+          role="region"
+          aria-labelledby={"#{@id}-trigger-#{item.index}"}
+          class="ur-accordion__content"
+          data-slot="accordion-content"
+          data-state={if(item.open, do: "open", else: "closed")}
+          hidden={not item.open}
+        >
+          {render_slot(item.content)}
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp accordion_items(assigns) do
+    triggers = assigns[:trigger] || []
+    contents = assigns[:content] || []
+    open_values = assigns[:default_value] |> List.wrap() |> MapSet.new()
+    type = assigns[:type] || :single
+
+    triggers
+    |> Enum.with_index()
+    |> Enum.map(fn {trigger, index} ->
+      %{
+        trigger: trigger,
+        index: index,
+        content: Enum.find(contents, &(&1.value == trigger.value)) || empty_slot(),
+        open: trigger.value in open_values,
+        toggle_js: accordion_toggle_js(assigns.id, index, type, triggers)
+      }
+    end)
+  end
+
+  defp empty_slot, do: %{inner_block: fn _changed, _argument -> "" end}
+
+  defp accordion_toggle_js(id, index, type, triggers) do
+    target = fn kind, i -> "##{Phoenix.HTML.css_escape("#{id}-#{kind}-#{i}")}" end
+
+    js =
+      %JS{}
+      |> JS.toggle_attribute({"aria-expanded", "true", "false"}, to: target.("trigger", index))
+      |> JS.toggle_attribute({"data-state", "open", "closed"}, to: target.("trigger", index))
+      |> JS.toggle_attribute({"data-state", "open", "closed"}, to: target.("item", index))
+      |> JS.toggle_attribute({"data-state", "open", "closed"}, to: target.("panel", index))
+      |> JS.toggle_attribute({"hidden", "hidden"}, to: target.("panel", index))
+
+    if type == :single do
+      triggers
+      |> Enum.with_index()
+      |> Enum.reduce(js, fn {_trigger, other}, commands ->
+        if other == index do
+          commands
+        else
+          commands
+          |> JS.set_attribute({"aria-expanded", "false"}, to: target.("trigger", other))
+          |> JS.set_attribute({"data-state", "closed"}, to: target.("trigger", other))
+          |> JS.set_attribute({"data-state", "closed"}, to: target.("item", other))
+          |> JS.set_attribute({"data-state", "closed"}, to: target.("panel", other))
+          |> JS.set_attribute({"hidden", "hidden"}, to: target.("panel", other))
+        end
+      end)
+    else
+      js
+    end
+  end
+
+  defp alert_classes(assigns) do
+    variant = assigns[:variant] || :default
+    ["ur-alert", "ur-alert--#{variant}", assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
   end
 
   defp part_classes(base, assigns) do

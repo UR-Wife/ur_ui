@@ -134,5 +134,155 @@ Parts: `avatar_image/1` (`src`, `alt`, `class`, `rest`), `avatar_fallback/1`,
 `avatar_badge/1`, `avatar_group/1`, `avatar_group_count/1` — each takes
 `class`, `rest` and a `:inner_block` slot.
 
+### card
+
+`UrUi.Components.card/1` — a bounded content surface (shadcn `Card`). Use for
+grouping related content and actions, not for every block of page copy.
+
+Compose `card_header/1`, `card_title/1`, `card_description/1`,
+`card_action/1`, `card_content/1` and `card_footer/1` inside the root. Put the
+action inside the header to align it at the trailing edge. Every part accepts
+`class` (appended), `rest` globals and an optional `:inner_block` slot; the
+root adds `data-slot="card"` and each part exposes its corresponding slot.
+
+```heex
+<.card>
+  <.card_header>
+    <.card_title>Workspace</.card_title>
+    <.card_description>Manage workspace members.</.card_description>
+    <.card_action><.button size={:sm}>Edit</.button></.card_action>
+  </.card_header>
+  <.card_content>Three active members.</.card_content>
+  <.card_footer><.button>Save</.button></.card_footer>
+</.card>
+```
+
+There are no card variants or sizes in shadcn; size through `class` or the
+surrounding layout. All seven functions render safely with no optional attrs.
+
+### alert
+
+`UrUi.Components.alert/1` — an assertive status message (shadcn `Alert`), with
+`role="alert"` by default. Attrs: `variant` (`:default`, `:destructive`;
+default `:default`), `class`, `rest`. Its optional `:inner_block` may contain
+an icon marked `data-slot="alert-icon"` and the composable title/description.
+
+Use `alert_title/1` and `alert_description/1` for the two content slots. Both
+accept `class`, `rest` and optional `:inner_block`. Add `aria-live="polite"`
+through `rest` when the message is not urgent.
+
+```heex
+<.alert variant={:destructive}>
+  <span data-slot="alert-icon" aria-hidden="true">!</span>
+  <.alert_title>Delete failed</.alert_title>
+  <.alert_description>Check your permissions and try again.</.alert_description>
+</.alert>
+```
+
+The destructive variant uses the UR red border/text token. Icons are optional;
+there are no sizes in shadcn.
+
+### table
+
+`UrUi.Components.table/1` — a semantic table inside a horizontal overflow
+container (shadcn `Table`). Attrs: `class`, `rest` and optional `:inner_block`.
+The root's globals are applied to `<table>`, not the container.
+
+Compose `table_header/1`, `table_body/1`, `table_footer/1`, `table_row/1`,
+`table_head/1`, `table_cell/1` and `table_caption/1`. Every part accepts
+`class`, `rest` and optional `:inner_block`; `table_head` also accepts `scope`
+(default `"col"`). Mark a selected row with `data-state="selected"` through
+`rest`. Use a caption or `aria-label` to name the table.
+
+```heex
+<.table>
+  <.table_caption>Workspace members</.table_caption>
+  <.table_header>
+    <.table_row><.table_head>Name</.table_head><.table_head>Role</.table_head></.table_row>
+  </.table_header>
+  <.table_body>
+    <.table_row><.table_cell>Ada</.table_cell><.table_cell>Owner</.table_cell></.table_row>
+  </.table_body>
+</.table>
+```
+
+Shadcn defines no table variants or sizes; layout and alignment belong to the
+caller through `class` and global attrs.
+
+### input
+
+`UrUi.Components.input/1` — a native input (shadcn `Input`) with optional
+Phoenix form integration. Attrs: `field` (`Phoenix.HTML.FormField`), `id`,
+`name`, `value`, `type` (default `"text"`), `errors`, `class` and `rest`.
+Explicit `id`/`name`/`value` override the field. File inputs never receive a
+`value` attribute.
+
+Pass `field={@form[:email]}` to derive the input id, name, value and errors.
+Changeset `{message, options}` errors are interpolated and rendered below the
+input; the error container is linked with `aria-describedby`, and invalid
+inputs receive `aria-invalid="true"`. Explicit `errors` accept the same tuples
+or plain strings.
+
+```heex
+<.form for={@form}>
+  <.label for={@form[:email].id}>Email</.label>
+  <.input field={@form[:email]} type="email" autocomplete="email" />
+</.form>
+```
+
+The `class` attr extends the input itself; native globals such as `placeholder`,
+`required`, `disabled`, `autocomplete` and `accept` pass through `rest`. There
+are no shadcn variants or sizes; use native `type` values instead.
 
 
+
+### tabs
+
+`UrUi.Components.tabs/1` — accessible tabs (shadcn `Tabs`) built on native
+radio inputs. Attrs: `id` (required), `default_value`, `class` and `rest`;
+the `:trigger` and `:content` slots pair by `value`. Switching runs
+client-side through `Phoenix.LiveView.JS` commands — no server round-trip.
+
+```heex
+<.tabs id="account-tabs" default_value="general">
+  <:trigger value="general">General</:trigger>
+  <:trigger value="security">Security</:trigger>
+  <:content value="general">Manage your profile and contact details.</:content>
+  <:content value="security">Password and two-factor authentication.</:content>
+</.tabs>
+```
+
+Arrow keys move between tabs through the native radio group, and the
+checked radio carries `role="tab"` with `aria-selected`; panels are
+`role="tabpanel"` linked with `aria-controls`/`aria-labelledby`, ARIA as in
+shadcn. The `class` attr extends the tab list container and globals pass
+through the root. A trigger renders `disabled` when its slot carries
+`disabled`. The active tab is marked `data-state="active"` on the trigger
+surface and the label underlines through `--ur-wifes-primary`.
+
+### accordion
+
+`UrUi.Components.accordion/1` — accessible accordion (shadcn `Accordion`)
+with matching `:trigger` and `:content` slots. Attrs: `id` (required),
+`type` (`:single` default keeps at most one item open — opening an item
+closes the others; `:multiple` toggles every item independently),
+`default_value` (a value or a list of values that start open), `class` and
+`rest`. Toggling runs client-side through `Phoenix.LiveView.JS` commands —
+no server round-trip.
+
+```heex
+<.accordion id="faq" type="single" default_value="billing">
+  <:trigger value="billing">Billing</:trigger>
+  <:trigger value="team">Team</:trigger>
+  <:content value="billing">Invoices are issued monthly.</:content>
+  <:content value="team">Invite teammates from settings.</:content>
+</.accordion>
+```
+
+Enter and Space toggle an item through the native button. ARIA as in
+shadcn: each trigger is a `type="button"` button inside an `h3` heading
+with `aria-expanded` and `aria-controls`, and each panel is a
+`role="region"` labelled by its trigger with `data-state` and `hidden`.
+Items pair by `value`; a trigger without a matching `:content` renders an
+empty region. A trigger slot carrying `disabled` renders a disabled button
+with no click command.
