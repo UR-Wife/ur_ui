@@ -233,14 +233,14 @@ defmodule UrUi.Components do
     assigns = assign(assigns, :classes, skeleton_classes(assigns))
 
     ~H"""
-    <div class={@classes} {@rest}>
+    <div class={@classes} data-slot="skeleton" {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
   end
 
   defp skeleton_classes(assigns) do
-    ["ur-skeleton", assigns[:class]]
+    ["bg-accent animate-pulse rounded-md", assigns[:class]]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
