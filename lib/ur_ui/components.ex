@@ -200,6 +200,7 @@ defmodule UrUi.Components do
     ~H"""
     <div
       class={@classes}
+      data-slot="separator"
       data-orientation={@orientation}
       role={if @decorative, do: "none", else: "separator"}
       aria-hidden={if @decorative, do: "true", else: nil}
@@ -211,7 +212,10 @@ defmodule UrUi.Components do
   end
 
   defp separator_classes(assigns) do
-    ["ur-separator", "ur-separator--#{assigns.orientation}", assigns[:class]]
+    [
+      "bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px",
+      assigns[:class]
+    ]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
