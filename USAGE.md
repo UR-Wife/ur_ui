@@ -209,4 +209,29 @@ Compose `table_header/1`, `table_body/1`, `table_footer/1`, `table_row/1`,
 Shadcn defines no table variants or sizes; layout and alignment belong to the
 caller through `class` and global attrs.
 
+### input
+
+`UrUi.Components.input/1` — a native input (shadcn `Input`) with optional
+Phoenix form integration. Attrs: `field` (`Phoenix.HTML.FormField`), `id`,
+`name`, `value`, `type` (default `"text"`), `errors`, `class` and `rest`.
+Explicit `id`/`name`/`value` override the field. File inputs never receive a
+`value` attribute.
+
+Pass `field={@form[:email]}` to derive the input id, name, value and errors.
+Changeset `{message, options}` errors are interpolated and rendered below the
+input; the error container is linked with `aria-describedby`, and invalid
+inputs receive `aria-invalid="true"`. Explicit `errors` accept the same tuples
+or plain strings.
+
+```heex
+<.form for={@form}>
+  <.label for={@form[:email].id}>Email</.label>
+  <.input field={@form[:email]} type="email" autocomplete="email" />
+</.form>
+```
+
+The `class` attr extends the input itself; native globals such as `placeholder`,
+`required`, `disabled`, `autocomplete` and `accept` pass through `rest`. There
+are no shadcn variants or sizes; use native `type` values instead.
+
 

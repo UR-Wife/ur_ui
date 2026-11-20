@@ -594,6 +594,71 @@ defmodule UrUi.Components do
     """
   end
 
+  @doc "Native input with Phoenix form-field and changeset-error support."
+  attr :field, Phoenix.HTML.FormField, default: nil
+  attr :id, :string, default: nil
+  attr :name, :string, default: nil
+  attr :value, :any, default: nil
+  attr :type, :string, default: "text"
+  attr :errors, :any, default: nil
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  def input(assigns) do
+    field = assigns[:field]
+    id = assigns[:id] || (field && field.id)
+    name = assigns[:name] || (field && field.name)
+    value = if assigns[:value] != nil, do: assigns[:value], else: field && field.value
+    errors = assigns[:errors] || (field && field.errors) || []
+    value = if assigns[:type] == "file", do: nil, else: Phoenix.HTML.Form.normalize_value(assigns[:type], value)
+
+    assigns =
+      assign(assigns,
+        id: id,
+        name: name,
+        value: value,
+        errors: errors,
+        error_id: if(errors != [] and id, do: "#{id}-errors"),
+        invalid: if(errors != [], do: "true"),
+        classes: input_classes(assigns, errors)
+      )
+
+    ~H"""
+    <div class="ur-input-field" data-slot="input-field">
+      <input
+        id={@id}
+        name={@name}
+        type={@type}
+        value={@value}
+        class={@classes}
+        data-slot="input"
+        data-invalid={@invalid}
+        aria-invalid={@invalid}
+        aria-describedby={@error_id}
+        {@rest}
+      />
+      <div :if={@errors != []} id={@error_id} class="ur-input-errors">
+        <p :for={error <- @errors} class="ur-input-error" data-slot="input-error">
+          {input_error_message(error)}
+        </p>
+      </div>
+    </div>
+    """
+  end
+
+  defp input_classes(assigns, errors) do
+    invalid = if errors != [], do: "ur-input--invalid"
+    ["ur-input", invalid, assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
+  end
+
+  defp input_error_message({message, options}) do
+    Enum.reduce(options, message, fn {key, value}, text ->
+      String.replace(text, "%{#{key}}", to_string(value))
+    end)
+  end
+
+  defp input_error_message(message) when is_binary(message), do: message
+
   defp alert_classes(assigns) do
     variant = assigns[:variant] || :default
     ["ur-alert", "ur-alert--#{variant}", assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")

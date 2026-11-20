@@ -39,7 +39,8 @@ defmodule UrUi.MixProject do
       {:phoenix, "~> 1.7.24 or ~> 1.8.0"},
       {:bandit, "~> 1.14.1", only: :dev},
       {:phoenix_storybook, "~> 1.3", only: :dev},
-      {:jason, "~> 1.4", only: [:dev, :test]}
+      {:jason, "~> 1.4", only: [:dev, :test]},
+      {:phoenix_ecto, "~> 4.6", only: [:dev, :test]}
     ]
   end
 end
