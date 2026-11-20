@@ -777,6 +777,128 @@ defmodule UrUi.Components do
     if default in values, do: default, else: List.first(values)
   end
 
+  @doc """
+  Accessible accordion with matching trigger and content slots (shadcn `Accordion`).
+
+  `type: :single` (the default) keeps at most one item open — opening an item
+  closes the others; `type: :multiple` toggles every item independently.
+  Opening and closing runs client-side through `Phoenix.LiveView.JS`; Enter
+  and Space toggle an item through the native button.
+  """
+  attr :id, :string, required: true
+  attr :type, :atom, default: :single, values: [:single, :multiple]
+  attr :default_value, :any, default: nil
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  slot :trigger do
+    attr :value, :string, required: true
+    attr :disabled, :boolean
+  end
+
+  slot :content do
+    attr :value, :string, required: true
+  end
+
+  def accordion(assigns) do
+    assigns =
+      assign(assigns,
+        items: accordion_items(assigns),
+        classes: part_classes("ur-accordion", assigns)
+      )
+
+    ~H"""
+    <div id={@id} class={@classes} data-slot="accordion" {@rest}>
+      <div
+        :for={item <- @items}
+        id={"#{@id}-item-#{item.index}"}
+        class="ur-accordion__item"
+        data-slot="accordion-item"
+        data-state={if(item.open, do: "open", else: "closed")}
+      >
+        <h3 class="ur-accordion__header">
+          <button
+            type="button"
+            id={"#{@id}-trigger-#{item.index}"}
+            class="ur-accordion__trigger"
+            aria-expanded={to_string(item.open)}
+            aria-controls={"#{@id}-panel-#{item.index}"}
+            data-slot="accordion-trigger"
+            data-state={if(item.open, do: "open", else: "closed")}
+            disabled={item.trigger[:disabled]}
+            phx-click={if(item.trigger[:disabled], do: nil, else: item.toggle_js)}
+          >
+            {render_slot(item.trigger)}
+          </button>
+        </h3>
+        <div
+          id={"#{@id}-panel-#{item.index}"}
+          role="region"
+          aria-labelledby={"#{@id}-trigger-#{item.index}"}
+          class="ur-accordion__content"
+          data-slot="accordion-content"
+          data-state={if(item.open, do: "open", else: "closed")}
+          hidden={not item.open}
+        >
+          {render_slot(item.content)}
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp accordion_items(assigns) do
+    triggers = assigns[:trigger] || []
+    contents = assigns[:content] || []
+    open_values = assigns[:default_value] |> List.wrap() |> MapSet.new()
+    type = assigns[:type] || :single
+
+    triggers
+    |> Enum.with_index()
+    |> Enum.map(fn {trigger, index} ->
+      %{
+        trigger: trigger,
+        index: index,
+        content: Enum.find(contents, &(&1.value == trigger.value)) || empty_slot(),
+        open: trigger.value in open_values,
+        toggle_js: accordion_toggle_js(assigns.id, index, type, triggers)
+      }
+    end)
+  end
+
+  defp empty_slot, do: %{inner_block: fn _changed, _argument -> "" end}
+
+  defp accordion_toggle_js(id, index, type, triggers) do
+    target = fn kind, i -> "##{Phoenix.HTML.css_escape("#{id}-#{kind}-#{i}")}" end
+
+    js =
+      %JS{}
+      |> JS.toggle_attribute({"aria-expanded", "true", "false"}, to: target.("trigger", index))
+      |> JS.toggle_attribute({"data-state", "open", "closed"}, to: target.("trigger", index))
+      |> JS.toggle_attribute({"data-state", "open", "closed"}, to: target.("item", index))
+      |> JS.toggle_attribute({"data-state", "open", "closed"}, to: target.("panel", index))
+      |> JS.toggle_attribute({"hidden", "hidden"}, to: target.("panel", index))
+
+    if type == :single do
+      triggers
+      |> Enum.with_index()
+      |> Enum.reduce(js, fn {_trigger, other}, commands ->
+        if other == index do
+          commands
+        else
+          commands
+          |> JS.set_attribute({"aria-expanded", "false"}, to: target.("trigger", other))
+          |> JS.set_attribute({"data-state", "closed"}, to: target.("trigger", other))
+          |> JS.set_attribute({"data-state", "closed"}, to: target.("item", other))
+          |> JS.set_attribute({"data-state", "closed"}, to: target.("panel", other))
+          |> JS.set_attribute({"hidden", "hidden"}, to: target.("panel", other))
+        end
+      end)
+    else
+      js
+    end
+  end
+
   defp alert_classes(assigns) do
     variant = assigns[:variant] || :default
     ["ur-alert", "ur-alert--#{variant}", assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")

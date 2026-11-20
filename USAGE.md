@@ -259,3 +259,30 @@ shadcn. The `class` attr extends the tab list container and globals pass
 through the root. A trigger renders `disabled` when its slot carries
 `disabled`. The active tab is marked `data-state="active"` on the trigger
 surface and the label underlines through `--ur-wifes-primary`.
+
+### accordion
+
+`UrUi.Components.accordion/1` — accessible accordion (shadcn `Accordion`)
+with matching `:trigger` and `:content` slots. Attrs: `id` (required),
+`type` (`:single` default keeps at most one item open — opening an item
+closes the others; `:multiple` toggles every item independently),
+`default_value` (a value or a list of values that start open), `class` and
+`rest`. Toggling runs client-side through `Phoenix.LiveView.JS` commands —
+no server round-trip.
+
+```heex
+<.accordion id="faq" type="single" default_value="billing">
+  <:trigger value="billing">Billing</:trigger>
+  <:trigger value="team">Team</:trigger>
+  <:content value="billing">Invoices are issued monthly.</:content>
+  <:content value="team">Invite teammates from settings.</:content>
+</.accordion>
+```
+
+Enter and Space toggle an item through the native button. ARIA as in
+shadcn: each trigger is a `type="button"` button inside an `h3` heading
+with `aria-expanded` and `aria-controls`, and each panel is a
+`role="region"` labelled by its trigger with `data-state` and `hidden`.
+Items pair by `value`; a trigger without a matching `:content` renders an
+empty region. A trigger slot carrying `disabled` renders a disabled button
+with no click command.

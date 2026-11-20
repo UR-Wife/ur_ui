@@ -637,3 +637,54 @@
   font-size: 0.875rem;
   color: var(--ur-wifes-fg);
 }
+
+/* ---------------------------------------------------------------- */
+/* accordion */
+/* ---------------------------------------------------------------- */
+
+.ur-accordion__item {
+  border-bottom: 1px solid var(--ur-wifes-border);
+}
+
+.ur-accordion__header {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ur-accordion__trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--ur-wifes-fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.ur-accordion__trigger:hover {
+  color: var(--ur-wifes-primary);
+}
+
+.ur-accordion__trigger:focus-visible {
+  outline: 2px solid var(--ur-wifes-ring);
+  outline-offset: -2px;
+}
+
+.ur-accordion__trigger[disabled] {
+  color: var(--ur-wifes-muted-fg);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ur-accordion__content {
+  padding: 0 0.25rem 1rem;
+  font-size: 0.875rem;
+  color: var(--ur-wifes-fg);
+}
