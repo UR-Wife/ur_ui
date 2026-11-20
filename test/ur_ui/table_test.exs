@@ -4,6 +4,19 @@ defmodule UrUi.TableTest do
   import Phoenix.LiveViewTest
 
   @component UrUi.Components
+  @classes %{
+    "table-container" => "relative w-full overflow-x-auto",
+    "table" => "w-full caption-bottom text-sm",
+    "table-header" => "[&_tr]:border-b",
+    "table-body" => "[&_tr:last-child]:border-0",
+    "table-footer" => "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
+    "table-row" => "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
+    "table-head" =>
+      "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+    "table-cell" =>
+      "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+    "table-caption" => "text-muted-foreground mt-4 text-sm"
+  }
 
   defp inner(content) do
     %{__slot__: :inner_block, inner_block: fn _changed, _argument -> content end}
@@ -14,13 +27,18 @@ defmodule UrUi.TableTest do
     render_component(Function.capture(@component, name, 1), assigns)
   end
 
+  defp assert_classes(html, slot, custom \\ nil) do
+    expected = [@classes[slot], custom] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
+    [part] = Floki.parse_fragment!(html) |> Floki.find("[data-slot='#{slot}']")
+    assert Floki.attribute(part, "class") == [expected]
+  end
+
   test "table renders its overflow container and table slot" do
     html = render_part(:table, %{}, "Rows")
 
-    assert html =~ ~s(data-slot="table-container")
-    assert html =~ ~s(data-slot="table")
+    assert_classes(html, "table-container")
+    assert_classes(html, "table")
     assert html =~ "<table"
-    assert html =~ "ur-table"
     assert html =~ "Rows"
   end
 
@@ -38,8 +56,7 @@ defmodule UrUi.TableTest do
       slot = unquote(name) |> Atom.to_string() |> String.replace("_", "-")
 
       assert html =~ "<#{unquote(tag)}"
-      assert html =~ ~s(data-slot="#{slot}")
-      assert html =~ "ur-table__#{slot |> String.replace("table-", "")}"
+      assert_classes(html, slot)
       assert html =~ "Content"
     end
   end
@@ -53,7 +70,7 @@ defmodule UrUi.TableTest do
   test "table extends classes and passes global attrs to the table element" do
     html = render_part(:table, %{class: "extra", id: "members", "aria-label": "Members"}, "Rows")
 
-    assert html =~ "ur-table extra"
+    assert_classes(html, "table", "extra")
     assert html =~ ~s(id="members")
     assert html =~ ~s(aria-label="Members")
   end

@@ -595,10 +595,10 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def table(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table", assigns))
+    assigns = assign(assigns, :classes, part_classes("w-full caption-bottom text-sm", assigns))
 
     ~H"""
-    <div class="ur-table-container" data-slot="table-container">
+    <div class="relative w-full overflow-x-auto" data-slot="table-container">
       <table class={@classes} data-slot="table" {@rest}>
         {render_slot(@inner_block)}
       </table>
@@ -612,7 +612,7 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def table_header(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__header", assigns))
+    assigns = assign(assigns, :classes, part_classes("[&_tr]:border-b", assigns))
 
     ~H"""
     <thead class={@classes} data-slot="table-header" {@rest}>
@@ -627,7 +627,7 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def table_body(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__body", assigns))
+    assigns = assign(assigns, :classes, part_classes("[&_tr:last-child]:border-0", assigns))
 
     ~H"""
     <tbody class={@classes} data-slot="table-body" {@rest}>
@@ -642,7 +642,12 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def table_footer(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__footer", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes("bg-muted/50 border-t font-medium [&>tr]:last:border-b-0", assigns)
+      )
 
     ~H"""
     <tfoot class={@classes} data-slot="table-footer" {@rest}>
@@ -657,7 +662,15 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def table_row(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__row", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
+          assigns
+        )
+      )
 
     ~H"""
     <tr class={@classes} data-slot="table-row" {@rest}>
@@ -673,7 +686,15 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def table_head(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__head", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+          assigns
+        )
+      )
 
     ~H"""
     <th scope={@scope} class={@classes} data-slot="table-head" {@rest}>
@@ -688,7 +709,15 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def table_cell(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__cell", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+          assigns
+        )
+      )
 
     ~H"""
     <td class={@classes} data-slot="table-cell" {@rest}>
@@ -703,7 +732,8 @@ defmodule UrUi.Components do
   slot(:inner_block)
 
   def table_caption(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__caption", assigns))
+    assigns =
+      assign(assigns, :classes, part_classes("text-muted-foreground mt-4 text-sm", assigns))
 
     ~H"""
     <caption class={@classes} data-slot="table-caption" {@rest}>
