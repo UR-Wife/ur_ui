@@ -968,26 +968,27 @@ defmodule UrUi.Components do
   end
 
   def accordion(assigns) do
-    assigns =
-      assign(assigns,
-        items: accordion_items(assigns),
-        classes: part_classes("ur-accordion", assigns)
-      )
+    rest =
+      if assigns[:class],
+        do: Map.put(assigns.rest, :class, assigns.class),
+        else: assigns.rest
+
+    assigns = assign(assigns, items: accordion_items(assigns), rest: rest)
 
     ~H"""
-    <div id={@id} class={@classes} data-slot="accordion" {@rest}>
+    <div id={@id} data-slot="accordion" {@rest}>
       <div
         :for={item <- @items}
         id={"#{@id}-item-#{item.index}"}
-        class="ur-accordion__item"
+        class="border-b last:border-b-0"
         data-slot="accordion-item"
         data-state={if(item.open, do: "open", else: "closed")}
       >
-        <h3 class="ur-accordion__header">
+        <h3 class="flex">
           <button
             type="button"
             id={"#{@id}-trigger-#{item.index}"}
-            class="ur-accordion__trigger"
+            class="flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180"
             aria-expanded={to_string(item.open)}
             aria-controls={"#{@id}-panel-#{item.index}"}
             data-slot="accordion-trigger"
@@ -996,18 +997,35 @@ defmodule UrUi.Components do
             phx-click={if(item.trigger[:disabled], do: nil, else: item.toggle_js)}
           >
             {render_slot(item.trigger)}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="pointer-events-none size-4 shrink-0 translate-y-0.5 text-muted-foreground transition-transform duration-200"
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </button>
         </h3>
         <div
           id={"#{@id}-panel-#{item.index}"}
           role="region"
           aria-labelledby={"#{@id}-trigger-#{item.index}"}
-          class="ur-accordion__content"
+          class="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
           data-slot="accordion-content"
           data-state={if(item.open, do: "open", else: "closed")}
           hidden={not item.open}
         >
-          {render_slot(item.content)}
+          <div class="pt-0 pb-4">
+            {render_slot(item.content)}
+          </div>
         </div>
       </div>
     </div>

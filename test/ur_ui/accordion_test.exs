@@ -4,6 +4,10 @@ defmodule UrUi.AccordionTest do
   import Phoenix.LiveViewTest
 
   @component UrUi.Components
+  @item_classes "border-b last:border-b-0"
+  @trigger_classes "flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180"
+  @content_classes "overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+  @icon_classes "pointer-events-none size-4 shrink-0 translate-y-0.5 text-muted-foreground transition-transform duration-200"
 
   defp slot(name, value, content) do
     %{
@@ -146,10 +150,30 @@ defmodule UrUi.AccordionTest do
     assert Floki.attribute(button, "phx-click") == []
   end
 
+  test "accordion uses the shadcn item trigger content and icon classes" do
+    document = render_accordion() |> Floki.parse_fragment!()
+    [root] = Floki.find(document, "[data-slot=accordion]")
+    items = Floki.find(document, "[data-slot=accordion-item]")
+    headers = Floki.find(document, "[data-slot=accordion-item] > h3")
+    triggers = Floki.find(document, "[data-slot=accordion-trigger]")
+    panels = Floki.find(document, "[data-slot=accordion-content]")
+    content_wrappers = Floki.find(document, "[data-slot=accordion-content] > div")
+    icons = Floki.find(document, "[data-slot=accordion-trigger] > svg")
+
+    assert Floki.attribute(root, "class") == []
+    assert Floki.attribute(items, "class") == [@item_classes, @item_classes]
+    assert Floki.attribute(headers, "class") == ["flex", "flex"]
+    assert Floki.attribute(triggers, "class") == [@trigger_classes, @trigger_classes]
+    assert Floki.attribute(panels, "class") == [@content_classes, @content_classes]
+    assert Floki.attribute(content_wrappers, "class") == ["pt-0 pb-4", "pt-0 pb-4"]
+    assert Floki.attribute(icons, "class") == [@icon_classes, @icon_classes]
+    assert Floki.attribute(icons, "aria-hidden") == ["true", "true"]
+  end
+
   test "accordion extends classes and passes global attrs through" do
     html = render_accordion(%{class: "extra", "aria-label": "FAQ"})
 
-    assert html =~ "ur-accordion extra"
+    assert html =~ ~s(class="extra")
     assert html =~ ~s(aria-label="FAQ")
   end
 
@@ -161,7 +185,6 @@ defmodule UrUi.AccordionTest do
         content: []
       })
 
-    assert html =~ "ur-accordion"
     assert html =~ ~s(data-slot="accordion")
   end
 
