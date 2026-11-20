@@ -471,6 +471,129 @@ defmodule UrUi.Components do
     """
   end
 
+  @doc "Responsive table wrapped in an overflow container."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table", assigns))
+
+    ~H"""
+    <div class="ur-table-container" data-slot="table-container">
+      <table class={@classes} data-slot="table" {@rest}>
+        {render_slot(@inner_block)}
+      </table>
+    </div>
+    """
+  end
+
+  @doc "Table heading rows."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_header(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__header", assigns))
+
+    ~H"""
+    <thead class={@classes} data-slot="table-header" {@rest}>
+      {render_slot(@inner_block)}
+    </thead>
+    """
+  end
+
+  @doc "Table body rows."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_body(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__body", assigns))
+
+    ~H"""
+    <tbody class={@classes} data-slot="table-body" {@rest}>
+      {render_slot(@inner_block)}
+    </tbody>
+    """
+  end
+
+  @doc "Table summary rows."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_footer(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__footer", assigns))
+
+    ~H"""
+    <tfoot class={@classes} data-slot="table-footer" {@rest}>
+      {render_slot(@inner_block)}
+    </tfoot>
+    """
+  end
+
+  @doc "Table row; pass data-state=selected through rest when selected."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_row(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__row", assigns))
+
+    ~H"""
+    <tr class={@classes} data-slot="table-row" {@rest}>
+      {render_slot(@inner_block)}
+    </tr>
+    """
+  end
+
+  @doc "Column heading cell."
+  attr :scope, :string, default: "col"
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_head(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__head", assigns))
+
+    ~H"""
+    <th scope={@scope} class={@classes} data-slot="table-head" {@rest}>
+      {render_slot(@inner_block)}
+    </th>
+    """
+  end
+
+  @doc "Table data cell."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_cell(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__cell", assigns))
+
+    ~H"""
+    <td class={@classes} data-slot="table-cell" {@rest}>
+      {render_slot(@inner_block)}
+    </td>
+    """
+  end
+
+  @doc "Accessible table caption."
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block
+
+  def table_caption(assigns) do
+    assigns = assign(assigns, :classes, part_classes("ur-table__caption", assigns))
+
+    ~H"""
+    <caption class={@classes} data-slot="table-caption" {@rest}>
+      {render_slot(@inner_block)}
+    </caption>
+    """
+  end
+
   defp alert_classes(assigns) do
     variant = assigns[:variant] || :default
     ["ur-alert", "ur-alert--#{variant}", assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")

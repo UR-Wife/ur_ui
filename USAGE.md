@@ -182,4 +182,31 @@ through `rest` when the message is not urgent.
 The destructive variant uses the UR red border/text token. Icons are optional;
 there are no sizes in shadcn.
 
+### table
+
+`UrUi.Components.table/1` — a semantic table inside a horizontal overflow
+container (shadcn `Table`). Attrs: `class`, `rest` and optional `:inner_block`.
+The root's globals are applied to `<table>`, not the container.
+
+Compose `table_header/1`, `table_body/1`, `table_footer/1`, `table_row/1`,
+`table_head/1`, `table_cell/1` and `table_caption/1`. Every part accepts
+`class`, `rest` and optional `:inner_block`; `table_head` also accepts `scope`
+(default `"col"`). Mark a selected row with `data-state="selected"` through
+`rest`. Use a caption or `aria-label` to name the table.
+
+```heex
+<.table>
+  <.table_caption>Workspace members</.table_caption>
+  <.table_header>
+    <.table_row><.table_head>Name</.table_head><.table_head>Role</.table_head></.table_row>
+  </.table_header>
+  <.table_body>
+    <.table_row><.table_cell>Ada</.table_cell><.table_cell>Owner</.table_cell></.table_row>
+  </.table_body>
+</.table>
+```
+
+Shadcn defines no table variants or sizes; layout and alignment belong to the
+caller through `class` and global attrs.
+
 
