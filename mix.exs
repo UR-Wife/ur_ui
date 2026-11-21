@@ -9,7 +9,7 @@ defmodule UrUi.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      description: "UR black/red/white UI components as Phoenix function components",
+      description: "shadcn/ui new-york-v4 components as Phoenix function components",
       package: package(),
       docs: [main: "usage", extras: ["USAGE.md"]]
     ]
@@ -34,7 +34,7 @@ defmodule UrUi.MixProject do
 
   defp deps do
     [
-      {:phoenix_live_view, "~> 1.2.12"},
+      {:phoenix_live_view, "~> 1.2.14"},
       {:phoenix_html, "~> 4.4.0"},
       {:phoenix, "~> 1.7.24 or ~> 1.8.0"},
       {:bandit, "~> 1.14.1", only: :dev},

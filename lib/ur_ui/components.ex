@@ -1,7 +1,7 @@
 defmodule UrUi.Components do
   @moduledoc """
-  UR UI function components — shadcn structure and behaviour ported to
-  Phoenix, styled by `assets/ur_ui.css` (`var(--ur-wifes-*)` tokens only).
+  UR UI function components — shadcn/ui new-york-v4 ported to Phoenix.
+  Styling uses shadcn's neutral theme and Tailwind v4 utility classes.
 
   Conventions:
 
@@ -9,11 +9,45 @@ defmodule UrUi.Components do
   - `class` extends, never replaces, the base classes
   - optional attrs have defaults; missing optional attrs never crash
   - global attributes (`id`, `aria-*`, `phx-*`, `data-*`) pass through
-  - focus styling is outline-only (see the CSS)
   """
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
+
+  @button_base "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+  @button_variants %{
+    default: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+    destructive:
+      "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+    outline:
+      "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+    secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
+    ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+    link: "text-primary underline-offset-4 hover:underline"
+  }
+  @button_sizes %{
+    default: "h-9 px-4 py-2 has-[>svg]:px-3",
+    xs:
+      "h-6 gap-1.5 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+    sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
+    lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+    icon: "size-9",
+    icon_xs: "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+    icon_sm: "size-8",
+    icon_lg: "size-10"
+  }
+  @badge_base "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden"
+  @badge_variants %{
+    default: "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+    secondary:
+      "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
+    destructive:
+      "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+    outline: "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+    ghost:
+      "border-transparent text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+    link: "border-transparent text-primary underline-offset-4 [a&]:hover:underline"
+  }
 
   @doc """
   Button (shadcn `Button`).
@@ -29,28 +63,30 @@ defmodule UrUi.Components do
 
   `:default`, `:xs`, `:sm`, `:lg`, `:icon`, `:icon_xs`, `:icon_sm`, `:icon_lg`
   """
-  attr :variant, :atom,
+  attr(:variant, :atom,
     default: :default,
     values: [:default, :destructive, :outline, :secondary, :ghost, :link],
     doc: "visual variant"
+  )
 
-  attr :size, :atom,
+  attr(:size, :atom,
     default: :default,
     values: [:default, :xs, :sm, :lg, :icon, :icon_xs, :icon_sm, :icon_lg],
     doc: "size variant"
+  )
 
-  attr :type, :string, default: "button", doc: "button type; ignored when href is given"
-  attr :href, :string, default: nil, doc: "renders an <a> when given"
-  attr :disabled, :boolean, default: false, doc: "disables the button"
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:type, :string, default: "button", doc: "button type; ignored when href is given")
+  attr(:href, :string, default: nil, doc: "renders an <a> when given")
+  attr(:disabled, :boolean, default: false, doc: "disables the button")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def button(%{href: href} = assigns) when is_binary(href) do
     assigns = assign(assigns, :classes, button_classes(assigns))
 
     ~H"""
-    <a href={@href} class={@classes} data-variant={@variant} data-size={@size} aria-disabled={@disabled} {@rest}>
+    <a href={@href} class={@classes} data-slot="button" data-variant={@variant} data-size={@size} aria-disabled={@disabled} {@rest}>
       {render_slot(@inner_block)}
     </a>
     """
@@ -60,7 +96,7 @@ defmodule UrUi.Components do
     assigns = assign(assigns, :classes, button_classes(assigns))
 
     ~H"""
-    <button type={@type} class={@classes} data-variant={@variant} data-size={@size} disabled={@disabled} {@rest}>
+    <button type={@type} class={@classes} data-slot="button" data-variant={@variant} data-size={@size} disabled={@disabled} {@rest}>
       {render_slot(@inner_block)}
     </button>
     """
@@ -68,9 +104,9 @@ defmodule UrUi.Components do
 
   defp button_classes(assigns) do
     [
-      "ur-btn",
-      "ur-btn--#{assigns.variant}",
-      "ur-btn--size-#{assigns.size}",
+      @button_base,
+      @button_variants[assigns.variant],
+      @button_sizes[assigns.size],
       assigns[:class]
     ]
     |> Enum.reject(&is_nil/1)
@@ -84,27 +120,28 @@ defmodule UrUi.Components do
 
   `:default`, `:secondary`, `:destructive`, `:outline`, `:ghost`, `:link`
   """
-  attr :variant, :atom,
+  attr(:variant, :atom,
     default: :default,
     values: [:default, :secondary, :destructive, :outline, :ghost, :link],
     doc: "visual variant"
+  )
 
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def badge(assigns) do
     assigns = assign(assigns, :classes, badge_classes(assigns))
 
     ~H"""
-    <span class={@classes} data-variant={@variant} {@rest}>
+    <span class={@classes} data-slot="badge" data-variant={@variant} {@rest}>
       {render_slot(@inner_block)}
     </span>
     """
   end
 
   defp badge_classes(assigns) do
-    ["ur-badge", "ur-badge--#{assigns.variant}", assigns[:class]]
+    [@badge_base, @badge_variants[assigns.variant], assigns[:class]]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
@@ -112,23 +149,26 @@ defmodule UrUi.Components do
   @doc """
   Label (shadcn `Label`) — caption for a form field.
   """
-  attr :for, :string, default: nil, doc: "id of the labelled control"
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:for, :string, default: nil, doc: "id of the labelled control")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def label(assigns) do
     assigns = assign(assigns, :classes, label_classes(assigns))
 
     ~H"""
-    <label for={@for} class={@classes} {@rest}>
+    <label for={@for} class={@classes} data-slot="label" {@rest}>
       {render_slot(@inner_block)}
     </label>
     """
   end
 
   defp label_classes(assigns) do
-    ["ur-label", assigns[:class]]
+    [
+      "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+      assigns[:class]
+    ]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
@@ -140,17 +180,19 @@ defmodule UrUi.Components do
   (`role="none"`, hidden from the accessibility tree); `decorative: false`
   exposes it as `role="separator"` with `aria-orientation`.
   """
-  attr :orientation, :atom,
+  attr(:orientation, :atom,
     default: :horizontal,
     values: [:horizontal, :vertical],
     doc: "line direction"
+  )
 
-  attr :decorative, :boolean,
+  attr(:decorative, :boolean,
     default: true,
     doc: "true = decoration only (role none)"
+  )
 
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
 
   def separator(assigns) do
     assigns = assign(assigns, :classes, separator_classes(assigns))
@@ -158,6 +200,7 @@ defmodule UrUi.Components do
     ~H"""
     <div
       class={@classes}
+      data-slot="separator"
       data-orientation={@orientation}
       role={if @decorative, do: "none", else: "separator"}
       aria-hidden={if @decorative, do: "true", else: nil}
@@ -169,7 +212,10 @@ defmodule UrUi.Components do
   end
 
   defp separator_classes(assigns) do
-    ["ur-separator", "ur-separator--#{assigns.orientation}", assigns[:class]]
+    [
+      "bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px",
+      assigns[:class]
+    ]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
@@ -179,22 +225,22 @@ defmodule UrUi.Components do
 
   Size and shape it through `class` (e.g. `class: "h-4 w-32"`).
   """
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def skeleton(assigns) do
     assigns = assign(assigns, :classes, skeleton_classes(assigns))
 
     ~H"""
-    <div class={@classes} {@rest}>
+    <div class={@classes} data-slot="skeleton" {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
   end
 
   defp skeleton_classes(assigns) do
-    ["ur-skeleton", assigns[:class]]
+    ["bg-accent animate-pulse rounded-md", assigns[:class]]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
@@ -210,16 +256,16 @@ defmodule UrUi.Components do
 
   `:default`, `:sm`, `:lg`
   """
-  attr :size, :atom, default: :default, values: [:default, :sm, :lg], doc: "avatar size"
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block
+  attr(:size, :atom, default: :default, values: [:default, :sm, :lg], doc: "avatar size")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def avatar(assigns) do
     assigns = assign(assigns, :classes, avatar_classes(assigns))
 
     ~H"""
-    <div class={@classes} data-size={@size} {@rest}>
+    <div class={@classes} data-slot="avatar" data-size={@size} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
@@ -228,16 +274,16 @@ defmodule UrUi.Components do
   @doc """
   Avatar image (shadcn `AvatarImage`) — the user photo, inside `avatar/1`.
   """
-  attr :src, :string, default: nil, doc: "image URL"
-  attr :alt, :string, default: "", doc: "alternative text"
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
+  attr(:src, :string, default: nil, doc: "image URL")
+  attr(:alt, :string, default: "", doc: "alternative text")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
 
   def avatar_image(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-avatar__image", assigns))
+    assigns = assign(assigns, :classes, part_classes("aspect-square size-full", assigns))
 
     ~H"""
-    <img src={@src} alt={@alt} class={@classes} {@rest} />
+    <img src={@src} alt={@alt} class={@classes} data-slot="avatar-image" {@rest} />
     """
   end
 
@@ -245,15 +291,23 @@ defmodule UrUi.Components do
   Avatar fallback (shadcn `AvatarFallback`) — initials shown when the image
   is missing, inside `avatar/1`.
   """
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def avatar_fallback(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-avatar__fallback", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "bg-muted flex size-full items-center justify-center rounded-full text-sm group-data-[size=sm]/avatar:text-xs",
+          assigns
+        )
+      )
 
     ~H"""
-    <span class={@classes} {@rest}>
+    <span class={@classes} data-slot="avatar-fallback" {@rest}>
       {render_slot(@inner_block)}
     </span>
     """
@@ -262,15 +316,23 @@ defmodule UrUi.Components do
   @doc """
   Avatar badge (shadcn `AvatarBadge`) — status marker on the avatar corner.
   """
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def avatar_badge(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-avatar__badge", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "bg-primary text-primary-foreground ring-background absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full ring-2 select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2 [&>svg]:size-2.5",
+          assigns
+        )
+      )
 
     ~H"""
-    <span class={@classes} {@rest}>
+    <span class={@classes} data-slot="avatar-badge" {@rest}>
       {render_slot(@inner_block)}
     </span>
     """
@@ -279,15 +341,23 @@ defmodule UrUi.Components do
   @doc """
   Avatar group (shadcn `AvatarGroup`) — overlapping avatars.
   """
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def avatar_group(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-avatar-group", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "[--avatar-group-spacing:0.5rem] group/avatar-group -space-x-[var(--avatar-group-spacing)] flex items-center [&_[data-slot=avatar]]:ring-background [&_[data-slot=avatar]]:ring-2",
+          assigns
+        )
+      )
 
     ~H"""
-    <div class={@classes} {@rest}>
+    <div class={@classes} data-slot="avatar-group" {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
@@ -296,33 +366,52 @@ defmodule UrUi.Components do
   @doc """
   Avatar group count (shadcn `AvatarGroupCount`) — the "+N" bubble in a group.
   """
-  attr :class, :string, default: nil, doc: "extra classes appended to base classes"
-  attr :rest, :global
-  slot :inner_block, required: true
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
 
   def avatar_group_count(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-avatar-group__count", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "bg-muted text-muted-foreground ring-background relative flex size-8 shrink-0 items-center justify-center rounded-full text-sm ring-2 group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
+          assigns
+        )
+      )
 
     ~H"""
-    <div class={@classes} {@rest}>
+    <div class={@classes} data-slot="avatar-group-count" {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
   end
 
   defp avatar_classes(assigns) do
-    ["ur-avatar", "ur-avatar--size-#{assigns.size}", assigns[:class]]
+    [
+      "group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6",
+      assigns[:class]
+    ]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
 
   @doc "Card surface with composable shadcn-compatible parts."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+          assigns
+        )
+      )
 
     ~H"""
     <div class={@classes} data-slot="card" {@rest}>
@@ -332,12 +421,20 @@ defmodule UrUi.Components do
   end
 
   @doc "Card header; reserves a trailing column when card_action is present."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_header(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__header", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
+          assigns
+        )
+      )
 
     ~H"""
     <div class={@classes} data-slot="card-header" {@rest}>
@@ -347,12 +444,12 @@ defmodule UrUi.Components do
   end
 
   @doc "Card heading."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_title(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__title", assigns))
+    assigns = assign(assigns, :classes, part_classes("leading-none font-semibold", assigns))
 
     ~H"""
     <div class={@classes} data-slot="card-title" {@rest}>
@@ -362,12 +459,12 @@ defmodule UrUi.Components do
   end
 
   @doc "Supporting card copy."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_description(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__description", assigns))
+    assigns = assign(assigns, :classes, part_classes("text-muted-foreground text-sm", assigns))
 
     ~H"""
     <div class={@classes} data-slot="card-description" {@rest}>
@@ -377,12 +474,17 @@ defmodule UrUi.Components do
   end
 
   @doc "Action placed at the trailing edge of card_header."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_action(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__action", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes("col-start-2 row-span-2 row-start-1 self-start justify-self-end", assigns)
+      )
 
     ~H"""
     <div class={@classes} data-slot="card-action" {@rest}>
@@ -392,12 +494,12 @@ defmodule UrUi.Components do
   end
 
   @doc "Main card body."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_content(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__content", assigns))
+    assigns = assign(assigns, :classes, part_classes("px-6", assigns))
 
     ~H"""
     <div class={@classes} data-slot="card-content" {@rest}>
@@ -407,12 +509,13 @@ defmodule UrUi.Components do
   end
 
   @doc "Card footer for actions or metadata."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def card_footer(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-card__footer", assigns))
+    assigns =
+      assign(assigns, :classes, part_classes("flex items-center px-6 [.border-t]:pt-6", assigns))
 
     ~H"""
     <div class={@classes} data-slot="card-footer" {@rest}>
@@ -422,10 +525,10 @@ defmodule UrUi.Components do
   end
 
   @doc "Status message with default and destructive variants."
-  attr :variant, :atom, values: [:default, :destructive], default: :default
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:variant, :atom, values: [:default, :destructive], default: :default)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def alert(assigns) do
     assigns = assign(assigns, :classes, alert_classes(assigns))
@@ -444,12 +547,17 @@ defmodule UrUi.Components do
   end
 
   @doc "Alert heading."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def alert_title(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-alert__title", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes("col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight", assigns)
+      )
 
     ~H"""
     <div class={@classes} data-slot="alert-title" {@rest}>
@@ -459,12 +567,20 @@ defmodule UrUi.Components do
   end
 
   @doc "Alert supporting copy."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def alert_description(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-alert__description", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
+          assigns
+        )
+      )
 
     ~H"""
     <div class={@classes} data-slot="alert-description" {@rest}>
@@ -474,15 +590,15 @@ defmodule UrUi.Components do
   end
 
   @doc "Responsive table wrapped in an overflow container."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table", assigns))
+    assigns = assign(assigns, :classes, part_classes("w-full caption-bottom text-sm", assigns))
 
     ~H"""
-    <div class="ur-table-container" data-slot="table-container">
+    <div class="relative w-full overflow-x-auto" data-slot="table-container">
       <table class={@classes} data-slot="table" {@rest}>
         {render_slot(@inner_block)}
       </table>
@@ -491,12 +607,12 @@ defmodule UrUi.Components do
   end
 
   @doc "Table heading rows."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_header(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__header", assigns))
+    assigns = assign(assigns, :classes, part_classes("[&_tr]:border-b", assigns))
 
     ~H"""
     <thead class={@classes} data-slot="table-header" {@rest}>
@@ -506,12 +622,12 @@ defmodule UrUi.Components do
   end
 
   @doc "Table body rows."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_body(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__body", assigns))
+    assigns = assign(assigns, :classes, part_classes("[&_tr:last-child]:border-0", assigns))
 
     ~H"""
     <tbody class={@classes} data-slot="table-body" {@rest}>
@@ -521,12 +637,17 @@ defmodule UrUi.Components do
   end
 
   @doc "Table summary rows."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_footer(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__footer", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes("bg-muted/50 border-t font-medium [&>tr]:last:border-b-0", assigns)
+      )
 
     ~H"""
     <tfoot class={@classes} data-slot="table-footer" {@rest}>
@@ -536,12 +657,20 @@ defmodule UrUi.Components do
   end
 
   @doc "Table row; pass data-state=selected through rest when selected."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_row(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__row", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
+          assigns
+        )
+      )
 
     ~H"""
     <tr class={@classes} data-slot="table-row" {@rest}>
@@ -551,13 +680,21 @@ defmodule UrUi.Components do
   end
 
   @doc "Column heading cell."
-  attr :scope, :string, default: "col"
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:scope, :string, default: "col")
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_head(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__head", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+          assigns
+        )
+      )
 
     ~H"""
     <th scope={@scope} class={@classes} data-slot="table-head" {@rest}>
@@ -567,12 +704,20 @@ defmodule UrUi.Components do
   end
 
   @doc "Table data cell."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_cell(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__cell", assigns))
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+          assigns
+        )
+      )
 
     ~H"""
     <td class={@classes} data-slot="table-cell" {@rest}>
@@ -582,12 +727,13 @@ defmodule UrUi.Components do
   end
 
   @doc "Accessible table caption."
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
 
   def table_caption(assigns) do
-    assigns = assign(assigns, :classes, part_classes("ur-table__caption", assigns))
+    assigns =
+      assign(assigns, :classes, part_classes("text-muted-foreground mt-4 text-sm", assigns))
 
     ~H"""
     <caption class={@classes} data-slot="table-caption" {@rest}>
@@ -597,14 +743,14 @@ defmodule UrUi.Components do
   end
 
   @doc "Native input with Phoenix form-field and changeset-error support."
-  attr :field, Phoenix.HTML.FormField, default: nil
-  attr :id, :string, default: nil
-  attr :name, :string, default: nil
-  attr :value, :any, default: nil
-  attr :type, :string, default: "text"
-  attr :errors, :any, default: nil
-  attr :class, :string, default: nil
-  attr :rest, :global
+  attr(:field, Phoenix.HTML.FormField, default: nil)
+  attr(:id, :string, default: nil)
+  attr(:name, :string, default: nil)
+  attr(:value, :any, default: nil)
+  attr(:type, :string, default: "text")
+  attr(:errors, :any, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
 
   def input(assigns) do
     field = assigns[:field]
@@ -612,7 +758,11 @@ defmodule UrUi.Components do
     name = assigns[:name] || (field && field.name)
     value = if assigns[:value] != nil, do: assigns[:value], else: field && field.value
     errors = assigns[:errors] || (field && field.errors) || []
-    value = if assigns[:type] == "file", do: nil, else: Phoenix.HTML.Form.normalize_value(assigns[:type], value)
+
+    value =
+      if assigns[:type] == "file",
+        do: nil,
+        else: Phoenix.HTML.Form.normalize_value(assigns[:type], value)
 
     assigns =
       assign(assigns,
@@ -622,11 +772,11 @@ defmodule UrUi.Components do
         errors: errors,
         error_id: if(errors != [] and id, do: "#{id}-errors"),
         invalid: if(errors != [], do: "true"),
-        classes: input_classes(assigns, errors)
+        classes: input_classes(assigns)
       )
 
     ~H"""
-    <div class="ur-input-field" data-slot="input-field">
+    <div data-slot="input-field">
       <input
         id={@id}
         name={@name}
@@ -639,8 +789,8 @@ defmodule UrUi.Components do
         aria-describedby={@error_id}
         {@rest}
       />
-      <div :if={@errors != []} id={@error_id} class="ur-input-errors">
-        <p :for={error <- @errors} class="ur-input-error" data-slot="input-error">
+      <div :if={@errors != []} id={@error_id} class="grid gap-1">
+        <p :for={error <- @errors} class="text-destructive text-sm" data-slot="input-error">
           {input_error_message(error)}
         </p>
       </div>
@@ -648,9 +798,13 @@ defmodule UrUi.Components do
     """
   end
 
-  defp input_classes(assigns, errors) do
-    invalid = if errors != [], do: "ur-input--invalid"
-    ["ur-input", invalid, assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
+  defp input_classes(assigns) do
+    [
+      "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+      assigns[:class]
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
   end
 
   defp input_error_message({message, options}) do
@@ -662,39 +816,41 @@ defmodule UrUi.Components do
   defp input_error_message(message) when is_binary(message), do: message
 
   @doc "Accessible tabs with matching trigger and content slots."
-  attr :id, :string, required: true
-  attr :default_value, :string, default: nil
-  attr :class, :string, default: nil
-  attr :rest, :global
+  attr(:id, :string, required: true)
+  attr(:default_value, :string, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
 
   slot :trigger do
-    attr :value, :string, required: true
-    attr :disabled, :boolean
+    attr(:value, :string, required: true)
+    attr(:disabled, :boolean)
   end
 
   slot :content do
-    attr :value, :string, required: true
+    attr(:value, :string, required: true)
   end
 
   def tabs(assigns) do
     assigns =
       assign(assigns,
         selected_value: tabs_selected_value(assigns),
-        classes: part_classes("ur-tabs", assigns)
+        classes:
+          part_classes("group/tabs flex gap-2 data-[orientation=horizontal]:flex-col", assigns)
       )
 
     ~H"""
-    <div id={@id} class={@classes} data-slot="tabs" {@rest}>
-      <div class="ur-tabs__list" data-slot="tabs-list" role="tablist">
+    <div id={@id} class={@classes} data-slot="tabs" data-orientation="horizontal" {@rest}>
+      <div class={tabs_list_classes()} data-slot="tabs-list" data-variant="default" role="tablist">
         <div
           :for={{trigger, index} <- Enum.with_index(@trigger)}
           id={"#{@id}-trigger-wrap-#{index}"}
-          class="ur-tabs__trigger"
+          class={tabs_trigger_classes()}
+          data-slot="tabs-trigger-surface"
           data-state={if(trigger.value == @selected_value, do: "active", else: "inactive")}
         >
           <input
             id={"#{@id}-trigger-#{index}"}
-            class="ur-tabs__input"
+            class="absolute inset-0 m-0 cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
             type="radio"
             name={"#{@id}-values"}
             value={trigger.value}
@@ -709,11 +865,7 @@ defmodule UrUi.Components do
             data-state={if(trigger.value == @selected_value, do: "active", else: "inactive")}
             phx-change={tabs_select_js(@id, @trigger, @content, trigger.value)}
           />
-          <label
-            id={"#{@id}-label-#{index}"}
-            for={"#{@id}-trigger-#{index}"}
-            class="ur-tabs__label"
-          >
+          <label id={"#{@id}-label-#{index}"} for={"#{@id}-trigger-#{index}"}>
             {render_slot(trigger)}
           </label>
         </div>
@@ -725,13 +877,28 @@ defmodule UrUi.Components do
         aria-labelledby={"#{@id}-trigger-#{index}"}
         aria-hidden={to_string(content.value != @selected_value)}
         hidden={content.value != @selected_value}
-        class="ur-tabs__content"
+        class="flex-1 outline-none"
         data-slot="tabs-content"
       >
         {render_slot(content)}
       </div>
     </div>
     """
+  end
+
+  defp tabs_list_classes do
+    "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col data-[variant=line]:rounded-none bg-muted"
+  end
+
+  defp tabs_trigger_classes do
+    [
+      "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+      "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
+      "data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground",
+      "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100",
+      "has-[:focus-visible]:border-ring has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50 has-[:focus-visible]:outline-1 has-[:focus-visible]:outline-ring has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50"
+    ]
+    |> Enum.join(" ")
   end
 
   defp tabs_select_js(id, triggers, contents, selected_value) do
@@ -785,42 +952,43 @@ defmodule UrUi.Components do
   Opening and closing runs client-side through `Phoenix.LiveView.JS`; Enter
   and Space toggle an item through the native button.
   """
-  attr :id, :string, required: true
-  attr :type, :atom, default: :single, values: [:single, :multiple]
-  attr :default_value, :any, default: nil
-  attr :class, :string, default: nil
-  attr :rest, :global
+  attr(:id, :string, required: true)
+  attr(:type, :atom, default: :single, values: [:single, :multiple])
+  attr(:default_value, :any, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
 
   slot :trigger do
-    attr :value, :string, required: true
-    attr :disabled, :boolean
+    attr(:value, :string, required: true)
+    attr(:disabled, :boolean)
   end
 
   slot :content do
-    attr :value, :string, required: true
+    attr(:value, :string, required: true)
   end
 
   def accordion(assigns) do
-    assigns =
-      assign(assigns,
-        items: accordion_items(assigns),
-        classes: part_classes("ur-accordion", assigns)
-      )
+    rest =
+      if assigns[:class],
+        do: Map.put(assigns.rest, :class, assigns.class),
+        else: assigns.rest
+
+    assigns = assign(assigns, items: accordion_items(assigns), rest: rest)
 
     ~H"""
-    <div id={@id} class={@classes} data-slot="accordion" {@rest}>
+    <div id={@id} data-slot="accordion" {@rest}>
       <div
         :for={item <- @items}
         id={"#{@id}-item-#{item.index}"}
-        class="ur-accordion__item"
+        class="border-b last:border-b-0"
         data-slot="accordion-item"
         data-state={if(item.open, do: "open", else: "closed")}
       >
-        <h3 class="ur-accordion__header">
+        <h3 class="flex">
           <button
             type="button"
             id={"#{@id}-trigger-#{item.index}"}
-            class="ur-accordion__trigger"
+            class="flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180"
             aria-expanded={to_string(item.open)}
             aria-controls={"#{@id}-panel-#{item.index}"}
             data-slot="accordion-trigger"
@@ -829,18 +997,35 @@ defmodule UrUi.Components do
             phx-click={if(item.trigger[:disabled], do: nil, else: item.toggle_js)}
           >
             {render_slot(item.trigger)}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="pointer-events-none size-4 shrink-0 translate-y-0.5 text-muted-foreground transition-transform duration-200"
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </button>
         </h3>
         <div
           id={"#{@id}-panel-#{item.index}"}
           role="region"
           aria-labelledby={"#{@id}-trigger-#{item.index}"}
-          class="ur-accordion__content"
+          class="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
           data-slot="accordion-content"
           data-state={if(item.open, do: "open", else: "closed")}
           hidden={not item.open}
         >
-          {render_slot(item.content)}
+          <div class="pt-0 pb-4">
+            {render_slot(item.content)}
+          </div>
         </div>
       </div>
     </div>
@@ -900,8 +1085,22 @@ defmodule UrUi.Components do
   end
 
   defp alert_classes(assigns) do
-    variant = assigns[:variant] || :default
-    ["ur-alert", "ur-alert--#{variant}", assigns[:class]] |> Enum.reject(&is_nil/1) |> Enum.join(" ")
+    variant =
+      case assigns[:variant] || :default do
+        :default ->
+          "bg-card text-card-foreground"
+
+        :destructive ->
+          "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90"
+      end
+
+    [
+      "relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
+      variant,
+      assigns[:class]
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
   end
 
   defp part_classes(base, assigns) do
