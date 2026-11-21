@@ -8,12 +8,13 @@ defmodule Storybook.UrUi.Skeleton do
     [
       %Variation{
         id: :default,
-        description: "Placeholder block (size it via class)"
+        description: "Placeholder block (size it via class)",
+        attributes: %{class: "h-4 w-[250px]"}
       },
       %Variation{
         id: :custom_class,
         description: "class extends the base classes",
-        attributes: %{class: "psb:opacity-80"}
+        attributes: %{class: "h-4 w-[250px] psb:opacity-80"}
       }
     ]
   end
