@@ -225,7 +225,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'input': return <InputDemo variant={variant} />
     case 'label': return <Label htmlFor={variant === 'with_for' ? 'email' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : 'Email'}</Label>
     case 'separator': return <Separator orientation={variant === 'vertical' ? 'vertical' : 'horizontal'} decorative={variant !== 'semantic'} className={variant === 'custom_class' ? 'opacity-80' : undefined} />
-    case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'opacity-80' : undefined} />
+    case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'h-4 w-[250px] opacity-80' : 'h-4 w-[250px]'} />
     case 'table': return <TableDemo variant={variant} />
     case 'tabs': return <TabsDemo variant={variant} />
   }
