@@ -1,4 +1,4 @@
-import { test } from '@playwright/test'
+import { test } from './ratchet'
 import { components, variationKey, variations, type Theme } from '../shared/variations'
 import {
   alignReferenceOrigin,

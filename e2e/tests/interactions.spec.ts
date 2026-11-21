@@ -1,4 +1,5 @@
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
+import { expect, test } from './ratchet'
 import { variationKey, variations, type Theme, type Variation } from '../shared/variations'
 import {
   mainLocator,

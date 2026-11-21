@@ -53,6 +53,11 @@ on ports 4173 and 4000 are reused locally. To start them yourself, use
 `npm run preview:reference` from `e2e/` and `mix phx.server` from the repository
 root. `REFERENCE_URL` and `STORYBOOK_URL` can override the default URLs.
 
+Known failures are pinned by Playwright test ID in `e2e/known-failures.json`. A
+listed failure is expected; a listed test that starts passing fails until its ID
+is removed; any unlisted failure fails the suite. `npm run test:ratchet`
+exercises those three rules with isolated fixtures.
+
 Generate the per-component Markdown/JSON summary with `npm run report`, and open
 the HTML report with `npx playwright show-report`. Raw style diffs, axe nodes,
 screenshots, and traces are written under `e2e/results/` and `e2e/test-results/`.
