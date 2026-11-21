@@ -34,7 +34,7 @@ defmodule UrUi.MixProject do
 
   defp deps do
     [
-      {:phoenix_live_view, "~> 1.2.12"},
+      {:phoenix_live_view, "~> 1.2.14"},
       {:phoenix_html, "~> 4.4.0"},
       {:phoenix, "~> 1.7.24 or ~> 1.8.0"},
       {:bandit, "~> 1.14.1", only: :dev},
