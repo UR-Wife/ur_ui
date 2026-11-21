@@ -1,0 +1,27 @@
+{
+  "name": "ur-ui-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:reference": "npm --prefix reference run build",
+    "build:storybook": "tailwindcss -i storybook.css -o .generated/ur_ui.css --minify",
+    "dev:reference": "npm --prefix reference run dev",
+    "preview:reference": "npm --prefix reference run preview",
+    "test": "npm run test:ratchet && npm run build:reference && npm run build:storybook && playwright test",
+    "test:ratchet": "node --test ratchet-tests/ratchet.test.mjs",
+    "test:ui": "npm run build:reference && npm run build:storybook && playwright test --ui",
+    "report": "node scripts/report.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
+    "@playwright/test": "^1.58.2",
+    "@tailwindcss/cli": "^4.3.5",
+    "@types/node": "^24.19.2",
+    "@types/pixelmatch": "^7.0.0",
+    "@types/pngjs": "^6.0.5",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
+    "typescript": "^5.9.3"
+  }
+}
