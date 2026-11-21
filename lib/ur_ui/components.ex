@@ -534,14 +534,16 @@ defmodule UrUi.Components do
     assigns = assign(assigns, :classes, alert_classes(assigns))
 
     ~H"""
-    <div
-      role="alert"
-      class={@classes}
-      data-slot="alert"
-      data-variant={@variant}
-      {@rest}
-    >
-      {render_slot(@inner_block)}
+    <div class="inline-block w-max">
+      <div
+        role="alert"
+        class={@classes}
+        data-slot="alert"
+        data-variant={@variant}
+        {@rest}
+      >
+        {render_slot(@inner_block)}
+      </div>
     </div>
     """
   end
