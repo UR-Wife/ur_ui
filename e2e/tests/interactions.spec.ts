@@ -47,23 +47,42 @@ async function checkAccordion(page: Page, root: Locator, variation: Variation) {
   await expect(first).toHaveAttribute('aria-expanded', initial!)
 }
 
-async function checkTabs(page: Page, root: Locator) {
+async function checkTabs(page: Page, root: Locator, variation: Variation) {
+  const tabExpectations: Record<string, { label: string; enabled: boolean }[]> = {
+    default: [{ label: 'General', enabled: true }, { label: 'Security', enabled: true }],
+    default_value: [{ label: 'Plans', enabled: true }, { label: 'Billing', enabled: true }],
+    disabled: [{ label: 'General', enabled: true }, { label: 'Advanced', enabled: false }],
+  }
+  const expectedTabs = tabExpectations[variation.variant]
+  if (!expectedTabs) throw new Error(`Expected tab order is not defined for ${variation.variant}`)
+  const expectedSelected = variation.variant === 'default_value' ? 1 : 0
+  const enabled = expectedTabs.flatMap((tab, index) => tab.enabled ? [index] : [])
+
   await expect(root.getByRole('tablist')).toBeVisible()
   const tabs = root.getByRole('tab')
-  const count = await tabs.count()
-  expect(count).toBeGreaterThan(0)
-  const enabled: number[] = []
-  let selected = -1
-  for (let index = 0; index < count; index++) {
-    const tab = tabs.nth(index)
-    if (await tab.isEnabled()) enabled.push(index)
-    if (await tab.getAttribute('aria-selected') === 'true') selected = index
-    await expect(tab).toHaveAttribute('aria-controls', /.+/)
+  await expect(tabs).toHaveCount(expectedTabs.length)
+  const assertExpectedOrder = async () => {
+    for (const [index, expected] of expectedTabs.entries()) {
+      const tab = tabs.nth(index)
+      const labelId = await tab.getAttribute('aria-labelledby')
+      if (labelId) {
+        await expect(byId(page, labelId)).toHaveText(expected.label)
+      } else {
+        await expect(tab).toHaveText(expected.label)
+      }
+      if (expected.enabled) {
+        await expect(tab).toBeEnabled()
+      } else {
+        await expect(tab).toBeDisabled()
+        await expect(tab).toHaveAttribute('aria-selected', 'false')
+      }
+    }
   }
-  expect(selected).toBeGreaterThanOrEqual(0)
-  expect(enabled.length).toBeGreaterThan(0)
+  await assertExpectedOrder()
+  await expect(tabs.nth(expectedSelected)).toHaveAttribute('aria-selected', 'true')
+  await expect(tabs.nth(expectedSelected)).toHaveAttribute('aria-controls', /.+/)
 
-  const selectedTab = tabs.nth(selected)
+  const selectedTab = tabs.nth(expectedSelected)
   const selectedId = await selectedTab.getAttribute('id')
   const panelId = await selectedTab.getAttribute('aria-controls')
   const panel = byId(page, panelId!)
@@ -72,7 +91,7 @@ async function checkTabs(page: Page, root: Locator) {
   await expect(panel).toHaveAttribute('aria-labelledby', selectedId!)
 
   await selectedTab.focus()
-  const right = enabled.find((index) => index > selected) ?? enabled[0]
+  const right = enabled.find((index) => index > expectedSelected) ?? enabled[0]
   await page.keyboard.press('ArrowRight')
   await expect(tabs.nth(right)).toHaveAttribute('aria-selected', 'true')
   await expect(tabs.nth(right)).toBeFocused()
@@ -82,6 +101,7 @@ async function checkTabs(page: Page, root: Locator) {
   await page.keyboard.press('ArrowLeft')
   await expect(tabs.nth(left)).toHaveAttribute('aria-selected', 'true')
   await expect(tabs.nth(left)).toBeFocused()
+  await assertExpectedOrder()
 }
 
 for (const component of ['accordion', 'tabs'] as const) {
@@ -122,6 +142,7 @@ for (const component of ['accordion', 'tabs'] as const) {
                   await checkTabs(
                     side === 'reference' ? referencePage : page,
                     side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
+                    variation,
                   )
                 }
               } catch (error) {
