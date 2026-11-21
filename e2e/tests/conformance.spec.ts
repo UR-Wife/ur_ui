@@ -53,15 +53,26 @@ test.describe('shadcn conformance', () => {
           const referenceMain = mainLocator(referencePage, variation)
           const storybookMain = storybookMainLocator(page, variation)
           await matchReferenceParentWidth(referenceMain, storybookMain)
-          const parentWidth = (locator: typeof referenceMain) => locator.evaluate((element) => {
-            if (!element.parentElement) throw new Error('Example has no parent container')
-            return element.parentElement.getBoundingClientRect().width
-          })
-          const [referenceParentWidth, storybookParentWidth] = await Promise.all([
-            parentWidth(referenceMain),
-            parentWidth(storybookMain),
-          ])
-          test.expect(referenceParentWidth, 'reference and Storybook parent widths must match').toBe(storybookParentWidth)
+          if (variation.component === 'input' || variation.component === 'table') {
+            const parentWidth = (locator: typeof referenceMain) => locator.evaluate((element) => {
+              if (!element.parentElement) throw new Error('Example has no parent container')
+              return element.parentElement.getBoundingClientRect().width
+            })
+            const [referenceParentWidth, storybookParentWidth] = await Promise.all([
+              parentWidth(referenceMain),
+              parentWidth(storybookMain),
+            ])
+            test.expect(referenceParentWidth, 'reference and Storybook parent widths must match').toBe(storybookParentWidth)
+          }
+          if (variation.component === 'label') {
+            await test.expect(referenceMain).toHaveText((await storybookMain.textContent())!)
+            const storybookFor = await storybookMain.getAttribute('for')
+            if (storybookFor === null) {
+              await test.expect(referenceMain).not.toHaveAttribute('for', /.+/)
+            } else {
+              await test.expect(referenceMain).toHaveAttribute('for', storybookFor)
+            }
+          }
           await alignReferenceOrigin(referenceMain, storybookMain)
           await test.step('computed styles', () => checkComputedStyles(referenceMain, storybookMain, result))
           await test.step('screenshot diff', () => checkScreenshots(

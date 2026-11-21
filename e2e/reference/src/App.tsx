@@ -223,7 +223,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'button': return <ButtonDemo variation={variation} />
     case 'card': return <CardDemo variant={variant} />
     case 'input': return <InputDemo variant={variant} />
-    case 'label': return <Label htmlFor={variant === 'with_for' ? 'display-name' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'default' ? 'Label' : variant === 'with_for' ? 'Display name' : 'With extra class'}</Label>
+    case 'label': return <Label htmlFor={variant === 'with_for' ? 'email' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : 'Email'}</Label>
     case 'separator': return <Separator orientation={variant === 'vertical' ? 'vertical' : 'horizontal'} decorative={variant !== 'semantic'} className={variant === 'custom_class' ? 'opacity-80' : undefined} />
     case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'opacity-80' : undefined} />
     case 'table': return <TableDemo variant={variant} />
@@ -235,5 +235,5 @@ export default function App() {
   const variation = variations.find((entry) => entry.route === window.location.pathname)
   if (!variation) return <main><h1>Not found</h1></main>
   const fullWidth = variation.component === 'input' || variation.component === 'table'
-  return <main className="p-10"><div data-reference-container className={fullWidth ? 'w-full' : 'inline-block'}><Demo variation={variation} /></div></main>
+  return <main className="p-10"><div data-reference-container data-match-storybook-width={fullWidth || undefined} className={fullWidth ? 'w-full' : 'inline-block'}><Demo variation={variation} /></div></main>
 }

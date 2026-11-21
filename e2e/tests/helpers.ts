@@ -102,14 +102,14 @@ export async function openStorybook(page: Page, variation: Variation, theme: The
 }
 
 export async function matchReferenceParentWidth(reference: Locator, storybook: Locator) {
+  const container = reference.locator('xpath=ancestor::*[@data-reference-container][1]')
+  if (await container.getAttribute('data-match-storybook-width') === null) return
   const width = await storybook.evaluate((element) => {
     if (!element.parentElement) throw new Error('Storybook example has no parent container')
     return element.parentElement.getBoundingClientRect().width
   })
-  await reference.evaluate((element, parentWidth) => {
-    const container = element.closest<HTMLElement>('[data-reference-container]')
-    if (!container) throw new Error('Reference example has no parent container')
-    container.style.width = `${parentWidth}px`
+  await container.evaluate((element, parentWidth) => {
+    element.style.width = `${parentWidth}px`
   }, width)
 }
 
