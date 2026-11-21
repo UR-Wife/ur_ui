@@ -101,6 +101,18 @@ export async function openStorybook(page: Page, variation: Variation, theme: The
   return main
 }
 
+export async function matchReferenceParentWidth(reference: Locator, storybook: Locator) {
+  const width = await storybook.evaluate((element) => {
+    if (!element.parentElement) throw new Error('Storybook example has no parent container')
+    return element.parentElement.getBoundingClientRect().width
+  })
+  await reference.evaluate((element, parentWidth) => {
+    const container = element.closest<HTMLElement>('[data-reference-container]')
+    if (!container) throw new Error('Reference example has no parent container')
+    container.style.width = `${parentWidth}px`
+  }, width)
+}
+
 export async function alignReferenceOrigin(reference: Locator, storybook: Locator) {
   const [referenceBounds, storybookBounds] = await Promise.all([reference.boundingBox(), storybook.boundingBox()])
   if (!referenceBounds || !storybookBounds) throw new Error('Cannot align hidden component bounds')

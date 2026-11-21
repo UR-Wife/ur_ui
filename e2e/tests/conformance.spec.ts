@@ -6,6 +6,7 @@ import {
   checkComputedStyles,
   checkScreenshots,
   mainLocator,
+  matchReferenceParentWidth,
   openReference,
   openStorybook,
   saveCaseResult,
@@ -51,6 +52,16 @@ test.describe('shadcn conformance', () => {
           ])
           const referenceMain = mainLocator(referencePage, variation)
           const storybookMain = storybookMainLocator(page, variation)
+          await matchReferenceParentWidth(referenceMain, storybookMain)
+          const parentWidth = (locator: typeof referenceMain) => locator.evaluate((element) => {
+            if (!element.parentElement) throw new Error('Example has no parent container')
+            return element.parentElement.getBoundingClientRect().width
+          })
+          const [referenceParentWidth, storybookParentWidth] = await Promise.all([
+            parentWidth(referenceMain),
+            parentWidth(storybookMain),
+          ])
+          test.expect(referenceParentWidth, 'reference and Storybook parent widths must match').toBe(storybookParentWidth)
           await alignReferenceOrigin(referenceMain, storybookMain)
           await test.step('computed styles', () => checkComputedStyles(referenceMain, storybookMain, result))
           await test.step('screenshot diff', () => checkScreenshots(

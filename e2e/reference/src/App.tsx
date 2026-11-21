@@ -235,5 +235,5 @@ export default function App() {
   const variation = variations.find((entry) => entry.route === window.location.pathname)
   if (!variation) return <main><h1>Not found</h1></main>
   const fullWidth = variation.component === 'input' || variation.component === 'table'
-  return <main className="p-10"><div className={fullWidth ? 'w-full' : 'inline-block'}><Demo variation={variation} /></div></main>
+  return <main className="p-10"><div data-reference-container className={fullWidth ? 'w-full' : 'inline-block'}><Demo variation={variation} /></div></main>
 }
