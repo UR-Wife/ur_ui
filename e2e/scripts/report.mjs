@@ -74,7 +74,7 @@ const components = componentNames.map((component) => {
 const failedCases = cases.filter((value) => !value.passed)
 function describeFailure(failure) {
   const violations = (Array.isArray(failure.details) ? failure.details : []).flatMap((violation) =>
-    violation.nodes.map((node) => `${violation.id} at ${node.target.join(', ')}: ${node.failureSummary}`),
+    (violation.nodes ?? []).map((node) => `${violation.id} at ${node.target.join(', ')}: ${node.failureSummary}`),
   )
   return violations?.length ? `${failure.message} — ${violations.join('; ')}` : failure.message
 }
