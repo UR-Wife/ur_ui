@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: "29.1.2"
+          elixir-version: "1.20.5"
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Install Elixir dependencies
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get
+
+      - name: Run Elixir tests
+        run: mix test
+
+      - name: Audit Hex dependencies
+        run: MIX_ENV=test mix hex.audit
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            e2e/package-lock.json
+            e2e/reference/package-lock.json
+
+      - name: Install isolated e2e dependencies
+        working-directory: e2e
+        run: |
+          npm ci
+          npm ci --prefix reference
+
+      - name: Install Playwright Chromium
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Build reference app and Storybook CSS
+        working-directory: e2e
+        run: |
+          npm run build:reference
+          npm run build:storybook
+          npx tsc --noEmit
+
+      - name: Start Storybook and run Playwright
+        working-directory: e2e
+        run: npx playwright test
+
+      - name: Generate component conformance summary
+        if: always()
+        working-directory: e2e
+        run: npm run report
+
+      - name: Upload Playwright report and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+            e2e/results
+          if-no-files-found: warn
+          retention-days: 14
