@@ -101,6 +101,17 @@ slot `:inner_block` | slot | required | label caption
 - `decorative: false` when the separation is meaningful (e.g. a toolbar
   divider announced to screen readers) — then it exposes
   `role="separator"` with `aria-orientation`.
+- Like shadcn's, it sizes from its container: horizontal is `w-full` and
+  vertical is `h-full`, so give a vertical separator a sized row, as in the
+  shadcn docs:
+
+```heex
+<div class="flex h-5 items-center space-x-4 text-sm">
+  <div>Blog</div>
+  <.separator orientation={:vertical} />
+  <div>Docs</div>
+</div>
+```
 
 Attr          | Type    | Default       | Notes
 --------------|---------|---------------|------
