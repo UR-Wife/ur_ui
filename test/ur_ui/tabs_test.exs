@@ -107,17 +107,14 @@ defmodule UrUi.TabsTest do
     end
   end
 
-  test "arrow, Home and End keys move focus and selection between enabled tabs" do
-    [list] = parse() |> Floki.find("[role=tablist]")
-    [handler] = Floki.attribute(list, "onkeydown")
+  test "keyboard navigation uses the UrUiTabs hook, with no inline script" do
+    html = render_tabs()
+    [list] = html |> Floki.parse_fragment!() |> Floki.find("[role=tablist]")
 
-    for key <- ["ArrowRight", "ArrowLeft", "Home", "End"] do
-      assert handler =~ key
-    end
-
-    assert handler =~ "disabled"
-    assert handler =~ "focus()"
-    assert handler =~ "click()"
+    assert Floki.attribute(list, "phx-hook") == ["UrUiTabs"]
+    assert Floki.attribute(list, "id") == ["account-tabs-list"]
+    refute html =~ "<script"
+    refute html =~ ~r/\son[a-z]+=/
   end
 
   test "disabled tabs are disabled buttons that are never selected" do

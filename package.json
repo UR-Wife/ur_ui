@@ -1,0 +1,12 @@
+{
+  "name": "ur_ui",
+  "version": "0.1.0",
+  "description": "LiveView hooks for ur_ui (shadcn/ui components for Phoenix)",
+  "license": "MIT",
+  "module": "./assets/js/ur_ui_hooks.js",
+  "main": "./assets/js/ur_ui_hooks.js",
+  "exports": {
+    ".": "./assets/js/ur_ui_hooks.js"
+  },
+  "files": ["assets/js/ur_ui_hooks.js"]
+}

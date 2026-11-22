@@ -32,7 +32,7 @@ defmodule Storybook.UrUi.Avatar do
         description: "Image with fallback behind it",
         attributes: %{size: :default},
         slots: [
-          ~s(<UrUi.Components.avatar_image src="/ur_ui_logo.svg" alt="UR" />),
+          ~s(<UrUi.Components.avatar_image id="avatar-with-image-photo" src="/ur_ui_logo.svg" alt="UR" />),
           "<UrUi.Components.avatar_fallback>UR</UrUi.Components.avatar_fallback>"
         ]
       },

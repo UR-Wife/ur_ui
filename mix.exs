@@ -28,6 +28,10 @@ defmodule UrUi.MixProject do
   defp package do
     [
       licenses: ["MIT"],
+      # assets/ holds the stylesheet and the LiveView hooks JS module, which
+      # host apps import through package.json ("ur_ui").
+      files:
+        ~w(lib priv assets package.json mix.exs README.md USAGE.md LICENSE LICENSES),
       links: %{"GitHub" => "https://github.com/UR-Wife/ur_ui"}
     ]
   end
@@ -36,9 +40,10 @@ defmodule UrUi.MixProject do
     [
       {:phoenix_live_view, "~> 1.2.14"},
       {:phoenix_html, "~> 4.4.0"},
-      {:phoenix, "~> 1.7.24 or ~> 1.8.0"},
+      {:phoenix, "~> 1.7 or ~> 1.8"},
       {:bandit, "~> 1.14.1", only: :dev},
       {:phoenix_storybook, "~> 1.3", only: :dev},
+      {:esbuild, "~> 0.10", only: :dev},
       {:jason, "~> 1.4", only: [:dev, :test]},
       {:phoenix_ecto, "~> 4.6", only: [:dev, :test]},
       {:floki, "~> 0.38", only: [:dev, :test]}

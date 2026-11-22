@@ -25,6 +25,26 @@ The stylesheet defines shadcn's neutral tokens in `:root` and `.dark`, with
 Tailwind v4 `@theme` mappings. Apply the `dark` class to an ancestor for dark
 mode. Override shadcn tokens rather than hardcoding one-off colors.
 
+## LiveView hooks
+
+Register ur_ui's hooks once in your `assets/js/app.js`:
+
+```javascript
+// assets/js/app.js
+import {UrUiHooks} from "ur_ui"
+
+const liveSocket = new LiveSocket("/live", Socket, {
+  hooks: {...UrUiHooks /* , ...your own hooks */},
+  // ...
+})
+```
+
+`"ur_ui"` resolves to `deps/ur_ui/package.json` through the `NODE_PATH`
+(`../deps`) that the default Phoenix esbuild config already sets, the same way
+`"phoenix_live_view"` does. The hooks are a plain ES module bundled into your
+`app.js`, so there is no inline script and they work under a strict
+`Content-Security-Policy`, on Phoenix 1.7 and 1.8.
+
 ## Conventions
 
 - Components are plain function components in `UrUi.Components`.
@@ -138,8 +158,10 @@ slot `:inner_block` | slot | optional | rarely needed
 
 `UrUi.Components.avatar/1` — user image with fallback (shadcn `Avatar`).
 
-- Compose: put `avatar_image/1` and `avatar_fallback/1` inside the root;
-  the fallback (initials) shows when the image fails or is absent.
+- Compose: put `avatar_image/1` before `avatar_fallback/1` inside the root.
+  As in Radix, the fallback (initials) shows while the image loads, when it
+  fails, or when there is no image; once the image loads, only the image
+  shows.
 - `avatar_badge/1` for status markers, `avatar_group/1` +
   `avatar_group_count/1` for stacked teams.
 
@@ -150,9 +172,15 @@ Attr   | Type | Default    | Notes
 `rest` | global | —        | `id`, `aria-*`, `phx-*`, `data-*` pass through
 slot `:inner_block` | slot | optional | image/fallback/badge parts
 
-Parts: `avatar_image/1` (`src`, `alt`, `class`, `rest`), `avatar_fallback/1`,
-`avatar_badge/1`, `avatar_group/1`, `avatar_group_count/1` — each takes
-`class`, `rest` and a `:inner_block` slot.
+Parts: `avatar_image/1` (`id` required, `src`, `alt`, `class`, `rest`),
+`avatar_fallback/1`, `avatar_badge/1`, `avatar_group/1`, `avatar_group_count/1`
+— each takes `class`, `rest` and a `:inner_block` slot.
+
+The loading/error states use the `UrUiAvatarImage` hook (see **LiveView
+hooks** above). Hooks need a DOM id that stays the same across renders, so
+`avatar_image/1` requires `id`. Without the hooks, the image still shows and
+the fallback stays hidden behind it; only the loading/error fallback is
+missing.
 
 ### card
 
@@ -268,10 +296,12 @@ a `label` whose `for` matches the input id:
 
 ### tabs
 
-`UrUi.Components.tabs/1` — accessible tabs (shadcn `Tabs`) built on native
-radio inputs. Attrs: `id` (required), `default_value`, `class` and `rest`;
-the `:trigger` and `:content` slots pair by `value`. Switching runs
-client-side through `Phoenix.LiveView.JS` commands — no server round-trip.
+`UrUi.Components.tabs/1` — accessible tabs (shadcn `Tabs`): a `tablist` of
+`<button role="tab">` triggers and one `role="tabpanel"` per content slot,
+with the same DOM, ARIA and classes as shadcn/Radix. Attrs: `id` (required),
+`default_value`, `class` and `rest`; the `:trigger` and `:content` slots pair
+by `value`. Clicking a tab switches client-side through `Phoenix.LiveView.JS`
+commands — no server round-trip.
 
 ```heex
 <.tabs id="account-tabs" default_value="general">
@@ -282,13 +312,17 @@ client-side through `Phoenix.LiveView.JS` commands — no server round-trip.
 </.tabs>
 ```
 
-Arrow keys move between tabs through the native radio group, and the
-checked radio carries `role="tab"` with `aria-selected`; panels are
-`role="tabpanel"` linked with `aria-controls`/`aria-labelledby`, ARIA as in
-shadcn. The `class` attr extends the tab list container and globals pass
-through the root. A trigger renders `disabled` when its slot carries
-`disabled`. The active tab is marked `data-state="active"` on both the native
-trigger and its styled surface, which carries shadcn's trigger classes.
+Each trigger carries `aria-selected`, `aria-controls`, `data-state` and a
+roving `tabindex` (only the selected tab is in the Tab order); panels carry
+`aria-labelledby`, `tabindex="0"` and `hidden` while inactive. A trigger
+whose slot carries `disabled` renders `disabled` and `data-disabled` and is
+never selected. `class` extends the root and globals pass through it.
+
+**Keyboard.** Arrow Left/Right move focus and selection to the
+previous/next enabled tab (wrapping, skipping disabled tabs); Home and End
+jump to the first/last enabled tab, as in Radix. This uses the `UrUiTabs`
+hook (see **LiveView hooks** above). Without it, clicking still works; only
+arrow-key navigation is missing.
 
 ### accordion
 

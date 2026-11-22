@@ -13,3 +13,13 @@ config :ur_ui, UrUiDev.Endpoint,
   server: true
 
 config :logger, level: :info
+
+# Bundles dev/assets/storybook.js (ur_ui's LiveView hooks) for Storybook.
+config :esbuild,
+  version: "0.25.0",
+  ur_ui_dev: [
+    args:
+      ~w(dev/assets/storybook.js --bundle --format=iife) ++
+        ["--outfile=#{Path.join([Mix.Project.build_path(), "storybook", "storybook.js"])}"],
+    cd: Path.expand("..", __DIR__)
+  ]
