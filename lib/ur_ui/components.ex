@@ -191,6 +191,39 @@ defmodule UrUi.Components do
   end
 
   @doc """
+  Spinner (shadcn `Spinner`) — an accessible loading indicator. It is a lucide
+  loader icon sized `size-4` and animated with `animate-spin`, with
+  `role="status"` and `aria-label="Loading"`. Size it up/down through `class`.
+  """
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+
+  def spinner(assigns) do
+    assigns = assign(assigns, :classes, part_classes("size-4 animate-spin", assigns))
+
+    ~H"""
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      role="status"
+      aria-label="Loading"
+      class={@classes}
+      data-slot="spinner"
+      {@rest}
+    >
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+    """
+  end
+
+  @doc """
   Breadcrumb (shadcn `Breadcrumb`) — a page-path breadcrumb. Compose the parts
   inside the root: `breadcrumb_list/1` (an `<ol>`), one `breadcrumb_item/1`
   per crumb, `breadcrumb_link/1` for links and `breadcrumb_page/1` for the
