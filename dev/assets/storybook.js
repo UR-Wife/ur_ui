@@ -1,5 +1,5 @@
-// Dev-only Storybook bundle: registers ur_ui's colocated hooks, the same way a
+// Dev-only Storybook bundle: registers ur_ui's LiveView hooks the same way a
 // host app's app.js does (see USAGE.md).
-import { hooks } from "phoenix-colocated/ur_ui"
+import { UrUiHooks } from "../../assets/js/ur_ui_hooks.js"
 
-window.storybook = { Hooks: hooks }
+window.storybook = { Hooks: UrUiHooks }

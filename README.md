@@ -27,6 +27,27 @@ The stylesheet defines shadcn's neutral tokens in `:root` and `.dark`, plus
 the Tailwind v4 `@theme` mappings used by the components. Apply the `dark`
 class to an ancestor to use dark mode.
 
+## LiveView hooks setup
+
+Interactive behaviour (tabs keyboard navigation, avatar image loading) runs in
+LiveView hooks that ur_ui ships as a JS module. Register them once:
+
+```javascript
+// assets/js/app.js
+import {UrUiHooks} from "ur_ui"
+
+const liveSocket = new LiveSocket("/live", Socket, {
+  hooks: {...UrUiHooks /* , ...your own hooks */},
+  // ...
+})
+```
+
+`"ur_ui"` resolves to `deps/ur_ui/package.json` through the `NODE_PATH`
+(`../deps`) that the default Phoenix esbuild config already sets, the same way
+`"phoenix_live_view"` does. The hooks are a plain ES module bundled into your
+`app.js`, so there is no inline script and they work under a strict
+`Content-Security-Policy`, on Phoenix 1.7 and 1.8.
+
 ## shadcn conformance e2e
 
 The differential harness covers all 12 components and 63 Storybook variations

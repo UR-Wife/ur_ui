@@ -14,14 +14,12 @@ config :ur_ui, UrUiDev.Endpoint,
 
 config :logger, level: :info
 
-# Bundles dev/assets/storybook.js (ur_ui's colocated hooks) for Storybook.
-# Paths follow Mix.Project.build_path() so a custom MIX_BUILD_PATH works.
+# Bundles dev/assets/storybook.js (ur_ui's LiveView hooks) for Storybook.
 config :esbuild,
   version: "0.25.0",
   ur_ui_dev: [
     args:
       ~w(dev/assets/storybook.js --bundle --format=iife) ++
         ["--outfile=#{Path.join([Mix.Project.build_path(), "storybook", "storybook.js"])}"],
-    cd: Path.expand("..", __DIR__),
-    env: %{"NODE_PATH" => Mix.Project.build_path()}
+    cd: Path.expand("..", __DIR__)
   ]

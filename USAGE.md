@@ -25,6 +25,26 @@ The stylesheet defines shadcn's neutral tokens in `:root` and `.dark`, with
 Tailwind v4 `@theme` mappings. Apply the `dark` class to an ancestor for dark
 mode. Override shadcn tokens rather than hardcoding one-off colors.
 
+## LiveView hooks
+
+Register ur_ui's hooks once in your `assets/js/app.js`:
+
+```javascript
+// assets/js/app.js
+import {UrUiHooks} from "ur_ui"
+
+const liveSocket = new LiveSocket("/live", Socket, {
+  hooks: {...UrUiHooks /* , ...your own hooks */},
+  // ...
+})
+```
+
+`"ur_ui"` resolves to `deps/ur_ui/package.json` through the `NODE_PATH`
+(`../deps`) that the default Phoenix esbuild config already sets, the same way
+`"phoenix_live_view"` does. The hooks are a plain ES module bundled into your
+`app.js`, so there is no inline script and they work under a strict
+`Content-Security-Policy`, on Phoenix 1.7 and 1.8.
+
 ## Conventions
 
 - Components are plain function components in `UrUi.Components`.
@@ -268,24 +288,9 @@ never selected. `class` extends the root and globals pass through it.
 
 **Keyboard.** Arrow Left/Right move focus and selection to the
 previous/next enabled tab (wrapping, skipping disabled tabs); Home and End
-jump to the first/last enabled tab, as in Radix. This uses a LiveView
-colocated hook, so ur_ui ships no inline script and works under a strict
-`Content-Security-Policy`. Requires Phoenix 1.8+. Register ur_ui's hooks once
-in your `assets/js/app.js`:
-
-```javascript
-import {hooks as colocatedHooks} from "phoenix-colocated/my_app"
-import {hooks as urUiHooks} from "phoenix-colocated/ur_ui"
-
-const liveSocket = new LiveSocket("/live", Socket, {
-  hooks: {...colocatedHooks, ...urUiHooks},
-  // ...
-})
-```
-
-The default Phoenix 1.8 esbuild config already resolves `phoenix-colocated/*`
-through `NODE_PATH` (it includes `Mix.Project.build_path()`). Without the
-import, clicking still works; only arrow-key navigation is missing.
+jump to the first/last enabled tab, as in Radix. This uses the `UrUiTabs`
+hook (see **LiveView hooks** above). Without it, clicking still works; only
+arrow-key navigation is missing.
 
 ### accordion
 
