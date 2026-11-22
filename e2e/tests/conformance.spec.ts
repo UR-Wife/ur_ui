@@ -17,9 +17,9 @@ import {
   type CaseResult,
 } from './helpers'
 
-test('manifest covers only the 12 components with unique routes and story IDs', () => {
-  test.expect(components).toHaveLength(12)
-  test.expect(variations).toHaveLength(63)
+test('manifest covers only the 13 components with unique routes and story IDs', () => {
+  test.expect(components).toHaveLength(13)
+  test.expect(variations).toHaveLength(67)
   test.expect(new Set(variations.map((variation) => variation.route)).size).toBe(variations.length)
   test.expect(new Set(variations.map((variation) => variation.storyId)).size).toBe(variations.length)
   test.expect(new Set(variations.map((variation) => variation.component))).toEqual(new Set(components))
@@ -53,7 +53,7 @@ test.describe('shadcn conformance', () => {
           const referenceMain = mainLocator(referencePage, variation)
           const storybookMain = storybookMainLocator(page, variation)
           await matchReferenceParentWidth(referenceMain, storybookMain)
-          if (variation.component === 'input' || variation.component === 'table') {
+          if (variation.component === 'input' || variation.component === 'textarea' || variation.component === 'table') {
             const parentWidth = (locator: typeof referenceMain) => locator.evaluate((element) => {
               if (!element.parentElement) throw new Error('Example has no parent container')
               return element.parentElement.getBoundingClientRect().width
