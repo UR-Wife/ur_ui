@@ -109,7 +109,10 @@ export async function matchReferenceParentWidth(reference: Locator, storybook: L
     const style = getComputedStyle(parentElement)
     return {
       width: parentElement.getBoundingClientRect().width,
-      contentWidth: parentElement.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+      // getBoundingClientRect keeps fractional pixels; clientWidth would round.
+      contentWidth: parentElement.getBoundingClientRect().width
+        - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth)
+        - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
       display: style.display,
       flexDirection: style.flexDirection,
       alignItems: style.alignItems,
