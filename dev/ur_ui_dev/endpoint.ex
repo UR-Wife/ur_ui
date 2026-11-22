@@ -19,7 +19,7 @@ defmodule UrUiDev.Endpoint do
   # Dev-only bundle of ur_ui's colocated hooks, built by UrUiDev.Application.
   plug Plug.Static,
     at: "/",
-    from: Path.expand("../../_build/dev/storybook", __DIR__),
+    from: Path.join(Mix.Project.build_path(), "storybook"),
     only: ~w(storybook.js)
 
   plug Plug.RequestId
