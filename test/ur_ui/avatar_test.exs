@@ -7,10 +7,10 @@ defmodule UrUi.AvatarTest do
 
   @avatar_base "group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6"
   @image_base "aspect-square size-full"
-  @fallback_base "bg-muted flex size-full items-center justify-center rounded-full text-sm group-data-[size=sm]/avatar:text-xs"
-  @badge_base "bg-primary text-primary-foreground ring-background absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full ring-2 select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2 [&>svg]:size-2.5"
-  @group_base "[--avatar-group-spacing:0.5rem] group/avatar-group -space-x-[var(--avatar-group-spacing)] flex items-center [&_[data-slot=avatar]]:ring-background [&_[data-slot=avatar]]:ring-2"
-  @count_base "bg-muted text-muted-foreground ring-background relative flex size-8 shrink-0 items-center justify-center rounded-full text-sm ring-2 group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3"
+  @fallback_base "flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs [[data-slot=avatar-image]:not([hidden])~&]:hidden"
+  @badge_base "absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2"
+  @group_base "group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background"
+  @count_base "relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3"
 
   defp render_avatar(assigns), do: render_component(&Components.avatar/1, assigns)
   defp render_image(assigns), do: render_component(&Components.avatar_image/1, assigns)
@@ -75,6 +75,17 @@ defmodule UrUi.AvatarTest do
     test "alt defaults to empty string" do
       html = render_image(%{src: "/u.png"})
       assert html =~ ~s(alt="")
+    end
+
+    test "uses the colocated hook with the given id, or a generated one" do
+      html = render_image(%{src: "/u.png", id: "ada-photo"})
+      [img] = html |> Floki.parse_fragment!() |> Floki.find("img")
+      assert Floki.attribute(img, "id") == ["ada-photo"]
+      assert Floki.attribute(img, "phx-hook") == ["UrUi.Components.AvatarImage"]
+      refute html =~ "<script"
+
+      [generated] = render_image(%{src: "/u.png"}) |> Floki.parse_fragment!() |> Floki.find("img")
+      assert [<<"avatar-image-", _::binary>>] = Floki.attribute(generated, "id")
     end
 
     test "class extends base classes" do

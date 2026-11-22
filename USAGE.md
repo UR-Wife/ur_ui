@@ -124,8 +124,10 @@ slot `:inner_block` | slot | optional | rarely needed
 
 `UrUi.Components.avatar/1` — user image with fallback (shadcn `Avatar`).
 
-- Compose: put `avatar_image/1` and `avatar_fallback/1` inside the root;
-  the fallback (initials) shows when the image fails or is absent.
+- Compose: put `avatar_image/1` before `avatar_fallback/1` inside the root.
+  As in Radix, the fallback (initials) shows while the image loads, when it
+  fails, or when there is no image; once the image loads, only the image
+  shows.
 - `avatar_badge/1` for status markers, `avatar_group/1` +
   `avatar_group_count/1` for stacked teams.
 
@@ -136,9 +138,16 @@ Attr   | Type | Default    | Notes
 `rest` | global | —        | `id`, `aria-*`, `phx-*`, `data-*` pass through
 slot `:inner_block` | slot | optional | image/fallback/badge parts
 
-Parts: `avatar_image/1` (`src`, `alt`, `class`, `rest`), `avatar_fallback/1`,
-`avatar_badge/1`, `avatar_group/1`, `avatar_group_count/1` — each takes
-`class`, `rest` and a `:inner_block` slot.
+Parts: `avatar_image/1` (`src`, `alt`, `id`, `class`, `rest`),
+`avatar_fallback/1`, `avatar_badge/1`, `avatar_group/1`, `avatar_group_count/1`
+— each takes `class`, `rest` and a `:inner_block` slot.
+
+The loading/error states use the colocated `.AvatarImage` hook (no inline
+script, so it works under a strict CSP). It needs the same one-time
+`phoenix-colocated/ur_ui` hooks import as tabs (see **tabs**). Hooks need a
+DOM id: pass `id` to `avatar_image/1` for a stable one, or one is generated.
+Without the hooks import, the image still shows and the fallback stays
+hidden behind it; only the loading/error fallback is missing.
 
 ### card
 
