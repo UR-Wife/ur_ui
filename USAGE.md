@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, checkbox, kbd, breadcrumb, tabs, accordion).
+textarea, checkbox, kbd, breadcrumb, spinner, tabs, accordion).
 
 ### button
 
@@ -144,6 +144,18 @@ the `<nav>` root), `breadcrumb_item/1` (one `<li>` per crumb),
 `breadcrumb_separator/1` (a decorative chevron, `role="presentation"`) and
 `breadcrumb_ellipsis/1` (the collapsed "More" placeholder). Each accepts
 `class`, `rest` and an optional `:inner_block` slot.
+
+### spinner
+
+`UrUi.Components.spinner/1` — an accessible loading indicator (shadcn
+`Spinner`): a lucide loader icon sized `size-4` and animated with
+`animate-spin`, marked `role="status"` and `aria-label="Loading"`. Size it up
+or down through `class` (`class: "size-8"`).
+
+Attr    | Type   | Default | Notes
+--------|--------|---------|------
+`class` | string | `nil`   | appended to base classes (sizing lives here)
+`rest`  | global | —       | `id`, `aria-*`, `data-*` pass through
 
 ### label
 

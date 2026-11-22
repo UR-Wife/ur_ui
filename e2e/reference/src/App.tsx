@@ -34,6 +34,7 @@ import { Kbd } from '@/components/ui/kbd'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import {
   Table,
   TableBody,
@@ -281,6 +282,10 @@ function SeparatorDemo({ variant }: { variant: string }) {
   )
 }
 
+function SpinnerDemo({ variant }: { variant: string }) {
+  return <Spinner className={variant === 'custom_class' ? 'size-8' : undefined} />
+}
+
 function TableDemo({ variant }: { variant: string }) {
   const headings = variant === 'default' ? ['Name', 'Role'] : variant === 'with_footer' ? ['Plan', 'Seats'] : variant === 'selected_row' ? ['Member', 'Status'] : ['Members']
   const rows = variant === 'default'
@@ -354,6 +359,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'kbd': return <KbdDemo variant={variant} />
     case 'label': return <Label htmlFor={variant === 'with_for' ? 'email' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : 'Email'}</Label>
     case 'separator': return <SeparatorDemo variant={variant} />
+    case 'spinner': return <SpinnerDemo variant={variant} />
     case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'h-4 w-[250px] opacity-80' : 'h-4 w-[250px]'} />
     case 'table': return <TableDemo variant={variant} />
     case 'tabs': return <TabsDemo variant={variant} />
