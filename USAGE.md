@@ -294,6 +294,31 @@ a `label` whose `for` matches the input id:
 
 
 
+### textarea
+
+`UrUi.Components.textarea/1` — a native textarea (shadcn `Textarea`) with
+optional Phoenix form integration. Attrs: `field` (`Phoenix.HTML.FormField`),
+`id`, `name`, `value`, `errors`, `class` and `rest`. Explicit
+`id`/`name`/`value` override the field. The value renders as the textarea's
+text content, not a `value` attribute.
+
+Pass `field={@form[:bio]}` to derive the textarea id, name, value and errors.
+Changeset `{message, options}` errors are interpolated and rendered below the
+textarea; the error container is linked with `aria-describedby`, and invalid
+textareas receive `aria-invalid="true"`. Explicit `errors` accept the same
+tuples or plain strings.
+
+```heex
+<.form for={@form}>
+  <.label for={@form[:bio].id}>Bio</.label>
+  <.textarea field={@form[:bio]} placeholder="Tell us about yourself" />
+</.form>
+```
+
+The `class` attr extends the textarea itself; native globals such as
+`placeholder`, `rows`, `required` and `disabled` pass through `rest`. There
+are no shadcn variants or sizes.
+
 ### tabs
 
 `UrUi.Components.tabs/1` — accessible tabs (shadcn `Tabs`): a `tablist` of

@@ -11,6 +11,7 @@ export const components = [
   'skeleton',
   'table',
   'tabs',
+  'textarea',
 ] as const
 
 export type ComponentName = (typeof components)[number]
@@ -23,7 +24,7 @@ export interface Variation {
   storyId: string
   storyPath: string
   group?: 'variants' | 'sizes'
-  screenshotSlot?: 'input-field' | 'table-container'
+  screenshotSlot?: 'input-field' | 'table-container' | 'textarea-field'
 }
 
 const slug = (value: string) => value.replaceAll('_', '-')
@@ -53,9 +54,11 @@ function single(component: ComponentName, variants: string[]): Variation[] {
     screenshotSlot:
       component === 'input' && variant.includes('error')
         ? 'input-field'
-        : component === 'table'
-          ? 'table-container'
-          : undefined,
+        : component === 'textarea' && variant.includes('error')
+          ? 'textarea-field'
+          : component === 'table'
+            ? 'table-container'
+            : undefined,
   }))
 }
 
@@ -77,6 +80,7 @@ export const variations: Variation[] = [
   ...single('skeleton', ['default', 'custom_class']),
   ...single('table', ['default', 'with_footer', 'selected_row', 'empty']),
   ...single('tabs', ['default', 'default_value', 'disabled']),
+  ...single('textarea', ['default', 'disabled', 'changeset_error', 'interpolated_error']),
 ]
 
 export function variationKey(variation: Variation): string {

@@ -34,6 +34,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
 
 function AccordionDemo({ variant }: { variant: string }) {
   const items = variant === 'multiple'
@@ -185,6 +186,37 @@ function InputDemo({ variant }: { variant: string }) {
   )
 }
 
+function TextareaDemo({ variant }: { variant: string }) {
+  const error = variant === 'changeset_error' ? 'is invalid' : variant === 'interpolated_error' ? 'should be at least 3 characters' : undefined
+  const id = variant === 'changeset_error' ? 'user_bio' : variant === 'default' ? 'bio' : variant === 'interpolated_error' ? 'name' : variant
+  const name = variant === 'changeset_error' ? 'user[bio]' : variant === 'default' ? 'bio' : variant
+  const value = variant === 'changeset_error' ? 'bad' : variant === 'interpolated_error' ? 'x' : variant === 'disabled' ? 'Read only' : undefined
+  const label = {
+    default: 'Bio',
+    disabled: 'Disabled',
+    changeset_error: 'Bio',
+    interpolated_error: 'Name',
+  }[variant]
+  // Mirrors the shadcn docs textarea-with-label demo.
+  return (
+    <div className="grid w-full max-w-sm items-center gap-3">
+      <Label htmlFor={id}>{label}</Label>
+      <div data-slot="textarea-field">
+        <Textarea
+          id={id}
+          name={name}
+          placeholder={variant === 'default' ? 'Bio' : undefined}
+          disabled={variant === 'disabled'}
+          defaultValue={value}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-errors` : undefined}
+        />
+        {error && <div id={`${id}-errors`} className="grid gap-1"><p className="text-sm text-destructive" data-slot="textarea-error">{error}</p></div>}
+      </div>
+    </div>
+  )
+}
+
 // Mirrors the shadcn docs separator demo: a horizontal separator under a
 // heading block, and a vertical one inside a sized (h-5) flex row.
 function SeparatorDemo({ variant }: { variant: string }) {
@@ -267,12 +299,13 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'h-4 w-[250px] opacity-80' : 'h-4 w-[250px]'} />
     case 'table': return <TableDemo variant={variant} />
     case 'tabs': return <TabsDemo variant={variant} />
+    case 'textarea': return <TextareaDemo variant={variant} />
   }
 }
 
 export default function App() {
   const variation = variations.find((entry) => entry.route === window.location.pathname)
   if (!variation) return <main><h1>Not found</h1></main>
-  const fullWidth = variation.component === 'input' || variation.component === 'table'
+  const fullWidth = variation.component === 'input' || variation.component === 'textarea' || variation.component === 'table'
   return <main className="p-10"><div data-reference-container data-match-storybook-width={fullWidth || undefined} className={fullWidth ? 'w-full' : 'inline-block'}><Demo variation={variation} /></div></main>
 }

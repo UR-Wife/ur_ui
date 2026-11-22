@@ -834,6 +834,63 @@ defmodule UrUi.Components do
 
   defp input_error_message(message) when is_binary(message), do: message
 
+  @doc "Native textarea with Phoenix form-field and changeset-error support."
+  attr(:field, Phoenix.HTML.FormField, default: nil)
+  attr(:id, :string, default: nil)
+  attr(:name, :string, default: nil)
+  attr(:value, :any, default: nil)
+  attr(:errors, :any, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+
+  def textarea(assigns) do
+    field = assigns[:field]
+    id = assigns[:id] || (field && field.id)
+    name = assigns[:name] || (field && field.name)
+    value = if assigns[:value] != nil, do: assigns[:value], else: field && field.value
+    errors = assigns[:errors] || (field && field.errors) || []
+
+    assigns =
+      assign(assigns,
+        id: id,
+        name: name,
+        value: value,
+        errors: errors,
+        error_id: if(errors != [] and id, do: "#{id}-errors"),
+        invalid: if(errors != [], do: "true"),
+        classes: textarea_classes(assigns)
+      )
+
+    ~H"""
+    <div data-slot="textarea-field">
+      <textarea
+        id={@id}
+        name={@name}
+        class={@classes}
+        data-slot="textarea"
+        data-invalid={@invalid}
+        aria-invalid={@invalid}
+        aria-describedby={@error_id}
+        {@rest}
+      >{@value}</textarea>
+      <div :if={@errors != []} id={@error_id} class="grid gap-1">
+        <p :for={error <- @errors} class="text-destructive text-sm" data-slot="textarea-error">
+          {input_error_message(error)}
+        </p>
+      </div>
+    </div>
+    """
+  end
+
+  defp textarea_classes(assigns) do
+    [
+      "flex field-sizing-content min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:aria-invalid:ring-destructive/40",
+      assigns[:class]
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
   @doc """
   Tabs (shadcn `Tabs`): a `tablist` of `<button role="tab">` triggers and one
   `tabpanel` per content slot.
