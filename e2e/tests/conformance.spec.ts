@@ -17,9 +17,9 @@ import {
   type CaseResult,
 } from './helpers'
 
-test('manifest covers only the 15 components with unique routes and story IDs', () => {
-  test.expect(components).toHaveLength(15)
-  test.expect(variations).toHaveLength(72)
+test('manifest covers only the 16 components with unique routes and story IDs', () => {
+  test.expect(components).toHaveLength(16)
+  test.expect(variations).toHaveLength(74)
   test.expect(new Set(variations.map((variation) => variation.route)).size).toBe(variations.length)
   test.expect(new Set(variations.map((variation) => variation.storyId)).size).toBe(variations.length)
   test.expect(new Set(variations.map((variation) => variation.component))).toEqual(new Set(components))

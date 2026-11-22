@@ -9,6 +9,15 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbEllipsis,
+} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -221,6 +230,28 @@ function TextareaDemo({ variant }: { variant: string }) {
 
 // Mirrors the shadcn docs separator demo: a horizontal separator under a
 // heading block, and a vertical one inside a sized (h-5) flex row.
+function BreadcrumbDemo({ variant }: { variant: string }) {
+  const list = (
+    <BreadcrumbList>
+      <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
+      <BreadcrumbSeparator />
+      {variant === 'with_ellipsis' ? (
+        <>
+          <BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem>
+          <BreadcrumbSeparator />
+        </>
+      ) : (
+        <>
+          <BreadcrumbItem><BreadcrumbLink href="/components">Components</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+        </>
+      )}
+      <BreadcrumbItem><BreadcrumbPage>{variant === 'with_ellipsis' ? 'Current' : 'Breadcrumb'}</BreadcrumbPage></BreadcrumbItem>
+    </BreadcrumbList>
+  )
+  return <Breadcrumb>{list}</Breadcrumb>
+}
+
 function KbdDemo({ variant }: { variant: string }) {
   if (variant === 'custom_class') return <Kbd className="tracking-wide">K</Kbd>
   return <Kbd>K</Kbd>
@@ -314,6 +345,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'accordion': return <AccordionDemo variant={variant} />
     case 'alert': return <AlertDemo variant={variant} />
     case 'avatar': return <AvatarDemo variant={variant} />
+    case 'breadcrumb': return <BreadcrumbDemo variant={variant} />
     case 'badge': return <Badge variant={variant === 'custom_class' ? 'default' : variant as 'default'} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : variant[0].toUpperCase() + variant.slice(1)}</Badge>
     case 'button': return <ButtonDemo variation={variation} />
     case 'card': return <CardDemo variant={variant} />
