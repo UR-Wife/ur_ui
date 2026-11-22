@@ -1,0 +1,17 @@
+schema: factory-1
+org: UR-Wife
+repo: ur_ui
+test:
+  command: MIX_ENV=test mix test --seed 0
+  suites: [test]
+  decider: ""
+checks:
+  required: ["RWX: CI"]
+  rwx_integration_id: 373758
+machinery:
+  fence: .rwx/machinery-paths.txt
+  approvers: .rwx/human-approvers.txt
+design_rules:
+  lint: ""
+commit:
+  identity: "UR Wife <sayhello2@urwife.me>"

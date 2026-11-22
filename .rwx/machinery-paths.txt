@@ -1,0 +1,8 @@
+# Paths whose changes must never be self-approved by an agent (UR-524 fence).
+# One glob per line. Blank lines and lines starting with '#' are ignored.
+.rwx/**
+**/AGENTS.md
+**/CLAUDE.md
+factory.yml
+.git/hooks/
+.githooks/
