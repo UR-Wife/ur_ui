@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
+import { Field, FieldContent, FieldTitle, FieldDescription } from '@/components/ui/field'
 import {
   Card,
   CardAction,
@@ -419,6 +420,20 @@ function TabsDemo({ variant }: { variant: string }) {
   )
 }
 
+function FieldDemo() {
+  return (
+    <div className="w-80">
+      <Field>
+        <FieldContent>
+          <FieldTitle>Email</FieldTitle>
+          <FieldDescription>We will not share your address.</FieldDescription>
+          <Input id="email" name="email" placeholder="you@example.com" />
+        </FieldContent>
+      </Field>
+    </div>
+  )
+}
+
 function EmptyDemo() {
   return (
     <div className="w-80">
@@ -468,6 +483,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'badge': return <Badge variant={variant === 'custom_class' ? 'default' : variant as 'default'} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : variant[0].toUpperCase() + variant.slice(1)}</Badge>
     case 'button': return <ButtonDemo variation={variation} />
     case 'card': return <CardDemo variant={variant} />
+    case 'field': return <FieldDemo />
     case 'empty': return <EmptyDemo />
     case 'collapsible': return <CollapsibleDemo variant={variant} />
     case 'checkbox': return <CheckboxDemo variant={variant} />
