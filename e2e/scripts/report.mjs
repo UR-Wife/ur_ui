@@ -7,7 +7,7 @@ const resultsDir = resolve(root, 'results')
 const resultsPath = resolve(resultsDir, 'results.json')
 const componentNames = [
   'accordion', 'alert', 'avatar', 'badge', 'button', 'card',
-  'checkbox', 'input', 'label', 'separator', 'skeleton', 'table', 'tabs', 'textarea',
+  'checkbox', 'input', 'kbd', 'label', 'separator', 'skeleton', 'table', 'tabs', 'textarea',
 ]
 mkdirSync(resultsDir, { recursive: true })
 

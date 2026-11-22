@@ -21,6 +21,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Kbd } from '@/components/ui/kbd'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -220,6 +221,11 @@ function TextareaDemo({ variant }: { variant: string }) {
 
 // Mirrors the shadcn docs separator demo: a horizontal separator under a
 // heading block, and a vertical one inside a sized (h-5) flex row.
+function KbdDemo({ variant }: { variant: string }) {
+  if (variant === 'custom_class') return <Kbd className="tracking-wide">K</Kbd>
+  return <Kbd>K</Kbd>
+}
+
 function SeparatorDemo({ variant }: { variant: string }) {
   if (variant === 'vertical') {
     return (
@@ -313,6 +319,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'card': return <CardDemo variant={variant} />
     case 'checkbox': return <CheckboxDemo variant={variant} />
     case 'input': return <InputDemo variant={variant} />
+    case 'kbd': return <KbdDemo variant={variant} />
     case 'label': return <Label htmlFor={variant === 'with_for' ? 'email' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : 'Email'}</Label>
     case 'separator': return <SeparatorDemo variant={variant} />
     case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'h-4 w-[250px] opacity-80' : 'h-4 w-[250px]'} />

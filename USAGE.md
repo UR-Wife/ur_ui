@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, checkbox, tabs, accordion).
+textarea, checkbox, kbd, tabs, accordion).
 
 ### button
 
@@ -98,6 +98,25 @@ Attr       | Type   | Default    | Notes
 `class`    | string | `nil`      | appended to base classes
 `rest`     | global | —          | `id`, `aria-*`, `phx-*`, `data-*` pass through
 slot `:inner_block` | slot | required | badge content
+
+### kbd
+
+`UrUi.Components.kbd/1` — a keyboard key or key combination (shadcn `Kbd`):
+a `<kbd>` element with shadcn's exact classes. `kbd_group/1` wraps several
+keys into a combination.
+
+- Use for keyboard shortcuts in docs, tooltips and menus.
+- Keep content to the key label (e.g. `K`, `⌘`, `Ctrl`).
+
+Attr       | Type   | Default | Notes
+-----------|--------|---------|------
+`class`    | string | `nil`   | appended to base classes
+`rest`     | global | —       | `id`, `aria-*`, `phx-*`, `data-*` pass through
+slot `:inner_block` | slot | required | key label
+
+`kbd_group/1` takes the same `class`, `rest` and `:inner_block` slot and
+renders a `<kbd data-slot="kbd-group">` that lays out its keys with a small
+gap.
 
 ### label
 

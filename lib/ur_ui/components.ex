@@ -150,6 +150,47 @@ defmodule UrUi.Components do
   end
 
   @doc """
+  Kbd (shadcn `Kbd`) — a keyboard key or key combination.
+
+  Group several keys in a `kbd_group/1`. For a combination, put the individual
+  keys inside the group; a single key can be rendered on its own.
+  """
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
+
+  def kbd(assigns) do
+    assigns = assign(assigns, :classes, part_classes(kbd_classes(), assigns))
+
+    ~H"""
+    <kbd class={@classes} data-slot="kbd" {@rest}>
+      {render_slot(@inner_block)}
+    </kbd>
+    """
+  end
+
+  @doc """
+  Kbd group (shadcn `KbdGroup`) — a key combination.
+  """
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
+
+  def kbd_group(assigns) do
+    assigns = assign(assigns, :classes, part_classes("inline-flex items-center gap-1", assigns))
+
+    ~H"""
+    <kbd class={@classes} data-slot="kbd-group" {@rest}>
+      {render_slot(@inner_block)}
+    </kbd>
+    """
+  end
+
+  defp kbd_classes do
+    "pointer-events-none inline-flex h-5 w-fit min-w-5 items-center justify-center gap-1 rounded-sm bg-muted px-1 font-sans text-xs font-medium text-muted-foreground select-none [&_svg:not([class*='size-'])]:size-3 [[data-slot=tooltip-content]_&]:bg-background/20 [[data-slot=tooltip-content]_&]:text-background dark:[[data-slot=tooltip-content]_&]:bg-background/10"
+  end
+
+  @doc """
   Label (shadcn `Label`) — caption for a form field.
   """
   attr(:for, :string, default: nil, doc: "id of the labelled control")
