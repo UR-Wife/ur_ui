@@ -19,6 +19,7 @@ defmodule Storybook.UrUi do
   def entry("kbd"), do: [icon: {:fa, "keyboard", :thin}]
   def entry("checkbox"), do: [icon: {:fa, "square-check", :thin}]
   def entry("radio-group"), do: [icon: {:fa, "circle-dot", :thin}]
+  def entry("progress"), do: [icon: {:fa, "bars-progress", :thin}]
   def entry("collapsible"), do: [icon: {:fa, "square-caret-down", :thin}]
   def entry("textarea"), do: [icon: {:fa, "align-left", :thin}]
   def entry("tabs"), do: [icon: {:fa, "table-columns", :thin}]

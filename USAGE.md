@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, checkbox, collapsible, kbd, breadcrumb, radio-group, spinner, switch, toggle, tabs, accordion).
+textarea, checkbox, collapsible, kbd, breadcrumb, progress, radio-group, spinner, switch, toggle, tabs, accordion).
 
 ### button
 
@@ -175,6 +175,23 @@ Attr    | Type   | Default | Notes
 --------|--------|---------|------
 `class` | string | `nil`   | appended to base classes (sizing lives here)
 `rest`  | global | —       | `id`, `aria-*`, `data-*` pass through
+
+### progress
+
+`UrUi.Components.progress/1` — a determinate progress bar (shadcn `Progress`).
+Attrs: `value` (default `0`), `max` (default `100`), `class` and `rest`. It
+renders `role="progressbar"` with the `aria-valuemin`/`aria-valuemax`/
+`aria-valuenow`/`aria-valuetext` attributes, plus `data-state` (`loading` or
+`complete`).
+
+```heex
+<.progress value={60} />
+```
+
+The fill position is applied by the `UrUiProgress` hook (see **LiveView
+hooks** above): it sets the indicator's `translateX` transform through the
+CSSOM, so the markup carries no inline style and works under a strict
+Content-Security-Policy. Size it through `class` (e.g. `class: "w-64"`).
 
 ### label
 

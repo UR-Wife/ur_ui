@@ -115,5 +115,23 @@ const UrUiRadioGroup = {
   }
 }
 
-export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox, UrUiRadioGroup }
+// progress/1: as in Radix Progress, position the indicator's fill via the
+// translate transform. Done through the CSSOM (el.style) so the markup carries
+// no inline style= and works under a strict Content-Security-Policy.
+const UrUiProgress = {
+  mounted() {
+    this.sync()
+  },
+  updated() {
+    this.sync()
+  },
+  sync() {
+    const value = Number(this.el.dataset.value)
+    const max = Number(this.el.dataset.max) || 100
+    const percent = Number.isFinite(value) ? Math.max(0, Math.min(100, (value / max) * 100)) : 0
+    this.el.style.transform = `translateX(-${100 - percent}%)`
+  }
+}
+
+export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox, UrUiRadioGroup, UrUiProgress }
 export default UrUiHooks
