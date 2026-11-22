@@ -13,6 +13,7 @@ defmodule Storybook.UrUi do
   def entry("alert"), do: [icon: {:fa, "bell", :thin}]
   def entry("table"), do: [icon: {:fa, "table", :thin}]
   def entry("input"), do: [icon: {:fa, "keyboard", :thin}]
+  def entry("checkbox"), do: [icon: {:fa, "square-check", :thin}]
   def entry("textarea"), do: [icon: {:fa, "align-left", :thin}]
   def entry("tabs"), do: [icon: {:fa, "table-columns", :thin}]
   def entry("accordion"), do: [icon: {:fa, "square-caret-down", :thin}]

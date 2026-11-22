@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Card,
   CardAction,
@@ -284,6 +285,23 @@ function TabsDemo({ variant }: { variant: string }) {
   )
 }
 
+function CheckboxDemo({ variant }: { variant: string }) {
+  const defaultChecked = variant === 'checked'
+  const disabled = variant === 'disabled'
+  // Mirrors the shadcn docs checkbox-with-text demo.
+  return (
+    <div className="flex items-center gap-2">
+      <Checkbox id="terms" defaultChecked={defaultChecked} disabled={disabled} />
+      <label
+        htmlFor="terms"
+        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      >
+        Accept terms and conditions
+      </label>
+    </div>
+  )
+}
+
 function Demo({ variation }: { variation: Variation }): ReactNode {
   const { component, variant } = variation
   switch (component) {
@@ -293,6 +311,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'badge': return <Badge variant={variant === 'custom_class' ? 'default' : variant as 'default'} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : variant[0].toUpperCase() + variant.slice(1)}</Badge>
     case 'button': return <ButtonDemo variation={variation} />
     case 'card': return <CardDemo variant={variant} />
+    case 'checkbox': return <CheckboxDemo variant={variant} />
     case 'input': return <InputDemo variant={variant} />
     case 'label': return <Label htmlFor={variant === 'with_for' ? 'email' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : 'Email'}</Label>
     case 'separator': return <SeparatorDemo variant={variant} />

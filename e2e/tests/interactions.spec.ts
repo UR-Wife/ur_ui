@@ -112,7 +112,33 @@ async function checkTabs(page: Page, root: Locator, variation: Variation) {
   await assertExpectedOrder()
 }
 
-for (const component of ['accordion', 'tabs'] as const) {
+async function checkCheckbox(page: Page, root: Locator, variation: Variation) {
+  await expect(root).toHaveRole('checkbox')
+  const initial = await root.getAttribute('aria-checked')
+  expect(initial).toMatch(/^(true|false)$/)
+
+  if (variation.variant === 'disabled') {
+    await expect(root).toBeDisabled()
+    return
+  }
+
+  await root.click()
+  await expect(root).not.toHaveAttribute('aria-checked', initial!)
+  await root.click()
+  await expect(root).toHaveAttribute('aria-checked', initial!)
+
+  await root.focus()
+  await page.keyboard.press('Space')
+  await expect(root).not.toHaveAttribute('aria-checked', initial!)
+  await page.keyboard.press('Space')
+  await expect(root).toHaveAttribute('aria-checked', initial!)
+
+  // Enter does not toggle (Radix prevents it).
+  await page.keyboard.press('Enter')
+  await expect(root).toHaveAttribute('aria-checked', initial!)
+}
+
+for (const component of ['accordion', 'tabs', 'checkbox'] as const) {
   test.describe(`${component} keyboard and ARIA`, () => {
     for (const variation of variations.filter((entry) => entry.component === component)) {
       for (const theme of ['light', 'dark'] as Theme[]) {
@@ -146,8 +172,14 @@ for (const component of ['accordion', 'tabs'] as const) {
                     side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
                     variation,
                   )
-                } else {
+                } else if (component === 'tabs') {
                   await checkTabs(
+                    side === 'reference' ? referencePage : page,
+                    side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
+                    variation,
+                  )
+                } else {
+                  await checkCheckbox(
                     side === 'reference' ? referencePage : page,
                     side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
                     variation,
