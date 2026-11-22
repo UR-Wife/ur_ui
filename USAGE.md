@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, checkbox, kbd, breadcrumb, spinner, switch, toggle, tabs, accordion).
+textarea, checkbox, collapsible, kbd, breadcrumb, spinner, switch, toggle, tabs, accordion).
 
 ### button
 
@@ -510,3 +510,23 @@ with `aria-expanded` and `aria-controls`, and each panel is a
 Items pair by `value`; a trigger without a matching `:content` renders an
 empty region. A trigger slot carrying `disabled` renders a disabled button
 with no click command.
+
+### collapsible
+
+`UrUi.Components.collapsible/1` — a trigger button that toggles a single
+collapsible region (shadcn `Collapsible`). Attrs: `id` (required),
+`default_open` (default `false`), `class` and `rest`; the `:trigger` and
+`:content` slots pair up, and the trigger slot may carry `disabled`. Toggling
+runs client-side through `Phoenix.LiveView.JS` commands — no round-trip.
+
+```heex
+<.collapsible id="faq" default_open>
+  <:trigger>Can I use this in my project?</:trigger>
+  <:content>Yes. Free to use for personal and commercial projects.</:content>
+</.collapsible>
+```
+
+The trigger carries `aria-expanded` and `aria-controls`; the content is
+`hidden` while closed and carries a matching `data-state` (`open`/`closed`).
+The root exposes `data-slot="collapsible"` and `data-state` as in Radix. Add
+shadcn's animation classes through `class` if you want the animated collapse.

@@ -280,6 +280,83 @@ defmodule UrUi.Components do
   end
 
   @doc """
+  Collapsible (shadcn `Collapsible`) — a trigger button that toggles a single
+  collapsible content region. Toggling runs client-side through
+  `Phoenix.LiveView.JS` commands, so no server round trip is needed. ARIA
+  matches Radix: the trigger carries `aria-expanded` and `aria-controls`, and
+  the content carries `data-state` and is `hidden` while closed.
+  """
+  attr(:id, :string, required: true)
+  attr(:default_open, :boolean, default: false)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+
+  slot :trigger do
+    attr(:disabled, :boolean)
+  end
+
+  slot(:content)
+
+  def collapsible(assigns) do
+    trigger_disabled =
+      case assigns[:trigger] do
+        [%{disabled: disabled} | _] -> disabled || false
+        _ -> false
+      end
+
+    assigns =
+      assign(assigns,
+        open: assigns[:default_open] || false,
+        trigger_disabled: trigger_disabled
+      )
+
+    ~H"""
+    <div
+      id={@id}
+      data-slot="collapsible"
+      data-state={if @open, do: "open", else: "closed"}
+      class={@class}
+      {@rest}
+    >
+      <button
+        type="button"
+        id={"#{@id}-trigger"}
+        aria-controls={if @open, do: "#{@id}-content"}
+        aria-expanded={to_string(@open)}
+        data-slot="collapsible-trigger"
+        data-state={if @open, do: "open", else: "closed"}
+        data-disabled={@trigger_disabled && ""}
+        disabled={@trigger_disabled}
+        phx-click={if @trigger_disabled, do: nil, else: collapsible_toggle_js(@id)}
+      >
+        {render_slot(@trigger)}
+      </button>
+      <div
+        id={"#{@id}-content"}
+        data-slot="collapsible-content"
+        data-state={if @open, do: "open", else: "closed"}
+        hidden={not @open}
+      >
+        {render_slot(@content)}
+      </div>
+    </div>
+    """
+  end
+
+  defp collapsible_toggle_js(id) do
+    root = "##{Phoenix.HTML.css_escape(id)}"
+    trigger = "##{Phoenix.HTML.css_escape("#{id}-trigger")}"
+    content = "##{Phoenix.HTML.css_escape("#{id}-content")}"
+
+    %JS{}
+    |> JS.toggle_attribute({"aria-expanded", "true", "false"}, to: trigger)
+    |> JS.toggle_attribute({"data-state", "open", "closed"}, to: trigger)
+    |> JS.toggle_attribute({"data-state", "open", "closed"}, to: root)
+    |> JS.toggle_attribute({"data-state", "open", "closed"}, to: content)
+    |> JS.toggle_attribute({"hidden", "hidden"}, to: content)
+  end
+
+  @doc """
   Badge (shadcn `Badge`) — a small status descriptor.
 
   ## Variants
