@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-tabs, accordion).
+textarea, checkbox, tabs, accordion).
 
 ### button
 
@@ -318,6 +318,40 @@ tuples or plain strings.
 The `class` attr extends the textarea itself; native globals such as
 `placeholder`, `rows`, `required` and `disabled` pass through `rest`. There
 are no shadcn variants or sizes.
+
+### checkbox
+
+`UrUi.Components.checkbox/1` — a button-based checkbox (shadcn `Checkbox`)
+matching Radix's DOM and ARIA: a `<button type="button" role="checkbox">`
+with `aria-checked`, `data-state` and a check indicator. Attrs: `id`
+(required), `name`, `value` (default `"on"`), `checked` (default `false`),
+`disabled`, `required`, `class` and `rest`. Toggling runs client-side through
+`Phoenix.LiveView.JS` commands — no server round-trip.
+
+```heex
+<div class="flex items-center gap-2">
+  <.checkbox id="terms" name="terms" />
+  <label for="terms" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+    Accept terms and conditions
+  </label>
+</div>
+```
+
+When `name` is given it also renders a hidden `<input type="checkbox">` (as
+Radix does) so the value submits with a form; the hidden input's `checked`
+state stays in sync with the button. `checked` sets the initial state; the
+check indicator is hidden while unchecked. `class` extends the button and
+globals pass through it. As in the shadcn docs, pair it with a `label` whose
+`for` matches the checkbox id.
+
+**Keyboard.** Space toggles the checkbox; Enter does not, as in Radix. This
+uses the `UrUiCheckbox` hook (see **LiveView hooks** above). Without it,
+clicking and Space still work; only Enter would also toggle.
+
+The hidden input's `checked` state is toggled through its `checked` attribute,
+so a native `form.reset()` restores the toggled state rather than the initial
+`checked` value. Use a LiveView re-render (the usual Phoenix flow) to reset a
+checkbox to its initial state.
 
 ### tabs
 

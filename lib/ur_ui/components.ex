@@ -892,6 +892,109 @@ defmodule UrUi.Components do
   end
 
   @doc """
+  Checkbox (shadcn `Checkbox`) — a button-based checkbox matching Radix's DOM
+  and ARIA. Toggling runs client-side through `Phoenix.LiveView.JS`, so no
+  server round trip is needed. When `name` is given it also renders a hidden
+  `<input type="checkbox">` (as Radix does) so the value submits with a form.
+
+  As in Radix, Space toggles and Enter does not; the `UrUiCheckbox` hook (from
+  `UrUiHooks`, see USAGE.md) prevents the native button's Enter click.
+  """
+  attr(:id, :string, required: true, doc: "stable, unique DOM id (the toggle JS needs it)")
+  attr(:name, :string, default: nil, doc: "renders a hidden input for form submission when given")
+  attr(:value, :string, default: "on", doc: "submitted value")
+  attr(:checked, :boolean, default: false, doc: "initial checked state")
+  attr(:disabled, :boolean, default: false, doc: "disables the checkbox")
+  attr(:required, :boolean, default: false, doc: "marks the checkbox required")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+
+  def checkbox(assigns) do
+    assigns = assign(assigns, :classes, checkbox_classes(assigns))
+
+    ~H"""
+    <button
+      type="button"
+      role="checkbox"
+      id={@id}
+      aria-checked={to_string(@checked)}
+      aria-required={@required && "true"}
+      data-state={if @checked, do: "checked", else: "unchecked"}
+      data-disabled={@disabled && ""}
+      disabled={@disabled}
+      value={@value}
+      class={@classes}
+      data-slot="checkbox"
+      phx-hook="UrUiCheckbox"
+      phx-click={if @disabled, do: nil, else: checkbox_toggle_js(@id)}
+      {@rest}
+    >
+      <span
+        data-slot="checkbox-indicator"
+        data-state={if @checked, do: "checked", else: "unchecked"}
+        data-disabled={@disabled && ""}
+        hidden={not @checked}
+        class="grid place-content-center text-current transition-none pointer-events-none"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="size-3.5"
+          aria-hidden="true"
+        >
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+      </span>
+    </button>
+    <input
+      :if={@name}
+      id={"#{@id}-input"}
+      type="checkbox"
+      aria-hidden="true"
+      tabindex="-1"
+      name={@name}
+      value={@value}
+      checked={@checked}
+      required={@required}
+      disabled={@disabled}
+      class="absolute pointer-events-none opacity-0 m-0 -translate-x-full"
+    />
+    """
+  end
+
+  defp checkbox_classes(assigns) do
+    [
+      "peer size-4 shrink-0 rounded-[4px] border border-input shadow-xs transition-shadow outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:bg-input/30 dark:aria-invalid:ring-destructive/40 dark:data-[state=checked]:bg-primary",
+      assigns[:class]
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
+  defp checkbox_toggle_js(id) do
+    input = "##{Phoenix.HTML.css_escape("#{id}-input")}"
+
+    %JS{}
+    |> JS.toggle_attribute({"aria-checked", "true", "false"})
+    |> JS.toggle_attribute({"data-state", "checked", "unchecked"})
+    |> JS.toggle_attribute({"data-state", "checked", "unchecked"},
+      to: {:inner, "[data-slot=checkbox-indicator]"}
+    )
+    |> JS.toggle_attribute({"hidden", "hidden"},
+      to: {:inner, "[data-slot=checkbox-indicator]"}
+    )
+    |> JS.toggle_attribute({"checked", "checked"}, to: input)
+    |> JS.dispatch("change", to: input)
+  end
+
+  @doc """
   Tabs (shadcn `Tabs`): a `tablist` of `<button role="tab">` triggers and one
   `tabpanel` per content slot.
 

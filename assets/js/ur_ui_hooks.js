@@ -62,5 +62,19 @@ const UrUiAvatarImage = {
   }
 }
 
-export const UrUiHooks = { UrUiTabs, UrUiAvatarImage }
+// checkbox/1: as in Radix Checkbox, Enter does not toggle the checkbox (only
+// Space does); prevent the native button's Enter click.
+const UrUiCheckbox = {
+  mounted() {
+    this.onKeyDown = (event) => {
+      if (event.key === "Enter") event.preventDefault()
+    }
+    this.el.addEventListener("keydown", this.onKeyDown)
+  },
+  destroyed() {
+    this.el.removeEventListener("keydown", this.onKeyDown)
+  }
+}
+
+export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox }
 export default UrUiHooks
