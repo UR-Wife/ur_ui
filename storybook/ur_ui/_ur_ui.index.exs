@@ -23,6 +23,7 @@ defmodule Storybook.UrUi do
   def entry("pagination"), do: [icon: {:fa, "ellipsis", :thin}]
   def entry("progress"), do: [icon: {:fa, "bars-progress", :thin}]
   def entry("collapsible"), do: [icon: {:fa, "square-caret-down", :thin}]
+  def entry("empty"), do: [icon: {:fa, "inbox", :thin}]
   def entry("textarea"), do: [icon: {:fa, "align-left", :thin}]
   def entry("tabs"), do: [icon: {:fa, "table-columns", :thin}]
   def entry("toggle"), do: [icon: {:fa, "toggle-on", :thin}]

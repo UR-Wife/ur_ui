@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, aspect-ratio, checkbox, collapsible, kbd, breadcrumb, pagination, progress, radio-group, spinner, switch, toggle, tabs, accordion).
+textarea, aspect-ratio, checkbox, collapsible, empty, kbd, breadcrumb, pagination, progress, radio-group, spinner, switch, toggle, tabs, accordion).
 
 ### button
 
@@ -231,6 +231,21 @@ ratios are not generated, so pass the ratio and width through `class`
     <div class="h-full w-full bg-muted"></div>
   </.aspect_ratio>
 </div>
+```
+
+### empty
+
+`UrUi.Components.empty/1` — an empty-state placeholder (shadcn `Empty`).
+Compose `empty_header/1`, `empty_media/1` (`variant: :default` or `:icon`),
+`empty_title/1`, `empty_description/1` and `empty_content/1` inside the root.
+Each accepts `class`, `rest` and an optional `:inner_block`.
+
+```heex
+<.empty>
+  <.empty_media variant={:icon}>+</.empty_media>
+  <.empty_title>No results</.empty_title>
+  <.empty_description>Try adjusting your search.</.empty_description>
+</.empty>
 ```
 
 ### label
