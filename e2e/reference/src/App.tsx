@@ -172,6 +172,32 @@ function InputDemo({ variant }: { variant: string }) {
   )
 }
 
+// Mirrors the shadcn docs separator demo: a horizontal separator under a
+// heading block, and a vertical one inside a sized (h-5) flex row.
+function SeparatorDemo({ variant }: { variant: string }) {
+  if (variant === 'vertical') {
+    return (
+      <div className="flex h-5 items-center space-x-4 text-sm">
+        <div>Blog</div>
+        <Separator orientation="vertical" />
+        <div>Docs</div>
+      </div>
+    )
+  }
+  return (
+    <div>
+      <div className="space-y-1">
+        <h4 className="text-sm leading-none font-medium">Radix Primitives</h4>
+        <p className="text-sm text-muted-foreground">An open-source UI component library.</p>
+      </div>
+      <Separator
+        decorative={variant !== 'semantic'}
+        className={variant === 'custom_class' ? 'my-4 opacity-80' : 'my-4'}
+      />
+    </div>
+  )
+}
+
 function TableDemo({ variant }: { variant: string }) {
   const headings = variant === 'default' ? ['Name', 'Role'] : variant === 'with_footer' ? ['Plan', 'Seats'] : variant === 'selected_row' ? ['Member', 'Status'] : ['Members']
   const rows = variant === 'default'
@@ -224,7 +250,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'card': return <CardDemo variant={variant} />
     case 'input': return <InputDemo variant={variant} />
     case 'label': return <Label htmlFor={variant === 'with_for' ? 'email' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : 'Email'}</Label>
-    case 'separator': return <Separator orientation={variant === 'vertical' ? 'vertical' : 'horizontal'} decorative={variant !== 'semantic'} className={variant === 'custom_class' ? 'opacity-80' : undefined} />
+    case 'separator': return <SeparatorDemo variant={variant} />
     case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'h-4 w-[250px] opacity-80' : 'h-4 w-[250px]'} />
     case 'table': return <TableDemo variant={variant} />
     case 'tabs': return <TabsDemo variant={variant} />
