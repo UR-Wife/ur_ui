@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, checkbox, collapsible, kbd, breadcrumb, spinner, switch, toggle, tabs, accordion).
+textarea, checkbox, collapsible, kbd, breadcrumb, radio-group, spinner, switch, toggle, tabs, accordion).
 
 ### button
 
@@ -453,6 +453,31 @@ When `name` is given it also renders a hidden `<input type="checkbox">` whose
 `checked` state stays in sync and which dispatches `change` after toggling, so
 the value submits with a form. `class` extends the button; globals pass through
 `rest`. Unlike the checkbox, Space and Enter both toggle the switch.
+
+### radio-group
+
+`UrUi.Components.radio_group/1` — a `role="radiogroup"` of button-based radio
+items (shadcn `RadioGroup`). Attrs: `id` (required), `name`, `default_value`,
+`disabled`, `class` and `rest`; each `:item` slot carries a `value` (required)
+and optional `disabled`, and its content is the item's label. Selection runs
+client-side through `Phoenix.LiveView.JS` commands.
+
+```heex
+<.radio_group id="size" name="size" default_value="comfortable">
+  <:item value="default">Default</:item>
+  <:item value="comfortable">Comfortable</:item>
+</.radio_group>
+```
+
+Each item renders `aria-checked`, `data-state` and a roving `tabindex` (only
+the checked item is in the Tab order); the checked item shows a filled dot.
+When `name` is given a hidden `<input type="radio">` is rendered per item, with
+`change` dispatched on the selected input.
+
+**Keyboard.** Arrow Up/Left/Down/Right move focus and selection to the
+previous/next enabled item (wrapping); Home and End jump to the first/last, as
+in Radix. This uses the `UrUiRadioGroup` hook (see **LiveView hooks** above).
+Without it, clicking still works; only arrow-key navigation is missing.
 
 ### tabs
 

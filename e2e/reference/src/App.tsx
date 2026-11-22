@@ -34,6 +34,7 @@ import { Input } from '@/components/ui/input'
 import { Kbd } from '@/components/ui/kbd'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
@@ -268,6 +269,25 @@ function ToggleDemo({ variant }: { variant: string }) {
   return <Toggle>Bold</Toggle>
 }
 
+function RadioGroupDemo({ variant }: { variant: string }) {
+  const defaultValue = variant === 'default_value' ? 'comfortable' : 'default'
+  const items: [string, string, boolean][] = variant === 'disabled'
+    ? [['default', 'Default', false], ['comfortable', 'Comfortable', true]]
+    : variant === 'default_value'
+      ? [['compact', 'Compact', false], ['comfortable', 'Comfortable', false]]
+      : [['default', 'Default', false], ['comfortable', 'Comfortable', false]]
+  return (
+    <RadioGroup defaultValue={defaultValue}>
+      {items.map(([value, label, disabled]) => (
+        <div className="flex items-center gap-2" key={value}>
+          <RadioGroupItem value={value} id={`r-${value}`} disabled={disabled} />
+          <Label htmlFor={`r-${value}`}>{label}</Label>
+        </div>
+      ))}
+    </RadioGroup>
+  )
+}
+
 function SeparatorDemo({ variant }: { variant: string }) {
   if (variant === 'vertical') {
     return (
@@ -405,6 +425,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'input': return <InputDemo variant={variant} />
     case 'kbd': return <KbdDemo variant={variant} />
     case 'label': return <Label htmlFor={variant === 'with_for' ? 'email' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : 'Email'}</Label>
+    case 'radio-group': return <RadioGroupDemo variant={variant} />
     case 'separator': return <SeparatorDemo variant={variant} />
     case 'switch': return <SwitchDemo variant={variant} />
     case 'spinner': return <SpinnerDemo variant={variant} />

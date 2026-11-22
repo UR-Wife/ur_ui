@@ -8,7 +8,7 @@ defmodule UrUi.BreadcrumbTest do
   defp inner(content),
     do: %{__slot__: :inner_block, inner_block: fn _changed, _arg -> content end}
 
-  defp render_breadcrumb(assigns \\ %{}), do: render_component(&Components.breadcrumb/1, assigns)
+  defp render_breadcrumb(assigns), do: render_component(&Components.breadcrumb/1, assigns)
 
   test "breadcrumb renders a nav labelled for assistive tech" do
     html = render_breadcrumb(%{inner_block: inner("Home")})

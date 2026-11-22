@@ -356,6 +356,168 @@ defmodule UrUi.Components do
     |> JS.toggle_attribute({"hidden", "hidden"}, to: content)
   end
 
+  @radio_item_classes "aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40"
+
+  @doc """
+  Radio group (shadcn `RadioGroup`) — a `role="radiogroup"` of button-based
+  radio items with a checked indicator. Selection runs client-side through
+  `Phoenix.LiveView.JS` commands; arrow keys move and select through the
+  `UrUiRadioGroup` hook (from `UrUiHooks`, see USAGE.md).
+
+  Each `:item` slot carries a `value` (and optionally `disabled`) and its
+  content is used as the item's label. When `name` is given a hidden
+  `<input type="radio">` is rendered per item so the value submits with a form.
+  """
+  attr(:id, :string, required: true)
+  attr(:name, :string, default: nil)
+  attr(:default_value, :string, default: nil)
+  attr(:disabled, :boolean, default: false)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+
+  slot :item do
+    attr(:value, :string, required: true)
+    attr(:disabled, :boolean)
+  end
+
+  def radio_group(assigns) do
+    items = assigns[:item] || []
+    group_disabled = assigns[:disabled] || false
+    selected = radio_group_selected(items, assigns[:default_value], group_disabled)
+
+    items =
+      items
+      |> Enum.with_index()
+      |> Enum.map(fn {item, index} ->
+        item
+        |> Map.put(:index, index)
+        |> Map.put(:id, "#{assigns.id}-item-#{index}")
+        |> Map.put(:disabled, item[:disabled] || group_disabled)
+        |> Map.put(:checked, item[:value] == selected)
+      end)
+
+    assigns =
+      assign(assigns,
+        items: items,
+        classes: part_classes("grid gap-3", assigns),
+        item_classes: @radio_item_classes
+      )
+
+    ~H"""
+    <div
+      id={@id}
+      role="radiogroup"
+      data-slot="radio-group"
+      data-disabled={@disabled && ""}
+      class={@classes}
+      phx-hook="UrUiRadioGroup"
+      {@rest}
+    >
+      <div :for={item <- @items} class="flex items-center gap-2">
+        <button
+          type="button"
+          role="radio"
+          id={item.id}
+          value={item.value}
+          aria-checked={to_string(item.checked)}
+          data-state={if item.checked, do: "checked", else: "unchecked"}
+          data-disabled={item.disabled && ""}
+          disabled={item.disabled}
+          tabindex={if item.checked, do: "0", else: "-1"}
+          data-slot="radio-group-item"
+          class={@item_classes}
+          phx-click={if item.disabled, do: nil, else: radio_group_select_js(@items, item.index)}
+        >
+          <span
+            data-slot="radio-group-indicator"
+            data-state={if item.checked, do: "checked", else: "unchecked"}
+            data-disabled={item.disabled && ""}
+            hidden={not item.checked}
+            class="relative flex items-center justify-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+            </svg>
+          </span>
+        </button>
+        <label
+          for={item.id}
+          class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+        >{render_slot(item)}</label>
+      </div>
+      <input
+        :if={@name}
+        :for={item <- @items}
+        id={"#{item.id}-input"}
+        type="radio"
+        aria-hidden="true"
+        tabindex="-1"
+        name={@name}
+        value={item.value}
+        checked={item.checked}
+        disabled={item.disabled}
+        class="absolute pointer-events-none opacity-0 m-0 -translate-x-full"
+      />
+    </div>
+    """
+  end
+
+  defp radio_group_selected(items, default_value, group_disabled) do
+    values =
+      items
+      |> Enum.reject(&(&1[:disabled] || group_disabled))
+      |> Enum.map(& &1.value)
+
+    cond do
+      default_value in values -> default_value
+      values == [] -> nil
+      true -> hd(values)
+    end
+  end
+
+  defp radio_group_select_js(items, selected_index) do
+    Enum.reduce(items, %JS{}, fn item, js ->
+      checked = item.index == selected_index
+      target = "##{Phoenix.HTML.css_escape(item.id)}"
+      indicator = "#{target} [data-slot=radio-group-indicator]"
+      input = "##{Phoenix.HTML.css_escape("#{item.id}-input")}"
+      state = if(checked, do: "checked", else: "unchecked")
+
+      js =
+        js
+        |> JS.set_attribute({"aria-checked", to_string(checked)}, to: target)
+        |> JS.set_attribute({"data-state", state}, to: target)
+        |> JS.set_attribute({"tabindex", if(checked, do: "0", else: "-1")}, to: target)
+        |> JS.set_attribute({"data-state", state}, to: indicator)
+
+      js =
+        if checked do
+          js
+          |> JS.remove_attribute("hidden", to: indicator)
+          |> JS.set_attribute({"checked", "checked"}, to: input)
+          |> JS.dispatch("change", to: input)
+        else
+          js
+          |> JS.set_attribute({"hidden", "hidden"}, to: indicator)
+          |> JS.remove_attribute("checked", to: input)
+        end
+
+      js
+    end)
+  end
+
   @doc """
   Badge (shadcn `Badge`) — a small status descriptor.
 

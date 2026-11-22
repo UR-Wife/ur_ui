@@ -76,5 +76,44 @@ const UrUiCheckbox = {
   }
 }
 
-export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox }
+// radio_group/1: roving focus with automatic activation, as in Radix
+// RadioGroup. Arrow Up/Left/Down/Right move focus to the previous/next enabled
+// radio (wrapping), Home/End to the first/last; the target radio is focused
+// and clicked, and its phx-click JS selects it. Enter does not select.
+const UrUiRadioGroup = {
+  mounted() {
+    this.onKeyDown = (event) => {
+      const radio = event.target.closest('[data-slot="radio-group-item"]')
+      if (!radio || !this.el.contains(radio)) return
+      const items = Array.from(this.el.querySelectorAll('[data-slot="radio-group-item"]')).filter(
+        (el) => !el.disabled
+      )
+      const index = items.indexOf(radio)
+      if (index < 0) return
+      if (event.key === "Enter") {
+        event.preventDefault()
+        return
+      }
+      const count = items.length
+      const next = {
+        ArrowRight: (index + 1) % count,
+        ArrowDown: (index + 1) % count,
+        ArrowLeft: (index - 1 + count) % count,
+        ArrowUp: (index - 1 + count) % count,
+        Home: 0,
+        End: count - 1
+      }[event.key]
+      if (next === undefined) return
+      event.preventDefault()
+      items[next].focus()
+      items[next].click()
+    }
+    this.el.addEventListener("keydown", this.onKeyDown)
+  },
+  destroyed() {
+    this.el.removeEventListener("keydown", this.onKeyDown)
+  }
+}
+
+export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox, UrUiRadioGroup }
 export default UrUiHooks
