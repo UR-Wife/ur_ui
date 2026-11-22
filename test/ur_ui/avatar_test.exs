@@ -77,11 +77,11 @@ defmodule UrUi.AvatarTest do
       assert html =~ ~s(alt="")
     end
 
-    test "uses the colocated hook on the caller's stable id" do
+    test "uses the UrUiAvatarImage hook on the caller's stable id" do
       html = render_image(%{src: "/u.png", id: "ada-photo"})
       [img] = html |> Floki.parse_fragment!() |> Floki.find("img")
       assert Floki.attribute(img, "id") == ["ada-photo"]
-      assert Floki.attribute(img, "phx-hook") == ["UrUi.Components.AvatarImage"]
+      assert Floki.attribute(img, "phx-hook") == ["UrUiAvatarImage"]
       refute html =~ "<script"
     end
 

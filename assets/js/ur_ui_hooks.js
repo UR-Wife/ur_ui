@@ -38,5 +38,29 @@ const UrUiTabs = {
   }
 }
 
-export const UrUiHooks = { UrUiTabs }
+// avatar_image/1: as in Radix Avatar, show the image only once it has loaded;
+// while it loads, or if it fails, it stays hidden and the fallback (its next
+// sibling, hidden by CSS only while a visible image precedes it) shows.
+const UrUiAvatarImage = {
+  mounted() {
+    this.onLoad = () => (this.el.hidden = false)
+    this.onError = () => (this.el.hidden = true)
+    this.el.addEventListener("load", this.onLoad)
+    this.el.addEventListener("error", this.onError)
+    this.sync()
+  },
+  updated() {
+    this.sync()
+  },
+  destroyed() {
+    this.el.removeEventListener("load", this.onLoad)
+    this.el.removeEventListener("error", this.onError)
+  },
+  // Only sets visibility; the listeners above handle later load/error.
+  sync() {
+    this.el.hidden = !(this.el.complete && this.el.naturalWidth > 0)
+  }
+}
+
+export const UrUiHooks = { UrUiTabs, UrUiAvatarImage }
 export default UrUiHooks

@@ -8,10 +8,6 @@
   "eb0fe36dc80a96c63ef7-21e61bfd2da48aa93835",
   "eb0fe36dc80a96c63ef7-3a26123891296ead5e2f",
   "eb0fe36dc80a96c63ef7-3d5206e5f4e60b60e838",
-  {
-    "id": "eb0fe36dc80a96c63ef7-3ed44fb23cc81da5e2a1",
-    "note": "avatar/with_image [light]: shadcn reference bug, not ur_ui. axe color-contrast fails on the reference itself: avatar fallback text-muted-foreground #737373 on bg-muted #f5f5f5 is 4.34:1 (WCAG AA needs 4.5:1). ur_ui matches the reference in styles and screenshot. Leave listed until shadcn changes the tokens."
-  },
   "eb0fe36dc80a96c63ef7-403a68530c6ad72bd6b6",
   "eb0fe36dc80a96c63ef7-440623de7259cc7246e6",
   {

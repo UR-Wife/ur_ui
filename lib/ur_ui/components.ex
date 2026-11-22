@@ -275,7 +275,8 @@ defmodule UrUi.Components do
   Avatar image (shadcn `AvatarImage`) — the user photo, inside `avatar/1`.
 
   As in Radix, the fallback is hidden once the image is shown, and the
-  colocated `.AvatarImage` hook keeps the image hidden (fallback visible)
+  `UrUiAvatarImage` hook (from `UrUiHooks`, see USAGE.md) keeps the image
+  hidden (fallback visible)
   while it loads and when it fails. Without the hook registered, the image
   shows and the fallback stays hidden. `id` is required: LiveView hooks need
   a DOM id that stays the same across renders.
@@ -296,33 +297,9 @@ defmodule UrUi.Components do
       alt={@alt}
       class={@classes}
       data-slot="avatar-image"
-      phx-hook=".AvatarImage"
+      phx-hook="UrUiAvatarImage"
       {@rest}
     />
-    <script :type={Phoenix.LiveView.ColocatedHook} name=".AvatarImage">
-      // Radix Avatar: show the image only once it has loaded; until then (or
-      // if it fails) it stays hidden and the fallback, its next sibling, shows.
-      export default {
-        mounted() {
-          this.onLoad = () => (this.el.hidden = false)
-          this.onError = () => (this.el.hidden = true)
-          this.el.addEventListener("load", this.onLoad)
-          this.el.addEventListener("error", this.onError)
-          this.sync()
-        },
-        updated() {
-          this.sync()
-        },
-        destroyed() {
-          this.el.removeEventListener("load", this.onLoad)
-          this.el.removeEventListener("error", this.onError)
-        },
-        // Only sets visibility; the listeners above handle later load/error.
-        sync() {
-          this.el.hidden = !(this.el.complete && this.el.naturalWidth > 0)
-        }
-      }
-    </script>
     """
   end
 

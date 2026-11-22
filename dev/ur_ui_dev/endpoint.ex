@@ -16,6 +16,13 @@ defmodule UrUiDev.Endpoint do
     from: Path.expand("../../assets", __DIR__),
     only: ~w(ur_ui.css)
 
+  # The avatar demo image, shared with the e2e reference app so both sides
+  # load the same bytes.
+  plug Plug.Static,
+    at: "/",
+    from: Path.expand("../../e2e/reference/public", __DIR__),
+    only: ~w(ur_ui_logo.svg)
+
   # Dev-only bundle of ur_ui's LiveView hooks, built by UrUiDev.Application.
   plug Plug.Static,
     at: "/",

@@ -162,12 +162,11 @@ Parts: `avatar_image/1` (`id` required, `src`, `alt`, `class`, `rest`),
 `avatar_fallback/1`, `avatar_badge/1`, `avatar_group/1`, `avatar_group_count/1`
 — each takes `class`, `rest` and a `:inner_block` slot.
 
-The loading/error states use the colocated `.AvatarImage` hook (no inline
-script, so it works under a strict CSP). It needs the same one-time
-`phoenix-colocated/ur_ui` hooks import as tabs (see **tabs**). Hooks need a
-DOM id that stays the same across renders, so `avatar_image/1` requires `id`.
-Without the hooks import, the image still shows and the fallback stays
-hidden behind it; only the loading/error fallback is missing.
+The loading/error states use the `UrUiAvatarImage` hook (see **LiveView
+hooks** above). Hooks need a DOM id that stays the same across renders, so
+`avatar_image/1` requires `id`. Without the hooks, the image still shows and
+the fallback stays hidden behind it; only the loading/error fallback is
+missing.
 
 ### card
 
