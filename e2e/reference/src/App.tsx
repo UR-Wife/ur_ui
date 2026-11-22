@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import {
   Card,
   CardAction,
@@ -335,6 +336,15 @@ function TabsDemo({ variant }: { variant: string }) {
   )
 }
 
+function CollapsibleDemo({ variant }: { variant: string }) {
+  return (
+    <Collapsible defaultOpen={variant === 'default_open'}>
+      <CollapsibleTrigger>Can I use this in my project?</CollapsibleTrigger>
+      <CollapsibleContent>Yes. Free to use for personal and commercial projects.</CollapsibleContent>
+    </Collapsible>
+  )
+}
+
 function CheckboxDemo({ variant }: { variant: string }) {
   const defaultChecked = variant === 'checked'
   const disabled = variant === 'disabled'
@@ -362,6 +372,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'badge': return <Badge variant={variant === 'custom_class' ? 'default' : variant as 'default'} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : variant[0].toUpperCase() + variant.slice(1)}</Badge>
     case 'button': return <ButtonDemo variation={variation} />
     case 'card': return <CardDemo variant={variant} />
+    case 'collapsible': return <CollapsibleDemo variant={variant} />
     case 'checkbox': return <CheckboxDemo variant={variant} />
     case 'input': return <InputDemo variant={variant} />
     case 'kbd': return <KbdDemo variant={variant} />
