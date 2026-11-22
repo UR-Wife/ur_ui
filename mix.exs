@@ -40,7 +40,7 @@ defmodule UrUi.MixProject do
     [
       {:phoenix_live_view, "~> 1.2.14"},
       {:phoenix_html, "~> 4.4.0"},
-      {:phoenix, "~> 1.7 or ~> 1.8"},
+      {:phoenix, "~> 1.7.24 or ~> 1.8.0"},
       {:bandit, "~> 1.14.1", only: :dev},
       {:phoenix_storybook, "~> 1.3", only: :dev},
       {:esbuild, "~> 0.10", only: :dev},
