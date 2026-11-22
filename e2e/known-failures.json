@@ -1,8 +1,5 @@
 [
   "eb0fe36dc80a96c63ef7-1bfad7d3f54b7c455603",
-  "eb0fe36dc80a96c63ef7-21e61bfd2da48aa93835",
-  "eb0fe36dc80a96c63ef7-3a26123891296ead5e2f",
-  "eb0fe36dc80a96c63ef7-3d5206e5f4e60b60e838",
   "eb0fe36dc80a96c63ef7-3ed44fb23cc81da5e2a1",
   "eb0fe36dc80a96c63ef7-403a68530c6ad72bd6b6",
   {
@@ -10,14 +7,9 @@
     "note": "alert/destructive [light]: shadcn reference bug, not ur_ui. axe color-contrast fails on the reference itself: destructive description text #ea1a23 on #ffffff is 4.49:1 (WCAG AA needs 4.5:1). Leave listed until shadcn changes the token."
   },
   "eb0fe36dc80a96c63ef7-507a31bdf18ad5f892c8",
-  "eb0fe36dc80a96c63ef7-5dc66acc233bfbcc8aa7",
-  "eb0fe36dc80a96c63ef7-600c28abc65328dc3d25",
   "eb0fe36dc80a96c63ef7-656a7ef97ade8395536b",
-  "eb0fe36dc80a96c63ef7-66f17374a1758162c88a",
   "eb0fe36dc80a96c63ef7-696d025e20a522cac2f2",
-  "eb0fe36dc80a96c63ef7-6d6d2c674eed058f2db2",
   "eb0fe36dc80a96c63ef7-72076689f92c0ca7a875",
-  "eb0fe36dc80a96c63ef7-7272ca10f275db68d05f",
   "eb0fe36dc80a96c63ef7-7da6b6389a4d31d57b4e",
   "eb0fe36dc80a96c63ef7-7f3a55d0bd1d60f81f1f",
   "eb0fe36dc80a96c63ef7-8cf307f4fbb9c6fc6ad1",
@@ -25,16 +17,10 @@
   "eb0fe36dc80a96c63ef7-91f137ed4be09dafc712",
   "eb0fe36dc80a96c63ef7-960c7b7081fea572d444",
   "eb0fe36dc80a96c63ef7-9c6aeffebed7569bdaad",
-  "eb0fe36dc80a96c63ef7-a186d1161f8661bcfd9e",
   "eb0fe36dc80a96c63ef7-a968afd647df566b2429",
-  "eb0fe36dc80a96c63ef7-ab8c5dcad598d853b234",
-  "eb0fe36dc80a96c63ef7-b5a15eb63985386b1a21",
   "eb0fe36dc80a96c63ef7-c33ea0875ec8d7c08ab8",
-  "eb0fe36dc80a96c63ef7-d0fc1b8074da0732be69",
-  "eb0fe36dc80a96c63ef7-d2c50f7900cf06e68b02",
   "eb0fe36dc80a96c63ef7-db6251d45aea7f5d952a",
   "eb0fe36dc80a96c63ef7-e4c4598932491ae9b251",
   "eb0fe36dc80a96c63ef7-eaed916f996aaf974f11",
-  "eb0fe36dc80a96c63ef7-f59b1dfeebdf41052833",
-  "eb0fe36dc80a96c63ef7-fa05059bae85c0a8f176"
+  "eb0fe36dc80a96c63ef7-f59b1dfeebdf41052833"
 ]
