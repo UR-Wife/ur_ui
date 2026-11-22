@@ -153,21 +153,34 @@ function InputDemo({ variant }: { variant: string }) {
   const id = variant === 'changeset_error' ? 'user_email' : variant === 'default' ? 'display-name' : variant === 'interpolated_error' ? 'name' : variant
   const name = variant === 'changeset_error' ? 'user[email]' : variant === 'default' ? 'display_name' : variant
   const value = variant === 'changeset_error' ? 'bad' : variant === 'interpolated_error' ? 'x' : variant === 'disabled' ? 'Read only' : undefined
+  const label = {
+    default: 'Display name',
+    email: 'Email',
+    password: 'Password',
+    file: 'Picture',
+    disabled: 'Disabled',
+    changeset_error: 'Email',
+    interpolated_error: 'Name',
+  }[variant]
+  // Mirrors the shadcn docs input-with-label demo.
   return (
-    <div data-slot="input-field">
-      <Input
-        id={id}
-        name={name}
-        type={variant === 'email' || variant === 'password' || variant === 'file' ? variant : 'text'}
-        placeholder={variant === 'default' ? 'Display name' : variant === 'email' ? 'you@example.com' : undefined}
-        required={variant === 'password'}
-        accept={variant === 'file' ? 'image/*' : undefined}
-        disabled={variant === 'disabled'}
-        defaultValue={value}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-errors` : undefined}
-      />
-      {error && <div id={`${id}-errors`} className="grid gap-1"><p className="text-sm text-destructive" data-slot="input-error">{error}</p></div>}
+    <div className="grid w-full max-w-sm items-center gap-3">
+      <Label htmlFor={id}>{label}</Label>
+      <div data-slot="input-field">
+        <Input
+          id={id}
+          name={name}
+          type={variant === 'email' || variant === 'password' || variant === 'file' ? variant : 'text'}
+          placeholder={variant === 'default' ? 'Display name' : variant === 'email' ? 'you@example.com' : undefined}
+          required={variant === 'password'}
+          accept={variant === 'file' ? 'image/*' : undefined}
+          disabled={variant === 'disabled'}
+          defaultValue={value}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-errors` : undefined}
+        />
+        {error && <div id={`${id}-errors`} className="grid gap-1"><p className="text-sm text-destructive" data-slot="input-error">{error}</p></div>}
+      </div>
     </div>
   )
 }
