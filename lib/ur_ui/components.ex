@@ -895,7 +895,10 @@ defmodule UrUi.Components do
     """
   end
 
+  # A trigger without matching content (or the reverse) gets no ARIA link.
+  defp tabs_trigger_id(_id, nil), do: nil
   defp tabs_trigger_id(id, index), do: "#{id}-trigger-#{index}"
+  defp tabs_panel_id(_id, nil), do: nil
   defp tabs_panel_id(id, index), do: "#{id}-panel-#{index}"
 
   defp tabs_trigger_index(triggers, value),

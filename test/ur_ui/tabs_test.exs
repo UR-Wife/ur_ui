@@ -152,6 +152,15 @@ defmodule UrUi.TabsTest do
     assert Floki.attribute(panels, "class") == [@content_classes, @content_classes]
   end
 
+  test "a trigger without matching content gets no dangling aria-controls" do
+    document = parse(%{content: [slot(:content, "general", "General panel")]})
+    [first, second] = Floki.find(document, "[role=tab]")
+    [panel] = Floki.find(document, "[role=tabpanel]")
+
+    assert Floki.attribute(first, "aria-controls") == Floki.attribute(panel, "id")
+    assert Floki.attribute(second, "aria-controls") == []
+  end
+
   test "tabs extends classes and passes global attrs through" do
     html = render_tabs(%{class: "extra", "aria-label": "Account settings"})
 
