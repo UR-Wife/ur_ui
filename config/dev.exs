@@ -13,3 +13,13 @@ config :ur_ui, UrUiDev.Endpoint,
   server: true
 
 config :logger, level: :info
+
+# Bundles dev/assets/storybook.js (ur_ui's colocated hooks) for Storybook.
+config :esbuild,
+  version: "0.25.0",
+  ur_ui_dev: [
+    args:
+      ~w(dev/assets/storybook.js --bundle --format=iife --outfile=_build/dev/storybook/storybook.js),
+    cd: Path.expand("..", __DIR__),
+    env: %{"NODE_PATH" => Path.expand("../_build/dev", __DIR__)}
+  ]

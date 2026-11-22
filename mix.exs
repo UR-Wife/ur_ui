@@ -7,6 +7,8 @@ defmodule UrUi.MixProject do
       version: "0.1.0",
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
+      # Writes the phoenix-colocated/ur_ui manifest for the tabs hook.
+      compilers: [:phoenix_live_view] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: "shadcn/ui new-york-v4 components as Phoenix function components",
@@ -36,9 +38,10 @@ defmodule UrUi.MixProject do
     [
       {:phoenix_live_view, "~> 1.2.14"},
       {:phoenix_html, "~> 4.4.0"},
-      {:phoenix, "~> 1.7.24 or ~> 1.8.0"},
+      {:phoenix, "~> 1.8.0"},
       {:bandit, "~> 1.14.1", only: :dev},
       {:phoenix_storybook, "~> 1.3", only: :dev},
+      {:esbuild, "~> 0.10", only: :dev},
       {:jason, "~> 1.4", only: [:dev, :test]},
       {:phoenix_ecto, "~> 4.6", only: [:dev, :test]},
       {:floki, "~> 0.38", only: [:dev, :test]}
