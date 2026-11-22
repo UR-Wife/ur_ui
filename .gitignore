@@ -3,6 +3,10 @@ _build/
 deps/
 doc/
 .fetch
+tmp/
+
+# RWX CLI artefacts
+.rwx/downloads/
 
 # Crash dumps
 erl_crash.dump

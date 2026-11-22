@@ -5,7 +5,7 @@ defmodule UrUi.MixProject do
     [
       app: :ur_ui,
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.20",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -46,7 +46,8 @@ defmodule UrUi.MixProject do
       {:esbuild, "~> 0.10", only: :dev},
       {:jason, "~> 1.4", only: [:dev, :test]},
       {:phoenix_ecto, "~> 4.6", only: [:dev, :test]},
-      {:floki, "~> 0.38", only: [:dev, :test]}
+      {:floki, "~> 0.38", only: [:dev, :test]},
+      {:junit_formatter, "~> 3.4", only: :test}
     ]
   end
 end

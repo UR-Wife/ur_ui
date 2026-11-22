@@ -1,0 +1,106 @@
+on:
+  cli:
+    init:
+      commit-sha: ${{ event.git.sha }}
+  github:
+    pull_request:
+      status-checks:
+        name: CI
+      init:
+        commit-sha: ${{ event.git.sha }}
+
+base:
+  image: elixir:1.20.5-otp-29
+  config: rwx/base 1.2.2
+
+tasks:
+  - key: code
+    call: git/clone 2.4.1
+    with:
+      repository: https://github.com/UR-Wife/ur_ui.git
+      ref: ${{ init.commit-sha }}
+      github-token: ${{ github.token }}
+
+  # `nodejs/install` verifies the Node release with gpgv, which is a separate
+  # Debian package from gnupg and not present in the base image.
+  - key: gpgv
+    filter: []
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y gpgv
+      sudo apt-get clean
+
+  # Node 22 via RWX's package (not apt) so version + toolchain stay consistent
+  # with the e2e tooling and the GitHub Actions `setup-node` (node-version: 22).
+  - key: node
+    use: [gpgv]
+    call: nodejs/install 1.2.1
+    with:
+      node-version: "22.23.5"
+
+  # Elixir toolchain only (global). No workspace files enter this task.
+  - key: packages
+    use: [code]
+    filter: []
+    run: |
+      mix local.hex --force && mix local.rebar --force
+
+  # Node deps + Playwright chromium, cached on the manifest files only so a
+  # source change cannot bust the heavy browser download.
+  - key: e2e-deps
+    use: [packages, node]
+    filter:
+      - e2e/package.json
+      - e2e/package-lock.json
+      - e2e/reference/package.json
+      - e2e/reference/package-lock.json
+    run: |
+      (cd e2e && npm ci && npm ci --prefix reference)
+      (cd e2e && npx playwright install --with-deps chromium)
+
+  - key: test-elixir
+    use: [packages]
+    filter:
+      - mix.exs
+      - mix.lock
+      - lib
+      - test
+      - config
+      - assets
+      - priv
+      - README.md
+      - USAGE.md
+      - LICENSES
+    run: |
+      MIX_ENV=test mix deps.get
+      mix test --formatter ExUnit.CLIFormatter --formatter JUnitFormatter
+      MIX_ENV=test mix hex.audit
+    outputs:
+      test-results:
+        - path: tmp/junit/ur-ui-test-junit-report.xml
+          options:
+            language: Elixir
+            framework: ExUnit
+
+  - key: test-e2e
+    use: [e2e-deps]
+    timeout: 25m
+    filter:
+      - e2e
+      - lib
+      - assets
+      - priv
+      - storybook
+      - dev
+      - config
+      - mix.exs
+      - mix.lock
+    run: |
+      MIX_ENV=dev mix deps.get
+      cd e2e
+      npm run test:ratchet
+      npm run build:reference
+      npm run build:storybook
+      npx tsc --noEmit
+      npx playwright test
+      npm run report
