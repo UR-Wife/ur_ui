@@ -51,7 +51,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 ## shadcn conformance e2e
 
-The differential harness covers all 15 components and 72 Storybook variations
+The differential harness covers all 16 components and 74 Storybook variations
 in light and dark modes. It compares seven computed-style properties, applies
 a 2% screenshot diff limit, checks accordion/tabs/checkbox keyboard and ARIA
 behavior, and runs axe-core on both implementations. The reference is

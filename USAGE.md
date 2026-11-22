@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, checkbox, kbd, tabs, accordion).
+textarea, checkbox, kbd, breadcrumb, tabs, accordion).
 
 ### button
 
@@ -117,6 +117,33 @@ slot `:inner_block` | slot | required | key label
 `kbd_group/1` takes the same `class`, `rest` and `:inner_block` slot and
 renders a `<kbd data-slot="kbd-group">` that lays out its keys with a small
 gap.
+
+### breadcrumb
+
+`UrUi.Components.breadcrumb/1` — a page-path breadcrumb (shadcn
+`Breadcrumb`). Compose the parts inside the root:
+
+```heex
+<.breadcrumb>
+  <.breadcrumb_list>
+    <.breadcrumb_item>
+      <.breadcrumb_link href="/">Home</.breadcrumb_link>
+    </.breadcrumb_item>
+    <.breadcrumb_separator />
+    <.breadcrumb_item>
+      <.breadcrumb_page>Current</.breadcrumb_page>
+    </.breadcrumb_item>
+  </.breadcrumb_list>
+</.breadcrumb>
+```
+
+Parts: `breadcrumb_list/1` (the `<ol>`, ARIA `aria-label="breadcrumb"` lives on
+the `<nav>` root), `breadcrumb_item/1` (one `<li>` per crumb),
+`breadcrumb_link/1` (`href` for a crumb that navigates), `breadcrumb_page/1`
+(the current page: `role="link"`, `aria-disabled` and `aria-current="page"`),
+`breadcrumb_separator/1` (a decorative chevron, `role="presentation"`) and
+`breadcrumb_ellipsis/1` (the collapsed "More" placeholder). Each accepts
+`class`, `rest` and an optional `:inner_block` slot.
 
 ### label
 

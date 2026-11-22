@@ -191,6 +191,160 @@ defmodule UrUi.Components do
   end
 
   @doc """
+  Breadcrumb (shadcn `Breadcrumb`) — a page-path breadcrumb. Compose the parts
+  inside the root: `breadcrumb_list/1` (an `<ol>`), one `breadcrumb_item/1`
+  per crumb, `breadcrumb_link/1` for links and `breadcrumb_page/1` for the
+  current page. `breadcrumb_separator/1` and `breadcrumb_ellipsis/1` render the
+  chevron and the collapsed ("More") placeholder, exactly as shadcn does.
+  """
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def breadcrumb(assigns) do
+    ~H"""
+    <nav aria-label="breadcrumb" class={@class} data-slot="breadcrumb" {@rest}>
+      {render_slot(@inner_block)}
+    </nav>
+    """
+  end
+
+  @doc "Breadcrumb list (shadcn `BreadcrumbList`) — the ordered list of crumbs."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def breadcrumb_list(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "flex flex-wrap items-center gap-1.5 text-sm break-words text-muted-foreground sm:gap-2.5",
+          assigns
+        )
+      )
+
+    ~H"""
+    <ol class={@classes} data-slot="breadcrumb-list" {@rest}>
+      {render_slot(@inner_block)}
+    </ol>
+    """
+  end
+
+  @doc "Breadcrumb item (shadcn `BreadcrumbItem`) — one crumb."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def breadcrumb_item(assigns) do
+    assigns = assign(assigns, :classes, part_classes("inline-flex items-center gap-1.5", assigns))
+
+    ~H"""
+    <li class={@classes} data-slot="breadcrumb-item" {@rest}>
+      {render_slot(@inner_block)}
+    </li>
+    """
+  end
+
+  @doc "Breadcrumb link (shadcn `BreadcrumbLink`) — a crumb that navigates."
+  attr(:href, :string, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def breadcrumb_link(assigns) do
+    assigns =
+      assign(assigns, :classes, part_classes("transition-colors hover:text-foreground", assigns))
+
+    ~H"""
+    <a href={@href} class={@classes} data-slot="breadcrumb-link" {@rest}>
+      {render_slot(@inner_block)}
+    </a>
+    """
+  end
+
+  @doc "Breadcrumb page (shadcn `BreadcrumbPage`) — the current page."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def breadcrumb_page(assigns) do
+    assigns = assign(assigns, :classes, part_classes("font-normal text-foreground", assigns))
+
+    ~H"""
+    <span
+      class={@classes}
+      data-slot="breadcrumb-page"
+      role="link"
+      aria-disabled="true"
+      aria-current="page"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </span>
+    """
+  end
+
+  @doc "Breadcrumb separator (shadcn `BreadcrumbSeparator`) — the chevron."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def breadcrumb_separator(assigns) do
+    assigns = assign(assigns, :classes, part_classes("[&>svg]:size-3.5", assigns))
+
+    ~H"""
+    <li
+      class={@classes}
+      data-slot="breadcrumb-separator"
+      role="presentation"
+      aria-hidden="true"
+      {@rest}
+    >
+      <%= if @inner_block == [] do %>
+        {breadcrumb_chevron()}
+      <% else %>
+        {render_slot(@inner_block)}
+      <% end %>
+    </li>
+    """
+  end
+
+  defp breadcrumb_chevron do
+    Phoenix.HTML.raw(
+      ~S(<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg>)
+    )
+  end
+
+  @doc "Breadcrumb ellipsis (shadcn `BreadcrumbEllipsis`) — the collapsed crumb."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def breadcrumb_ellipsis(assigns) do
+    assigns =
+      assign(assigns, :classes, part_classes("flex size-9 items-center justify-center", assigns))
+
+    ~H"""
+    <span
+      class={@classes}
+      data-slot="breadcrumb-ellipsis"
+      role="presentation"
+      aria-hidden="true"
+      {@rest}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
+        <circle cx="12" cy="12" r="1" />
+        <circle cx="19" cy="12" r="1" />
+        <circle cx="5" cy="12" r="1" />
+      </svg>
+      <span class="sr-only">More</span>
+    </span>
+    """
+  end
+
+  @doc """
   Label (shadcn `Label`) — caption for a form field.
   """
   attr(:for, :string, default: nil, doc: "id of the labelled control")
