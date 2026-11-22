@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, aspect-ratio, checkbox, collapsible, empty, kbd, breadcrumb, pagination, progress, radio-group, spinner, switch, toggle, tabs, accordion).
+textarea, aspect-ratio, checkbox, collapsible, empty, field, kbd, breadcrumb, pagination, progress, radio-group, spinner, switch, toggle, tabs, accordion).
 
 ### button
 
@@ -247,6 +247,29 @@ Each accepts `class`, `rest` and an optional `:inner_block`.
   <.empty_description>Try adjusting your search.</.empty_description>
 </.empty>
 ```
+
+### field
+
+`UrUi.Components.field/1` — labelled form-field shells (shadcn `Field`).
+Compose `field_set/1`, `field_legend/1`, `field_group/1`, `field/1`,
+`field_content/1`, `field_label/1`, `field_title/1`, `field_description/1`,
+`field_separator/1` and `field_error/1` to wrap controls with labels, help and
+errors. `field/1` takes `orientation` (`:vertical`, `:horizontal`,
+`:responsive`) and renders `role="group"`.
+
+```heex
+<.field>
+  <.field_content>
+    <.field_title>Email</.field_title>
+    <.field_description>We will not share your address.</.field_description>
+    <.input id="email" name="email" placeholder="you@example.com" />
+  </.field_content>
+</.field>
+```
+
+`field_error/1` renders `role="alert"` and accepts either `errors` (a list of
+`{message, opts}` tuples or strings, interpolated like `input`) or an
+`:inner_block`.
 
 ### label
 

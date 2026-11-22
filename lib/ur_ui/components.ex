@@ -872,6 +872,286 @@ defmodule UrUi.Components do
   defp aspect_ratio_class("3/4"), do: "aspect-[3/4]"
   defp aspect_ratio_class(_ratio), do: nil
 
+  @field_orientations %{
+    vertical: "flex-col [&>*]:w-full [&>.sr-only]:w-auto",
+    horizontal:
+      "flex-row items-center [&>[data-slot=field-label]]:flex-auto has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+    responsive:
+      "flex-col @md/field-group:flex-row @md/field-group:items-center [&>*]:w-full @md/field-group:[&>*]:w-auto [&>.sr-only]:w-auto @md/field-group:[&>[data-slot=field-label]]:flex-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px"
+  }
+
+  @doc """
+  Field (shadcn `Field`) — labelled form-field shells. Compose `field_set/1`,
+  `field_legend/1`, `field_group/1`, `field/1`, `field_content/1`,
+  `field_label/1`, `field_title/1`, `field_description/1`, `field_separator/1`
+  and `field_error/1` to wrap form controls with labels and errors.
+  """
+  attr(:orientation, :atom,
+    default: :vertical,
+    values: [:vertical, :horizontal, :responsive]
+  )
+
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def field(assigns) do
+    assigns =
+      assign(assigns,
+        classes:
+          [
+            "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
+            @field_orientations[assigns[:orientation] || :vertical],
+            assigns[:class]
+          ]
+          |> Enum.reject(&is_nil/1)
+          |> Enum.join(" ")
+      )
+
+    ~H"""
+    <div role="group" data-slot="field" data-orientation={@orientation} class={@classes} {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Field set (shadcn `FieldSet`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def field_set(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "flex flex-col gap-6 has-[>[data-slot=checkbox-group]]:gap-3 has-[>[data-slot=radio-group]]:gap-3",
+          assigns
+        )
+      )
+
+    ~H"""
+    <fieldset class={@classes} data-slot="field-set" {@rest}>
+      {render_slot(@inner_block)}
+    </fieldset>
+    """
+  end
+
+  @doc "Field legend (shadcn `FieldLegend`)."
+  attr(:variant, :atom, default: :legend, values: [:legend, :label])
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def field_legend(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "mb-3 font-medium data-[variant=legend]:text-base data-[variant=label]:text-sm",
+          assigns
+        )
+      )
+
+    ~H"""
+    <legend class={@classes} data-slot="field-legend" data-variant={@variant} {@rest}>
+      {render_slot(@inner_block)}
+    </legend>
+    """
+  end
+
+  @doc "Field group (shadcn `FieldGroup`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def field_group(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4",
+          assigns
+        )
+      )
+
+    ~H"""
+    <div class={@classes} data-slot="field-group" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Field content (shadcn `FieldContent`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def field_content(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes("group/field-content flex flex-1 flex-col gap-1.5 leading-snug", assigns)
+      )
+
+    ~H"""
+    <div class={@classes} data-slot="field-content" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Field label (shadcn `FieldLabel`)."
+  attr(:for, :string, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def field_label(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10",
+          assigns
+        )
+      )
+
+    ~H"""
+    <label for={@for} class={@classes} data-slot="field-label" {@rest}>
+      {render_slot(@inner_block)}
+    </label>
+    """
+  end
+
+  @doc "Field title (shadcn `FieldTitle`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def field_title(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "flex w-fit items-center gap-2 text-sm leading-snug font-medium group-data-[disabled=true]/field:opacity-50",
+          assigns
+        )
+      )
+
+    ~H"""
+    <div class={@classes} data-slot="field-label" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Field description (shadcn `FieldDescription`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def field_description(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "text-sm leading-normal font-normal text-muted-foreground group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&]:-mt-1.5 [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
+          assigns
+        )
+      )
+
+    ~H"""
+    <p class={@classes} data-slot="field-description" {@rest}>
+      {render_slot(@inner_block)}
+    </p>
+    """
+  end
+
+  @doc "Field separator (shadcn `FieldSeparator`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def field_separator(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "relative -my-2 h-5 text-sm group-data-[variant=outline]/field-group:-mb-2",
+          assigns
+        )
+      )
+
+    ~H"""
+    <div class={@classes} data-slot="field-separator" data-content={@inner_block != []} {@rest}>
+      <div
+        role="none"
+        data-slot="separator"
+        data-orientation="horizontal"
+        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px absolute inset-0 top-1/2"
+      >
+      </div>
+      <span :if={@inner_block != []} class="relative mx-auto block w-fit bg-background px-2 text-muted-foreground" data-slot="field-separator-content">
+        {render_slot(@inner_block)}
+      </span>
+    </div>
+    """
+  end
+
+  @doc """
+  Field error (shadcn `FieldError`) — an `role="alert"` error message. Pass
+  `errors` (a list of `{message, opts}` tuples or strings) or an `:inner_block`.
+  """
+  attr(:errors, :any, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def field_error(assigns) do
+    errors =
+      case assigns[:errors] do
+        nil -> []
+        list when is_list(list) -> Enum.map(list, &field_error_message/1)
+        other -> [other]
+      end
+
+    assigns = assign(assigns, errors: Enum.reject(errors, &is_nil/1))
+
+    ~H"""
+    <div
+      :if={@inner_block != [] or @errors != []}
+      role="alert"
+      class={part_classes("text-sm font-normal text-destructive", assigns)}
+      data-slot="field-error"
+      {@rest}
+    >
+      <ul :if={length(@errors) > 1} class="ml-4 flex list-disc flex-col gap-1">
+        <li :for={error <- @errors}>{error}</li>
+      </ul>
+      <span :if={length(@errors) == 1}>{hd(@errors)}</span>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  defp field_error_message({message, options}) do
+    Enum.reduce(options, message, fn {key, value}, text ->
+      String.replace(text, "%{#{key}}", to_string(value))
+    end)
+  end
+
+  defp field_error_message(message) when is_binary(message), do: message
+  defp field_error_message(_), do: nil
+
   @empty_media_variants %{
     default: "bg-transparent",
     icon:
