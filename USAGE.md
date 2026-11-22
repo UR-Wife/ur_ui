@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, checkbox, kbd, breadcrumb, spinner, toggle, tabs, accordion).
+textarea, checkbox, kbd, breadcrumb, spinner, switch, toggle, tabs, accordion).
 
 ### button
 
@@ -429,6 +429,30 @@ The hidden input's `checked` state is toggled through its `checked` attribute,
 so a native `form.reset()` restores the toggled state rather than the initial
 `checked` value. Use a LiveView re-render (the usual Phoenix flow) to reset a
 checkbox to its initial state.
+
+### switch
+
+`UrUi.Components.switch/1` — an on/off switch (shadcn `Switch`): a
+`<button role="switch">` with `aria-checked`, `data-state` and a sliding
+thumb. Attrs: `id` (required), `name`, `value` (default `"on"`), `size`
+(`:default`, `:sm`), `checked` (default `false`), `disabled`, `required`,
+`class` and `rest`. Toggling runs client-side through `Phoenix.LiveView.JS`
+commands — no server round-trip.
+
+```heex
+<div class="flex items-center justify-between gap-4">
+  <div class="grid gap-1.5 leading-none">
+    <label for="strict-mode" class="text-sm font-medium">Strict mode</label>
+    <p class="text-sm text-muted-foreground">Enforce additional checks</p>
+  </div>
+  <.switch id="strict-mode" name="strict_mode" />
+</div>
+```
+
+When `name` is given it also renders a hidden `<input type="checkbox">` whose
+`checked` state stays in sync and which dispatches `change` after toggling, so
+the value submits with a form. `class` extends the button; globals pass through
+`rest`. Unlike the checkbox, Space and Enter both toggle the switch.
 
 ### tabs
 
