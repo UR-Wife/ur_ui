@@ -83,7 +83,9 @@ slot `:inner_block` | slot | required | button content
 
 ### badge
 
-`UrUi.Components.badge/1` — small status descriptor (shadcn `Badge`).
+`UrUi.Components.badge/1` — small status descriptor (shadcn `Badge`): a
+fully rounded pill (`rounded-full`) with shadcn's exact classes; `:outline`
+draws a `border-border` outline and the other variants a transparent border.
 
 - Use for counts, statuses and category tags; never as a button.
 - `:destructive` for error/failed states, `:outline` for neutral tags,
