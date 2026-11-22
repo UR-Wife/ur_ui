@@ -116,6 +116,84 @@ defmodule UrUi.Components do
     |> Enum.join(" ")
   end
 
+  @toggle_base "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-[color,box-shadow] outline-none hover:bg-muted hover:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+  @toggle_variants %{
+    default: "bg-transparent",
+    outline:
+      "border border-input bg-transparent shadow-xs hover:bg-accent hover:text-accent-foreground"
+  }
+  @toggle_sizes %{
+    default: "h-9 min-w-9 px-2",
+    sm: "h-8 min-w-8 px-1.5",
+    lg: "h-10 min-w-10 px-2.5"
+  }
+
+  @doc """
+  Toggle (shadcn `Toggle`) — a pressable button with a pressed/on state.
+
+  Toggling runs client-side through `Phoenix.LiveView.JS`, so no server round
+  trip is needed.
+
+  ## Variants
+
+  `:default`, `:outline`
+
+  ## Sizes
+
+  `:default`, `:sm`, `:lg`
+  """
+  attr(:variant, :atom,
+    default: :default,
+    values: [:default, :outline],
+    doc: "visual variant"
+  )
+
+  attr(:size, :atom, default: :default, values: [:default, :sm, :lg], doc: "size variant")
+  attr(:pressed, :boolean, default: false, doc: "initial pressed state")
+  attr(:disabled, :boolean, default: false, doc: "disables the toggle")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
+
+  def toggle(assigns) do
+    assigns = assign(assigns, :classes, toggle_classes(assigns))
+
+    ~H"""
+    <button
+      type="button"
+      class={@classes}
+      data-slot="toggle"
+      data-variant={@variant}
+      data-size={@size}
+      data-state={if @pressed, do: "on", else: "off"}
+      data-disabled={@disabled && ""}
+      aria-pressed={to_string(@pressed)}
+      disabled={@disabled}
+      phx-click={if @disabled, do: nil, else: toggle_js()}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </button>
+    """
+  end
+
+  defp toggle_classes(assigns) do
+    [
+      @toggle_base,
+      @toggle_variants[assigns.variant],
+      @toggle_sizes[assigns.size],
+      assigns[:class]
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
+  defp toggle_js do
+    %JS{}
+    |> JS.toggle_attribute({"aria-pressed", "true", "false"})
+    |> JS.toggle_attribute({"data-state", "on", "off"})
+  end
+
   @doc """
   Badge (shadcn `Badge`) — a small status descriptor.
 

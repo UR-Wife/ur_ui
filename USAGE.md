@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, checkbox, kbd, breadcrumb, spinner, tabs, accordion).
+textarea, checkbox, kbd, breadcrumb, spinner, toggle, tabs, accordion).
 
 ### button
 
@@ -80,6 +80,25 @@ Attr       | Type      | Default    | Notes
 `class`    | string    | `nil`      | appended to base classes
 `rest`     | global    | —          | `id`, `aria-*`, `phx-*`, `data-*` pass through
 slot `:inner_block` | slot | required | button content
+
+### toggle
+
+`UrUi.Components.toggle/1` — a pressable button with an on/off state (shadcn
+`Toggle`). It renders `aria-pressed` and `data-state="on|off"`; toggling runs
+client-side through `Phoenix.LiveView.JS` commands, so no server round-trip.
+
+- Use for toolbar-style on/off controls (bold, italic, …).
+- `variant: :outline` draws a border; `size` controls the sizing.
+
+Attr       | Type   | Default    | Notes
+-----------|--------|------------|------
+`variant`  | atom   | `:default` | `:default`, `:outline`
+`size`     | atom   | `:default` | `:default`, `:sm`, `:lg`
+`pressed`  | boolean| `false`    | initial pressed state
+`disabled` | boolean| `false`    | disables the toggle
+`class`    | string | `nil`      | appended to base classes
+`rest`     | global | —          | `id`, `aria-*`, `phx-*`, `data-*` pass through
+slot `:inner_block` | slot | required | toggle content
 
 ### badge
 
