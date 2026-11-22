@@ -110,4 +110,23 @@ defmodule UrUi.RadioGroupTest do
     assert Floki.attribute(Enum.at(buttons, 1), "disabled") != []
     assert Floki.attribute(Enum.at(buttons, 1), "phx-click") == []
   end
+
+  test "a disabled group disables every item" do
+    html = render_radio_group(%{disabled: true})
+    buttons = Floki.parse_fragment!(html) |> Floki.find("[data-slot=radio-group-item]")
+
+    assert Floki.attribute(buttons, "disabled") == ["disabled", "disabled"]
+    assert Floki.attribute(buttons, "phx-click") == []
+  end
+
+  test "a disabled first item does not take the tab stop" do
+    html =
+      render_radio_group(%{
+        item: [slot("default", "Default", true), slot("comfortable", "Comfortable")]
+      })
+
+    buttons = Floki.parse_fragment!(html) |> Floki.find("[data-slot=radio-group-item]")
+    assert Floki.attribute(buttons, "aria-checked") == ["false", "true"]
+    assert Floki.attribute(buttons, "tabindex") == ["-1", "0"]
+  end
 end

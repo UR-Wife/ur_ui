@@ -382,17 +382,18 @@ defmodule UrUi.Components do
 
   def radio_group(assigns) do
     items = assigns[:item] || []
-    selected = radio_group_selected(items, assigns[:default_value])
+    group_disabled = assigns[:disabled] || false
+    selected = radio_group_selected(items, assigns[:default_value], group_disabled)
 
     items =
       items
       |> Enum.with_index()
       |> Enum.map(fn {item, index} ->
         item
-        |> Map.put_new(:disabled, nil)
         |> Map.put(:index, index)
         |> Map.put(:id, "#{assigns.id}-item-#{index}")
-        |> Map.put(:checked, item.value == selected)
+        |> Map.put(:disabled, item[:disabled] || group_disabled)
+        |> Map.put(:checked, item[:value] == selected)
       end)
 
     assigns =
@@ -473,8 +474,11 @@ defmodule UrUi.Components do
     """
   end
 
-  defp radio_group_selected(items, default_value) do
-    values = Enum.map(items, & &1.value)
+  defp radio_group_selected(items, default_value, group_disabled) do
+    values =
+      items
+      |> Enum.reject(&(&1[:disabled] || group_disabled))
+      |> Enum.map(& &1.value)
 
     cond do
       default_value in values -> default_value
