@@ -117,3 +117,17 @@ test('a listed timeout is expected and the suite exits zero', (t) => {
   assert.equal(spec.tests[0].expectedStatus, 'failed')
   assert.equal(report.stats.unexpected, 0)
 })
+
+test('an annotated entry with a note is treated like a plain test ID', (t) => {
+  const fixture = makeFixture(t, { 'annotated failure': "throw new Error('reference bug')" })
+  writeFileSync(fixture.knownFailures, JSON.stringify([
+    { id: fixture.ids.get('annotated failure'), note: 'bug in the reference, not ur_ui' },
+  ]))
+  const result = fixture.run()
+  assert.equal(result.status, 0, failureOutput(result))
+
+  const report = JSON.parse(readFileSync(fixture.report, 'utf8'))
+  const spec = collectSpecs(report.suites).find((candidate) => candidate.title === 'annotated failure')
+  assert.equal(spec.ok, true)
+  assert.equal(spec.tests[0].expectedStatus, 'failed')
+})
