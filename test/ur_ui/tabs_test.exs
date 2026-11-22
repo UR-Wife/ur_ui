@@ -107,11 +107,11 @@ defmodule UrUi.TabsTest do
     end
   end
 
-  test "keyboard navigation uses the colocated hook, with no inline script" do
+  test "keyboard navigation uses the UrUiTabs hook, with no inline script" do
     html = render_tabs()
     [list] = html |> Floki.parse_fragment!() |> Floki.find("[role=tablist]")
 
-    assert Floki.attribute(list, "phx-hook") == ["UrUi.Components.Tabs"]
+    assert Floki.attribute(list, "phx-hook") == ["UrUiTabs"]
     assert Floki.attribute(list, "id") == ["account-tabs-list"]
     refute html =~ "<script"
     refute html =~ ~r/\son[a-z]+=/

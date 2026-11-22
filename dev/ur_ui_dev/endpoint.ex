@@ -16,7 +16,7 @@ defmodule UrUiDev.Endpoint do
     from: Path.expand("../../assets", __DIR__),
     only: ~w(ur_ui.css)
 
-  # Dev-only bundle of ur_ui's colocated hooks, built by UrUiDev.Application.
+  # Dev-only bundle of ur_ui's LiveView hooks, built by UrUiDev.Application.
   plug Plug.Static,
     at: "/",
     from: Path.join(Mix.Project.build_path(), "storybook"),

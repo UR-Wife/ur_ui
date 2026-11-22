@@ -861,9 +861,9 @@ defmodule UrUi.Components do
   Selection runs on the client with `Phoenix.LiveView.JS` commands, so no
   server round trip is needed. Arrow Left/Right, Home and End move focus and
   selection between enabled tabs (wrapping, skipping disabled ones) through the
-  colocated `.Tabs` hook. It ships no inline script, so it works under a strict
-  Content-Security-Policy; the host app imports ur_ui's colocated hooks once
-  (see USAGE.md).
+  `UrUiTabs` hook from ur_ui's JS module (`import {UrUiHooks} from "ur_ui"`,
+  see USAGE.md). No inline script, so it works under a strict
+  Content-Security-Policy.
   """
   attr(:id, :string, required: true)
   attr(:default_value, :string, default: nil)
@@ -897,7 +897,7 @@ defmodule UrUi.Components do
         data-slot="tabs-list"
         data-variant="default"
         data-orientation="horizontal"
-        phx-hook=".Tabs"
+        phx-hook="UrUiTabs"
       >
         <button
           :for={{trigger, index} <- Enum.with_index(@trigger)}
@@ -933,37 +933,6 @@ defmodule UrUi.Components do
         {render_slot(content)}
       </div>
     </div>
-    <script :type={Phoenix.LiveView.ColocatedHook} name=".Tabs">
-      // Roving focus with automatic activation, as in Radix Tabs: the next
-      // enabled tab is focused and clicked, and its phx-click JS selects it.
-      export default {
-        mounted() {
-          this.onKeyDown = (event) => {
-            const tab = event.target.closest('[role="tab"]')
-            if (!tab || tab.parentElement !== this.el) return
-            const tabs = Array.from(this.el.children).filter(
-              (el) => el.getAttribute("role") === "tab" && !el.disabled
-            )
-            const index = tabs.indexOf(tab)
-            const count = tabs.length
-            const next = {
-              ArrowRight: (index + 1) % count,
-              ArrowLeft: (index - 1 + count) % count,
-              Home: 0,
-              End: count - 1
-            }[event.key]
-            if (index < 0 || next === undefined) return
-            event.preventDefault()
-            tabs[next].focus()
-            tabs[next].click()
-          }
-          this.el.addEventListener("keydown", this.onKeyDown)
-        },
-        destroyed() {
-          this.el.removeEventListener("keydown", this.onKeyDown)
-        }
-      }
-    </script>
     """
   end
 

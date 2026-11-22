@@ -4,8 +4,7 @@ defmodule UrUiDev.Application do
 
   @impl true
   def start(_type, _args) do
-    # Colocated hooks are extracted at compile time; bundle them before
-    # Storybook serves its first page.
+    # Bundle ur_ui's LiveView hooks before Storybook serves its first page.
     0 = Esbuild.install_and_run(:ur_ui_dev, [])
 
     children = [
