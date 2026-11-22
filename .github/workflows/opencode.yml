@@ -1,0 +1,42 @@
+name: /oc lane
+
+on:
+  issue_comment:
+    types: [created]
+  # Greptile posts a review summary (greptile-apps[bot], `<!-- greptile_summary -->`);
+  # re-enter the lane when a fresh review lands so findings are fixed without a human.
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  oc:
+    if: >-
+      (github.event_name == 'issue_comment' &&
+       startsWith(github.event.comment.body, '/oc') &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review' &&
+       contains(github.event.review.body, 'greptile_summary'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.OPENCODE_APP_TOKEN }}
+
+      - name: Run OpenCode
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_APP_TOKEN: ${{ secrets.OPENCODE_APP_TOKEN }}
+          OPENCODE_MODEL: ${{ secrets.OPENCODE_MODEL }}
+          BOUNDLESS_API_BASE: ${{ secrets.BOUNDLESS_API_BASE }}
+          BOUNDLESS_API_KEY: ${{ secrets.BOUNDLESS_API_KEY }}
+        with:
+          model: ${{ secrets.OPENCODE_MODEL }}
+          prompt: ${{ github.event_name == 'pull_request_review' && github.event.review.body || github.event.comment.body }}
