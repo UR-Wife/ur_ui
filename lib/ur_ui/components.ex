@@ -176,9 +176,10 @@ defmodule UrUi.Components do
   @doc """
   Separator (shadcn `Separator`) — visual or semantic divider.
 
-  `decorative: true` (default) marks it as pure decoration
-  (`role="none"`, hidden from the accessibility tree); `decorative: false`
-  exposes it as `role="separator"` with `aria-orientation`.
+  ARIA matches Radix: `decorative: true` (default) renders `role="none"`;
+  `decorative: false` renders `role="separator"`, adding
+  `aria-orientation="vertical"` for vertical separators (horizontal is the
+  ARIA default, so it is omitted).
   """
   attr(:orientation, :atom,
     default: :horizontal,
@@ -203,8 +204,7 @@ defmodule UrUi.Components do
       data-slot="separator"
       data-orientation={@orientation}
       role={if @decorative, do: "none", else: "separator"}
-      aria-hidden={if @decorative, do: "true", else: nil}
-      aria-orientation={if @decorative, do: nil, else: @orientation}
+      aria-orientation={if !@decorative and @orientation == :vertical, do: "vertical"}
       {@rest}
     >
     </div>

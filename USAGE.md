@@ -98,7 +98,8 @@ slot `:inner_block` | slot | required | label caption
 - Decorative by default: a horizontal rule between content sections.
 - `decorative: false` when the separation is meaningful (e.g. a toolbar
   divider announced to screen readers) — then it exposes
-  `role="separator"` with `aria-orientation`.
+  `role="separator"` (plus `aria-orientation="vertical"` when vertical).
+  Decorative separators render `role="none"`, exactly as Radix does.
 - Like shadcn's, it sizes from its container: horizontal is `w-full` and
   vertical is `h-full`, so give a vertical separator a sized row, as in the
   shadcn docs:
