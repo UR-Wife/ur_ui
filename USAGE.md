@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, checkbox, collapsible, kbd, breadcrumb, pagination, progress, radio-group, spinner, switch, toggle, tabs, accordion).
+textarea, aspect-ratio, checkbox, collapsible, kbd, breadcrumb, pagination, progress, radio-group, spinner, switch, toggle, tabs, accordion).
 
 ### button
 
@@ -215,6 +215,23 @@ Compose `pagination_content/1` (the `<ul>`), `pagination_item/1` (one `<li>`),
 
 Each part accepts `class`, `rest` and (except ellipsis) an optional
 `:inner_block`. The root `<nav>` carries `aria-label="pagination"`.
+
+### aspect-ratio
+
+`UrUi.Components.aspect_ratio/1` — keeps its content at a fixed width/height
+ratio (shadcn `AspectRatio`). Attrs: `ratio` (a `"width/height"` string,
+default `"1/1"`), `class` and `rest`. Common ratios map to Tailwind's built-in
+aspect utilities (`1/1` -> `aspect-square`, `16/9` -> `aspect-video`); other
+ratios are not generated, so pass the ratio and width through `class`
+(e.g. `class: "aspect-[5/4] w-64"`) or a sized container.
+
+```heex
+<div class="w-64">
+  <.aspect_ratio ratio="16/9">
+    <div class="h-full w-full bg-muted"></div>
+  </.aspect_ratio>
+</div>
+```
 
 ### label
 
