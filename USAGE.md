@@ -240,6 +240,16 @@ The `class` attr extends the input itself; native globals such as `placeholder`,
 `required`, `disabled`, `autocomplete` and `accept` pass through `rest`. There
 are no shadcn variants or sizes; use native `type` values instead.
 
+Always give an input an accessible name. As in the shadcn docs, pair it with
+a `label` whose `for` matches the input id:
+
+```heex
+<div class="grid w-full max-w-sm items-center gap-3">
+  <.label for="picture">Picture</.label>
+  <.input id="picture" name="picture" type="file" />
+</div>
+```
+
 
 
 ### tabs
