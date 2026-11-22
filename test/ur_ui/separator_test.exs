@@ -30,18 +30,25 @@ defmodule UrUi.SeparatorTest do
   end
 
   describe "semantics" do
-    test "decorative by default: role none, hidden from accessibility tree" do
+    test "decorative by default: role none only, as Radix renders it" do
       html = render_separator(%{})
       assert html =~ ~s(role="none")
-      assert html =~ ~s(aria-hidden="true")
+      refute html =~ "aria-hidden"
+      refute html =~ "aria-orientation"
       refute html =~ ~s(role="separator")
     end
 
-    test "decorative: false exposes role separator with aria-orientation" do
+    test "decorative: false vertical exposes role separator with aria-orientation" do
       html = render_separator(%{decorative: false, orientation: :vertical})
       assert html =~ ~s(role="separator")
       assert html =~ ~s(aria-orientation="vertical")
       refute html =~ ~s(role="none")
+    end
+
+    test "decorative: false horizontal omits aria-orientation (the ARIA default)" do
+      html = render_separator(%{decorative: false})
+      assert html =~ ~s(role="separator")
+      refute html =~ "aria-orientation"
     end
   end
 
