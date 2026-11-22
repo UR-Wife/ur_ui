@@ -36,7 +36,7 @@ defmodule UrUi.MixProject do
     [
       {:phoenix_live_view, "~> 1.2.14"},
       {:phoenix_html, "~> 4.4.0"},
-      {:phoenix, "~> 1.7.24 or ~> 1.8.0"},
+      {:phoenix, "~> 1.7.25 or ~> 1.8"},
       {:bandit, "~> 1.14.1", only: :dev},
       {:phoenix_storybook, "~> 1.3", only: :dev},
       {:jason, "~> 1.4", only: [:dev, :test]},
