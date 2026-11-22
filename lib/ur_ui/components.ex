@@ -36,16 +36,19 @@ defmodule UrUi.Components do
     icon_sm: "size-8",
     icon_lg: "size-10"
   }
-  @badge_base "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden"
+  @badge_base "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3"
+  # shadcn's classes as rendered: its cn() (tailwind-merge) drops the base
+  # border-transparent when a variant sets a border colour (:outline), so
+  # border-transparent lives on every other variant instead.
   @badge_variants %{
     default: "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
     secondary:
       "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
     destructive:
-      "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-    outline: "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-    ghost:
-      "border-transparent text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+      "border-transparent bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90",
+    outline:
+      "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+    ghost: "border-transparent [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
     link: "border-transparent text-primary underline-offset-4 [a&]:hover:underline"
   }
 
