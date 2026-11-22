@@ -815,7 +815,16 @@ defmodule UrUi.Components do
 
   defp input_error_message(message) when is_binary(message), do: message
 
-  @doc "Accessible tabs with matching trigger and content slots."
+  @doc """
+  Tabs (shadcn `Tabs`): a `tablist` of `<button role="tab">` triggers and one
+  `tabpanel` per content slot.
+
+  Selection runs on the client with `Phoenix.LiveView.JS` commands, so no
+  server round trip is needed. Arrow Left/Right, Home and End move focus and
+  selection between enabled tabs (wrapping, skipping disabled ones) through a
+  small inline `onkeydown` handler on the tablist, which needs no hook
+  registration in the host app.
+  """
   attr(:id, :string, required: true)
   attr(:default_value, :string, default: nil)
   attr(:class, :string, default: nil)
@@ -840,50 +849,69 @@ defmodule UrUi.Components do
 
     ~H"""
     <div id={@id} class={@classes} data-slot="tabs" data-orientation="horizontal" {@rest}>
-      <div class={tabs_list_classes()} data-slot="tabs-list" data-variant="default" role="tablist">
-        <div
+      <div
+        role="tablist"
+        aria-orientation="horizontal"
+        class={tabs_list_classes()}
+        data-slot="tabs-list"
+        data-variant="default"
+        data-orientation="horizontal"
+        onkeydown={tabs_keydown_handler()}
+      >
+        <button
           :for={{trigger, index} <- Enum.with_index(@trigger)}
-          id={"#{@id}-trigger-wrap-#{index}"}
-          class={tabs_trigger_classes()}
-          data-slot="tabs-trigger-surface"
+          type="button"
+          role="tab"
+          id={tabs_trigger_id(@id, index)}
+          aria-selected={to_string(trigger.value == @selected_value)}
+          aria-controls={tabs_panel_id(@id, tabs_content_index(@content, trigger.value))}
+          tabindex={if(trigger.value == @selected_value, do: "0", else: "-1")}
+          disabled={trigger[:disabled]}
+          data-disabled={trigger[:disabled] && ""}
           data-state={if(trigger.value == @selected_value, do: "active", else: "inactive")}
+          data-orientation="horizontal"
+          data-slot="tabs-trigger"
+          class={tabs_trigger_classes()}
+          phx-click={tabs_select_js(@id, @trigger, @content, trigger.value)}
         >
-          <input
-            id={"#{@id}-trigger-#{index}"}
-            class="absolute inset-0 m-0 cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
-            type="radio"
-            name={"#{@id}-values"}
-            value={trigger.value}
-            checked={trigger.value == @selected_value}
-            disabled={trigger[:disabled]}
-            role="tab"
-            aria-selected={to_string(trigger.value == @selected_value)}
-            aria-controls={"#{@id}-panel-#{index}"}
-            aria-labelledby={"#{@id}-label-#{index}"}
-            tabindex={if(trigger.value == @selected_value, do: 0, else: -1)}
-            data-slot="tabs-trigger"
-            data-state={if(trigger.value == @selected_value, do: "active", else: "inactive")}
-            phx-change={tabs_select_js(@id, @trigger, @content, trigger.value)}
-          />
-          <label id={"#{@id}-label-#{index}"} for={"#{@id}-trigger-#{index}"}>
-            {render_slot(trigger)}
-          </label>
-        </div>
+          {render_slot(trigger)}
+        </button>
       </div>
       <div
         :for={{content, index} <- Enum.with_index(@content)}
-        id={"#{@id}-panel-#{index}"}
+        id={tabs_panel_id(@id, index)}
         role="tabpanel"
-        aria-labelledby={"#{@id}-trigger-#{index}"}
-        aria-hidden={to_string(content.value != @selected_value)}
+        aria-labelledby={tabs_trigger_id(@id, tabs_trigger_index(@trigger, content.value))}
+        tabindex="0"
         hidden={content.value != @selected_value}
-        class="flex-1 outline-none"
+        data-state={if(content.value == @selected_value, do: "active", else: "inactive")}
+        data-orientation="horizontal"
         data-slot="tabs-content"
+        class="flex-1 outline-none"
       >
         {render_slot(content)}
       </div>
     </div>
     """
+  end
+
+  defp tabs_trigger_id(id, index), do: "#{id}-trigger-#{index}"
+  defp tabs_panel_id(id, index), do: "#{id}-panel-#{index}"
+
+  defp tabs_trigger_index(triggers, value),
+    do: Enum.find_index(triggers, &(&1.value == value))
+
+  defp tabs_content_index(contents, value),
+    do: Enum.find_index(contents, &(&1.value == value))
+
+  # Roving focus with automatic activation, as in Radix Tabs: the next enabled
+  # tab is focused and clicked, and its phx-click JS performs the selection.
+  defp tabs_keydown_handler do
+    "var tab=event.target.closest('[role=tab]');if(!tab||tab.parentElement!==this)return;" <>
+      "var tabs=Array.prototype.filter.call(this.children,function(el){return el.getAttribute('role')==='tab'&&!el.disabled});" <>
+      "var i=tabs.indexOf(tab),n=tabs.length,k=event.key;" <>
+      "var j=k==='ArrowRight'?(i+1)%n:k==='ArrowLeft'?(i-1+n)%n:k==='Home'?0:k==='End'?n-1:-1;" <>
+      "if(i<0||j<0)return;event.preventDefault();tabs[j].focus();tabs[j].click();"
   end
 
   defp tabs_list_classes do
@@ -895,40 +923,37 @@ defmodule UrUi.Components do
       "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
       "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
       "data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground",
-      "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100",
-      "has-[:focus-visible]:border-ring has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50 has-[:focus-visible]:outline-1 has-[:focus-visible]:outline-ring has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50"
+      "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100"
     ]
     |> Enum.join(" ")
   end
 
   defp tabs_select_js(id, triggers, contents, selected_value) do
-    js = %JS{}
-
     js =
       triggers
       |> Enum.with_index()
-      |> Enum.reduce(js, fn {trigger, index}, commands ->
+      |> Enum.reduce(%JS{}, fn {trigger, index}, commands ->
         selected = trigger.value == selected_value
-        target = "##{Phoenix.HTML.css_escape("#{id}-trigger-#{index}")}"
-        wrap_target = "##{Phoenix.HTML.css_escape("#{id}-trigger-wrap-#{index}")}"
-        state = if selected, do: "active", else: "inactive"
+        target = "##{Phoenix.HTML.css_escape(tabs_trigger_id(id, index))}"
 
         commands
         |> JS.set_attribute({"aria-selected", to_string(selected)}, to: target)
         |> JS.set_attribute({"tabindex", if(selected, do: "0", else: "-1")}, to: target)
-        |> JS.set_attribute({"data-state", state}, to: target)
-        |> JS.set_attribute({"data-state", state}, to: wrap_target)
+        |> JS.set_attribute({"data-state", if(selected, do: "active", else: "inactive")},
+          to: target
+        )
       end)
 
     contents
     |> Enum.with_index()
     |> Enum.reduce(js, fn {content, index}, commands ->
       selected = content.value == selected_value
-      target = "##{Phoenix.HTML.css_escape("#{id}-panel-#{index}")}"
-      state = if selected, do: "active", else: "inactive"
+      target = "##{Phoenix.HTML.css_escape(tabs_panel_id(id, index))}"
 
-      commands = JS.set_attribute(commands, {"aria-hidden", to_string(!selected)}, to: target)
-      commands = JS.set_attribute(commands, {"data-state", state}, to: target)
+      commands =
+        JS.set_attribute(commands, {"data-state", if(selected, do: "active", else: "inactive")},
+          to: target
+        )
 
       if selected do
         JS.remove_attribute(commands, "hidden", to: target)
