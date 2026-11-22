@@ -5,16 +5,17 @@ defmodule UrUi.BadgeTest do
 
   alias UrUi.Components
 
-  @base "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3"
+  @base "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3"
   @variants %{
-    default: "bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
-    secondary: "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
+    default: "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+    secondary:
+      "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
     destructive:
-      "bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90",
+      "border-transparent bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90",
     outline:
       "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-    ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-    link: "text-primary underline-offset-4 [a&]:hover:underline"
+    ghost: "border-transparent [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+    link: "border-transparent text-primary underline-offset-4 [a&]:hover:underline"
   }
 
   defp render_badge(assigns), do: render_component(&Components.badge/1, assigns)
@@ -83,5 +84,14 @@ defmodule UrUi.BadgeTest do
       assert html =~ ~s(id="b1")
       assert html =~ ~s(aria-label="status")
     end
+  end
+
+  test "outline renders only border-border, as shadcn's merged classes do" do
+    html = render_badge(%{variant: :outline, inner_block: inner("Beta")})
+    [badge] = html |> Floki.parse_fragment!() |> Floki.find("[data-slot=badge]")
+    classes = badge |> Floki.attribute("class") |> hd() |> String.split()
+
+    assert "border-border" in classes
+    refute "border-transparent" in classes
   end
 end
