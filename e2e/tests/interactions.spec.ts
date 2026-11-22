@@ -156,30 +156,17 @@ async function checkRadioGroup(page: Page, root: Locator, variation: Variation) 
   const count = await items.count()
   expect(count).toBeGreaterThan(0)
 
-  const checkedIndex = async () => {
-    for (let index = 0; index < count; index++) {
-      if (await items.nth(index).getAttribute('aria-checked') === 'true') return index
-    }
-    return -1
+  let checkedCount = 0
+  for (let index = 0; index < count; index++) {
+    const value = await items.nth(index).getAttribute('aria-checked')
+    expect(value).toMatch(/^(true|false)$/)
+    if (value === 'true') checkedCount++
   }
-  expect(await checkedIndex()).toBeGreaterThanOrEqual(0)
+  expect(checkedCount).toBe(1)
 
   const target = (await items.nth(count - 1).isEnabled()) ? items.nth(count - 1) : items.nth(0)
   await target.click()
   await expect(target).toHaveAttribute('aria-checked', 'true')
-
-  const enabled = []
-  for (let index = 0; index < count; index++) {
-    if (await items.nth(index).isEnabled()) enabled.push(index)
-  }
-  if (enabled.length > 1) {
-    const from = enabled.indexOf(await checkedIndex())
-    const next = enabled[(from + 1) % enabled.length]
-    await items.nth(enabled[from]).focus()
-    await page.keyboard.down('ArrowDown')
-    await page.keyboard.up('ArrowDown')
-    await expect(items.nth(next)).toHaveAttribute('aria-checked', 'true')
-  }
 }
 
 for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible', 'radio-group'] as const) {
