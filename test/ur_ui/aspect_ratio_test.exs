@@ -13,30 +13,32 @@ defmodule UrUi.AspectRatioTest do
     render_component(&Components.aspect_ratio/1, assigns)
   end
 
-  test "aspect_ratio defaults to a square" do
+  test "aspect_ratio wraps content in a relative frame and an absolute fill" do
     html = render_aspect_ratio()
 
-    assert html =~ ~s(data-slot="aspect-ratio")
-    assert html =~ "aspect-square w-full"
-    assert html =~ "x"
+    assert html =~ ~s(class="relative w-full aspect-square")
+    [inner] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=aspect-ratio]")
+    assert Floki.attribute(inner, "class") == ["absolute inset-0"]
   end
 
   test "aspect_ratio maps common ratios to built-in utilities" do
     html = render_aspect_ratio(%{ratio: "16/9"})
-    assert html =~ "aspect-video w-full"
+    assert html =~ ~s(class="relative w-full aspect-video")
 
     html = render_aspect_ratio(%{ratio: "4/3"})
     assert html =~ "aspect-[4/3]"
   end
 
-  test "aspect_ratio uses an arbitrary value for other ratios" do
-    html = render_aspect_ratio(%{ratio: "2/1"})
-    assert html =~ "aspect-[2/1]"
+  test "aspect_ratio leaves unknown ratios to the caller" do
+    html = render_aspect_ratio(%{ratio: "5/4"})
+    assert html =~ ~s(class="relative w-full")
   end
 
-  test "aspect_ratio extends classes" do
-    html = render_aspect_ratio(%{class: "w-64", inner_block: inner("x")})
+  test "aspect_ratio extends the inner element class" do
+    html = render_aspect_ratio(%{class: "overflow-hidden", inner_block: inner("x")})
 
-    assert html =~ "aspect-square w-full w-64"
+    assert Floki.parse_fragment!(html)
+           |> Floki.find("[data-slot=aspect-ratio]")
+           |> Floki.attribute("class") == ["absolute inset-0 overflow-hidden"]
   end
 end

@@ -836,28 +836,33 @@ defmodule UrUi.Components do
   defp progress_state(_value, _max), do: "loading"
 
   @doc """
-  Aspect ratio (shadcn `AspectRatio`) — keeps its content at a fixed width/height
-  ratio. `ratio` is a `"width/height"` string (default `"1/1"`); common ratios
-  map to Tailwind's built-in aspect utilities and the rest use an arbitrary
-  value. Size it through `class` or a sized container.
+  Aspect ratio (shadcn `AspectRatio`) — a wrapper that holds its content at a
+  fixed width/height ratio and, like Radix, positions the content absolutely
+  so it cannot stretch the frame. `ratio` is a `"width/height"` string: the
+  common `"1/1"`, `"16/9"`, `"4/3"` and `"3/4"` map to Tailwind aspect
+  utilities; other ratios are not generated, so width and ratio come from
+  `class` (e.g. `class: "aspect-[5/4]"`) or a sized container.
   """
   attr(:ratio, :string, default: "1/1", doc: "aspect ratio as \"width/height\"")
-  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:class, :string, default: nil, doc: "extra classes appended to the inner element")
   attr(:rest, :global)
   slot(:inner_block, required: true)
 
   def aspect_ratio(assigns) do
     assigns =
       assign(assigns,
-        classes:
-          [aspect_ratio_class(assigns[:ratio]), "w-full", assigns[:class]]
+        outer_classes:
+          ["relative w-full", aspect_ratio_class(assigns[:ratio])]
           |> Enum.reject(&is_nil/1)
-          |> Enum.join(" ")
+          |> Enum.join(" "),
+        inner_classes: part_classes("absolute inset-0", assigns)
       )
 
     ~H"""
-    <div class={@classes} data-slot="aspect-ratio" {@rest}>
-      {render_slot(@inner_block)}
+    <div class={@outer_classes}>
+      <div class={@inner_classes} data-slot="aspect-ratio" {@rest}>
+        {render_slot(@inner_block)}
+      </div>
     </div>
     """
   end
@@ -866,7 +871,7 @@ defmodule UrUi.Components do
   defp aspect_ratio_class("16/9"), do: "aspect-video"
   defp aspect_ratio_class("4/3"), do: "aspect-[4/3]"
   defp aspect_ratio_class("3/4"), do: "aspect-[3/4]"
-  defp aspect_ratio_class(ratio), do: "aspect-[#{ratio}]"
+  defp aspect_ratio_class(_ratio), do: nil
 
   @doc """
   Breadcrumb (shadcn `Breadcrumb`) — a page-path breadcrumb. Compose the parts
