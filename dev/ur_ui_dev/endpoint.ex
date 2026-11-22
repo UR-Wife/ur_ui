@@ -16,6 +16,12 @@ defmodule UrUiDev.Endpoint do
     from: Path.expand("../../assets", __DIR__),
     only: ~w(ur_ui.css)
 
+  # Dev-only bundle of ur_ui's colocated hooks, built by UrUiDev.Application.
+  plug Plug.Static,
+    at: "/",
+    from: Path.expand("../../_build/dev/storybook", __DIR__),
+    only: ~w(storybook.js)
+
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 

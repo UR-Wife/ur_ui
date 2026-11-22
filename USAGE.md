@@ -244,10 +244,12 @@ are no shadcn variants or sizes; use native `type` values instead.
 
 ### tabs
 
-`UrUi.Components.tabs/1` — accessible tabs (shadcn `Tabs`) built on native
-radio inputs. Attrs: `id` (required), `default_value`, `class` and `rest`;
-the `:trigger` and `:content` slots pair by `value`. Switching runs
-client-side through `Phoenix.LiveView.JS` commands — no server round-trip.
+`UrUi.Components.tabs/1` — accessible tabs (shadcn `Tabs`): a `tablist` of
+`<button role="tab">` triggers and one `role="tabpanel"` per content slot,
+with the same DOM, ARIA and classes as shadcn/Radix. Attrs: `id` (required),
+`default_value`, `class` and `rest`; the `:trigger` and `:content` slots pair
+by `value`. Clicking a tab switches client-side through `Phoenix.LiveView.JS`
+commands — no server round-trip.
 
 ```heex
 <.tabs id="account-tabs" default_value="general">
@@ -258,13 +260,32 @@ client-side through `Phoenix.LiveView.JS` commands — no server round-trip.
 </.tabs>
 ```
 
-Arrow keys move between tabs through the native radio group, and the
-checked radio carries `role="tab"` with `aria-selected`; panels are
-`role="tabpanel"` linked with `aria-controls`/`aria-labelledby`, ARIA as in
-shadcn. The `class` attr extends the tab list container and globals pass
-through the root. A trigger renders `disabled` when its slot carries
-`disabled`. The active tab is marked `data-state="active"` on both the native
-trigger and its styled surface, which carries shadcn's trigger classes.
+Each trigger carries `aria-selected`, `aria-controls`, `data-state` and a
+roving `tabindex` (only the selected tab is in the Tab order); panels carry
+`aria-labelledby`, `tabindex="0"` and `hidden` while inactive. A trigger
+whose slot carries `disabled` renders `disabled` and `data-disabled` and is
+never selected. `class` extends the root and globals pass through it.
+
+**Keyboard.** Arrow Left/Right move focus and selection to the
+previous/next enabled tab (wrapping, skipping disabled tabs); Home and End
+jump to the first/last enabled tab, as in Radix. This uses a LiveView
+colocated hook, so ur_ui ships no inline script and works under a strict
+`Content-Security-Policy`. Requires Phoenix 1.8+. Register ur_ui's hooks once
+in your `assets/js/app.js`:
+
+```javascript
+import {hooks as colocatedHooks} from "phoenix-colocated/my_app"
+import {hooks as urUiHooks} from "phoenix-colocated/ur_ui"
+
+const liveSocket = new LiveSocket("/live", Socket, {
+  hooks: {...colocatedHooks, ...urUiHooks},
+  // ...
+})
+```
+
+The default Phoenix 1.8 esbuild config already resolves `phoenix-colocated/*`
+through `NODE_PATH` (it includes `Mix.Project.build_path()`). Without the
+import, clicking still works; only arrow-key navigation is missing.
 
 ### accordion
 

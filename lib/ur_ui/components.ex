@@ -821,9 +821,10 @@ defmodule UrUi.Components do
 
   Selection runs on the client with `Phoenix.LiveView.JS` commands, so no
   server round trip is needed. Arrow Left/Right, Home and End move focus and
-  selection between enabled tabs (wrapping, skipping disabled ones) through a
-  small inline `onkeydown` handler on the tablist, which needs no hook
-  registration in the host app.
+  selection between enabled tabs (wrapping, skipping disabled ones) through the
+  colocated `.Tabs` hook. It ships no inline script, so it works under a strict
+  Content-Security-Policy; the host app imports ur_ui's colocated hooks once
+  (see USAGE.md).
   """
   attr(:id, :string, required: true)
   attr(:default_value, :string, default: nil)
@@ -850,13 +851,14 @@ defmodule UrUi.Components do
     ~H"""
     <div id={@id} class={@classes} data-slot="tabs" data-orientation="horizontal" {@rest}>
       <div
+        id={"#{@id}-list"}
         role="tablist"
         aria-orientation="horizontal"
         class={tabs_list_classes()}
         data-slot="tabs-list"
         data-variant="default"
         data-orientation="horizontal"
-        onkeydown={tabs_keydown_handler()}
+        phx-hook=".Tabs"
       >
         <button
           :for={{trigger, index} <- Enum.with_index(@trigger)}
@@ -892,6 +894,37 @@ defmodule UrUi.Components do
         {render_slot(content)}
       </div>
     </div>
+    <script :type={Phoenix.LiveView.ColocatedHook} name=".Tabs">
+      // Roving focus with automatic activation, as in Radix Tabs: the next
+      // enabled tab is focused and clicked, and its phx-click JS selects it.
+      export default {
+        mounted() {
+          this.onKeyDown = (event) => {
+            const tab = event.target.closest('[role="tab"]')
+            if (!tab || tab.parentElement !== this.el) return
+            const tabs = Array.from(this.el.children).filter(
+              (el) => el.getAttribute("role") === "tab" && !el.disabled
+            )
+            const index = tabs.indexOf(tab)
+            const count = tabs.length
+            const next = {
+              ArrowRight: (index + 1) % count,
+              ArrowLeft: (index - 1 + count) % count,
+              Home: 0,
+              End: count - 1
+            }[event.key]
+            if (index < 0 || next === undefined) return
+            event.preventDefault()
+            tabs[next].focus()
+            tabs[next].click()
+          }
+          this.el.addEventListener("keydown", this.onKeyDown)
+        },
+        destroyed() {
+          this.el.removeEventListener("keydown", this.onKeyDown)
+        }
+      }
+    </script>
     """
   end
 
@@ -906,16 +939,6 @@ defmodule UrUi.Components do
 
   defp tabs_content_index(contents, value),
     do: Enum.find_index(contents, &(&1.value == value))
-
-  # Roving focus with automatic activation, as in Radix Tabs: the next enabled
-  # tab is focused and clicked, and its phx-click JS performs the selection.
-  defp tabs_keydown_handler do
-    "var tab=event.target.closest('[role=tab]');if(!tab||tab.parentElement!==this)return;" <>
-      "var tabs=Array.prototype.filter.call(this.children,function(el){return el.getAttribute('role')==='tab'&&!el.disabled});" <>
-      "var i=tabs.indexOf(tab),n=tabs.length,k=event.key;" <>
-      "var j=k==='ArrowRight'?(i+1)%n:k==='ArrowLeft'?(i-1+n)%n:k==='Home'?0:k==='End'?n-1:-1;" <>
-      "if(i<0||j<0)return;event.preventDefault();tabs[j].focus();tabs[j].click();"
-  end
 
   defp tabs_list_classes do
     "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col data-[variant=line]:rounded-none bg-muted"
