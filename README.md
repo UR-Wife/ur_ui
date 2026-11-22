@@ -56,7 +56,9 @@ root. `REFERENCE_URL` and `STORYBOOK_URL` can override the default URLs.
 Known failures are pinned by Playwright test ID in `e2e/known-failures.json`. A
 listed failure is expected; a listed test that starts passing fails until its ID
 is removed; any unlisted failure fails the suite. `npm run test:ratchet`
-exercises those three rules with isolated fixtures.
+exercises those three rules with isolated fixtures. An entry can also be an
+object, `{ "id": "...", "note": "..." }`, to record why a failure is expected
+when ur_ui cannot fix it (for example a bug in the shadcn reference).
 
 Generate the per-component Markdown/JSON summary with `npm run report`, and open
 the HTML report with `npx playwright show-report`. Raw style diffs, axe nodes,

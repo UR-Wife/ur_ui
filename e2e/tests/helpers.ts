@@ -103,14 +103,38 @@ export async function openStorybook(page: Page, variation: Variation, theme: The
 
 export async function matchReferenceParentWidth(reference: Locator, storybook: Locator) {
   const container = reference.locator('xpath=ancestor::*[@data-reference-container][1]')
-  if (await container.getAttribute('data-match-storybook-width') === null) return
-  const width = await storybook.evaluate((element) => {
-    if (!element.parentElement) throw new Error('Storybook example has no parent container')
-    return element.parentElement.getBoundingClientRect().width
+  const parent = await storybook.evaluate((element) => {
+    const parentElement = element.parentElement
+    if (!parentElement) throw new Error('Storybook example has no parent container')
+    const style = getComputedStyle(parentElement)
+    return {
+      width: parentElement.getBoundingClientRect().width,
+      contentWidth: parentElement.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+      display: style.display,
+      flexDirection: style.flexDirection,
+      alignItems: style.alignItems,
+      justifyContent: style.justifyContent,
+    }
   })
-  await container.evaluate((element, parentWidth) => {
-    element.style.width = `${parentWidth}px`
-  }, width)
+  if (await container.getAttribute('data-match-storybook-width') !== null) {
+    await container.evaluate((element, parentWidth) => {
+      element.style.width = `${parentWidth}px`
+    }, parent.width)
+    return
+  }
+  // Give the reference example the same layout box Storybook gives ur_ui: the
+  // cell's content width and its flex alignment. Otherwise w-full examples
+  // (alert) fill the cell in Storybook but shrink to their text in the
+  // reference, and wide text (card) wraps in the narrow cell only, which makes
+  // results depend on the machine's fonts.
+  await container.evaluate((element, layout) => {
+    element.style.boxSizing = 'content-box'
+    element.style.width = `${layout.contentWidth}px`
+    element.style.display = layout.display
+    element.style.flexDirection = layout.flexDirection
+    element.style.alignItems = layout.alignItems
+    element.style.justifyContent = layout.justifyContent
+  }, parent)
 }
 
 export async function alignReferenceOrigin(reference: Locator, storybook: Locator) {
