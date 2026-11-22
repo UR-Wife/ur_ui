@@ -933,9 +933,8 @@ defmodule UrUi.Components do
         data-slot="checkbox-indicator"
         data-state={if @checked, do: "checked", else: "unchecked"}
         data-disabled={@disabled && ""}
-        style="pointer-events: none"
         hidden={not @checked}
-        class="grid place-content-center text-current transition-none"
+        class="grid place-content-center text-current transition-none pointer-events-none"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -965,7 +964,7 @@ defmodule UrUi.Components do
       checked={@checked}
       required={@required}
       disabled={@disabled}
-      style="position:absolute; pointer-events:none; opacity:0; margin:0; transform:translateX(-100%)"
+      class="absolute pointer-events-none opacity-0 m-0 -translate-x-full"
     />
     """
   end
@@ -980,6 +979,8 @@ defmodule UrUi.Components do
   end
 
   defp checkbox_toggle_js(id) do
+    input = "##{Phoenix.HTML.css_escape("#{id}-input")}"
+
     %JS{}
     |> JS.toggle_attribute({"aria-checked", "true", "false"})
     |> JS.toggle_attribute({"data-state", "checked", "unchecked"})
@@ -989,9 +990,8 @@ defmodule UrUi.Components do
     |> JS.toggle_attribute({"hidden", "hidden"},
       to: {:inner, "[data-slot=checkbox-indicator]"}
     )
-    |> JS.toggle_attribute({"checked", "checked"},
-      to: "##{Phoenix.HTML.css_escape("#{id}-input")}"
-    )
+    |> JS.toggle_attribute({"checked", "checked"}, to: input)
+    |> JS.dispatch("change", to: input)
   end
 
   @doc """

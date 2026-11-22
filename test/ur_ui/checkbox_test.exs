@@ -96,6 +96,14 @@ defmodule UrUi.CheckboxTest do
     assert command =~ "terms-input"
   end
 
+  test "checkbox dispatches change to the hidden input after toggling" do
+    html = render_checkbox(%{id: "terms", name: "terms"})
+    [button] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=checkbox]")
+    [command] = Floki.attribute(button, "phx-click")
+
+    assert command =~ ~s(["dispatch",{"to":"#terms-input","event":"change"}])
+  end
+
   test "a disabled checkbox gets no click command" do
     html = render_checkbox(%{id: "terms", disabled: true})
     [button] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=checkbox]")
