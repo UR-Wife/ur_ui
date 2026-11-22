@@ -276,7 +276,15 @@ defmodule UrUi.Components do
 
   @doc """
   Avatar image (shadcn `AvatarImage`) — the user photo, inside `avatar/1`.
+
+  As in Radix, the fallback is hidden once the image is shown, and the
+  `UrUiAvatarImage` hook (from `UrUiHooks`, see USAGE.md) keeps the image
+  hidden (fallback visible)
+  while it loads and when it fails. Without the hook registered, the image
+  shows and the fallback stays hidden. `id` is required: LiveView hooks need
+  a DOM id that stays the same across renders.
   """
+  attr(:id, :string, required: true, doc: "stable, unique DOM id (the hook needs it)")
   attr(:src, :string, default: nil, doc: "image URL")
   attr(:alt, :string, default: "", doc: "alternative text")
   attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
@@ -286,7 +294,15 @@ defmodule UrUi.Components do
     assigns = assign(assigns, :classes, part_classes("aspect-square size-full", assigns))
 
     ~H"""
-    <img src={@src} alt={@alt} class={@classes} data-slot="avatar-image" {@rest} />
+    <img
+      id={@id}
+      src={@src}
+      alt={@alt}
+      class={@classes}
+      data-slot="avatar-image"
+      phx-hook="UrUiAvatarImage"
+      {@rest}
+    />
     """
   end
 
@@ -304,7 +320,7 @@ defmodule UrUi.Components do
         assigns,
         :classes,
         part_classes(
-          "bg-muted flex size-full items-center justify-center rounded-full text-sm group-data-[size=sm]/avatar:text-xs",
+          "flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs [[data-slot=avatar-image]:not([hidden])~&]:hidden",
           assigns
         )
       )
@@ -329,7 +345,7 @@ defmodule UrUi.Components do
         assigns,
         :classes,
         part_classes(
-          "bg-primary text-primary-foreground ring-background absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full ring-2 select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2 [&>svg]:size-2.5",
+          "absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2",
           assigns
         )
       )
@@ -354,7 +370,7 @@ defmodule UrUi.Components do
         assigns,
         :classes,
         part_classes(
-          "[--avatar-group-spacing:0.5rem] group/avatar-group -space-x-[var(--avatar-group-spacing)] flex items-center [&_[data-slot=avatar]]:ring-background [&_[data-slot=avatar]]:ring-2",
+          "group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background",
           assigns
         )
       )
@@ -379,7 +395,7 @@ defmodule UrUi.Components do
         assigns,
         :classes,
         part_classes(
-          "bg-muted text-muted-foreground ring-background relative flex size-8 shrink-0 items-center justify-center rounded-full text-sm ring-2 group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
+          "relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
           assigns
         )
       )
