@@ -150,7 +150,26 @@ async function checkCollapsible(page: Page, root: Locator, variation: Variation)
   await expect(trigger).toHaveAttribute('aria-expanded', initial!)
 }
 
-for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible'] as const) {
+async function checkRadioGroup(page: Page, root: Locator, variation: Variation) {
+  await expect(root).toHaveRole('radiogroup')
+  const items = root.getByRole('radio')
+  const count = await items.count()
+  expect(count).toBeGreaterThan(0)
+
+  let checkedCount = 0
+  for (let index = 0; index < count; index++) {
+    const value = await items.nth(index).getAttribute('aria-checked')
+    expect(value).toMatch(/^(true|false)$/)
+    if (value === 'true') checkedCount++
+  }
+  expect(checkedCount).toBe(1)
+
+  const target = (await items.nth(count - 1).isEnabled()) ? items.nth(count - 1) : items.nth(0)
+  await target.click()
+  await expect(target).toHaveAttribute('aria-checked', 'true')
+}
+
+for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible', 'radio-group'] as const) {
   test.describe(`${component} keyboard and ARIA`, () => {
     for (const variation of variations.filter((entry) => entry.component === component)) {
       for (const theme of ['light', 'dark'] as Theme[]) {
@@ -192,6 +211,12 @@ for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible'] as cons
                   )
                 } else if (component === 'collapsible') {
                   await checkCollapsible(
+                    side === 'reference' ? referencePage : page,
+                    side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
+                    variation,
+                  )
+                } else if (component === 'radio-group') {
+                  await checkRadioGroup(
                     side === 'reference' ? referencePage : page,
                     side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
                     variation,
