@@ -34,6 +34,7 @@ import { Input } from '@/components/ui/input'
 import { Kbd } from '@/components/ui/kbd'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/ui/pagination'
 import { Progress } from '@/components/ui/progress'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -270,6 +271,21 @@ function ToggleDemo({ variant }: { variant: string }) {
   return <Toggle>Bold</Toggle>
 }
 
+function PaginationDemo() {
+  return (
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem><PaginationPrevious href="#" /></PaginationItem>
+        <PaginationItem><PaginationLink href="#" isActive>1</PaginationLink></PaginationItem>
+        <PaginationItem><PaginationLink href="#">2</PaginationLink></PaginationItem>
+        <PaginationItem><PaginationLink href="#">3</PaginationLink></PaginationItem>
+        <PaginationItem><PaginationEllipsis /></PaginationItem>
+        <PaginationItem><PaginationNext href="#" /></PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  )
+}
+
 function ProgressDemo({ variant }: { variant: string }) {
   const value = { default: 60, complete: 100, quarter: 25 }[variant] ?? 60
   return <div className="w-64"><Progress aria-label="Progress" value={value} /></div>
@@ -432,6 +448,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'kbd': return <KbdDemo variant={variant} />
     case 'label': return <Label htmlFor={variant === 'with_for' ? 'email' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : 'Email'}</Label>
     case 'radio-group': return <RadioGroupDemo variant={variant} />
+    case 'pagination': return <PaginationDemo />
     case 'progress': return <ProgressDemo variant={variant} />
     case 'separator': return <SeparatorDemo variant={variant} />
     case 'switch': return <SwitchDemo variant={variant} />
