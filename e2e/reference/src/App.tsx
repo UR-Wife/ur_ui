@@ -46,6 +46,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Toggle } from '@/components/ui/toggle'
 import { Textarea } from '@/components/ui/textarea'
 
 function AccordionDemo({ variant }: { variant: string }) {
@@ -258,6 +259,13 @@ function KbdDemo({ variant }: { variant: string }) {
   return <Kbd>K</Kbd>
 }
 
+function ToggleDemo({ variant }: { variant: string }) {
+  if (variant === 'pressed') return <Toggle pressed>Italic</Toggle>
+  if (variant === 'outline') return <Toggle variant="outline">Underline</Toggle>
+  if (variant === 'disabled') return <Toggle disabled>Disabled</Toggle>
+  return <Toggle>Bold</Toggle>
+}
+
 function SeparatorDemo({ variant }: { variant: string }) {
   if (variant === 'vertical') {
     return (
@@ -362,6 +370,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'spinner': return <SpinnerDemo variant={variant} />
     case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'h-4 w-[250px] opacity-80' : 'h-4 w-[250px]'} />
     case 'table': return <TableDemo variant={variant} />
+    case 'toggle': return <ToggleDemo variant={variant} />
     case 'tabs': return <TabsDemo variant={variant} />
     case 'textarea': return <TextareaDemo variant={variant} />
   }

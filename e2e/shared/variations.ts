@@ -15,6 +15,7 @@ export const components = [
   'spinner',
   'table',
   'tabs',
+  'toggle',
   'textarea',
 ] as const
 
@@ -88,6 +89,7 @@ export const variations: Variation[] = [
   ...single('spinner', ['default', 'custom_class']),
   ...single('table', ['default', 'with_footer', 'selected_row', 'empty']),
   ...single('tabs', ['default', 'default_value', 'disabled']),
+  ...single('toggle', ['default', 'pressed', 'outline', 'disabled']),
   ...single('textarea', ['default', 'disabled', 'changeset_error', 'interpolated_error']),
 ]
 
