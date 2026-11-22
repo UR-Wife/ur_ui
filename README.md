@@ -53,7 +53,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 The differential harness covers all 20 components and 86 Storybook variations
 in light and dark modes. It compares seven computed-style properties, applies
-a 2% screenshot diff limit, checks accordion/tabs/checkbox keyboard and ARIA
+a 2% screenshot diff limit, checks accordion/tabs/checkbox/collapsible keyboard and ARIA
 behavior, and runs axe-core on both implementations. The reference is
 generated with the shadcn CLI using `new-york-v4` and the default neutral
 theme.

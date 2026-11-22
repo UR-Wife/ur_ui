@@ -321,7 +321,7 @@ defmodule UrUi.Components do
       <button
         type="button"
         id={"#{@id}-trigger"}
-        aria-controls={"#{@id}-content"}
+        aria-controls={if @open, do: "#{@id}-content"}
         aria-expanded={to_string(@open)}
         data-slot="collapsible-trigger"
         data-state={if @open, do: "open", else: "closed"}

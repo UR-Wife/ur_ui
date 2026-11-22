@@ -138,7 +138,19 @@ async function checkCheckbox(page: Page, root: Locator, variation: Variation) {
   await expect(root).toHaveAttribute('aria-checked', initial!)
 }
 
-for (const component of ['accordion', 'tabs', 'checkbox'] as const) {
+async function checkCollapsible(page: Page, root: Locator, variation: Variation) {
+  const trigger = root.locator('[data-slot="collapsible-trigger"]')
+  await expect(trigger).toHaveRole('button')
+  const initial = await trigger.getAttribute('aria-expanded')
+  expect(initial).toMatch(/^(true|false)$/)
+
+  await trigger.click()
+  await expect(trigger).not.toHaveAttribute('aria-expanded', initial!)
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', initial!)
+}
+
+for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible'] as const) {
   test.describe(`${component} keyboard and ARIA`, () => {
     for (const variation of variations.filter((entry) => entry.component === component)) {
       for (const theme of ['light', 'dark'] as Theme[]) {
@@ -174,6 +186,12 @@ for (const component of ['accordion', 'tabs', 'checkbox'] as const) {
                   )
                 } else if (component === 'tabs') {
                   await checkTabs(
+                    side === 'reference' ? referencePage : page,
+                    side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
+                    variation,
+                  )
+                } else if (component === 'collapsible') {
+                  await checkCollapsible(
                     side === 'reference' ? referencePage : page,
                     side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
                     variation,

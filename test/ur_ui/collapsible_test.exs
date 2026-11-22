@@ -30,7 +30,7 @@ defmodule UrUi.CollapsibleTest do
 
     [trigger] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=collapsible-trigger]")
     assert Floki.attribute(trigger, "aria-expanded") == ["false"]
-    assert Floki.attribute(trigger, "aria-controls") == ["faq-content"]
+    assert Floki.attribute(trigger, "aria-controls") == []
 
     [content] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=collapsible-content]")
     assert Floki.attribute(content, "hidden") != []
@@ -42,6 +42,7 @@ defmodule UrUi.CollapsibleTest do
     assert html =~ ~s(data-state="open")
     [trigger] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=collapsible-trigger]")
     assert Floki.attribute(trigger, "aria-expanded") == ["true"]
+    assert Floki.attribute(trigger, "aria-controls") == ["faq-content"]
     [content] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=collapsible-content]")
     assert Floki.attribute(content, "hidden") == []
   end
