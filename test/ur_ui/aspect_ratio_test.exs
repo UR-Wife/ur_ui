@@ -34,11 +34,9 @@ defmodule UrUi.AspectRatioTest do
     assert html =~ ~s(class="relative w-full")
   end
 
-  test "aspect_ratio extends the inner element class" do
-    html = render_aspect_ratio(%{class: "overflow-hidden", inner_block: inner("x")})
+  test "aspect_ratio extends the frame class" do
+    html = render_aspect_ratio(%{class: "w-64", inner_block: inner("x")})
 
-    assert Floki.parse_fragment!(html)
-           |> Floki.find("[data-slot=aspect-ratio]")
-           |> Floki.attribute("class") == ["absolute inset-0 overflow-hidden"]
+    assert html =~ ~s(class="relative w-full aspect-square w-64")
   end
 end

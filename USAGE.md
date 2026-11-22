@@ -222,8 +222,8 @@ Each part accepts `class`, `rest` and (except ellipsis) an optional
 ratio (shadcn `AspectRatio`). Attrs: `ratio` (a `"width/height"` string,
 default `"1/1"`), `class` and `rest`. Common ratios map to Tailwind's built-in
 aspect utilities (`1/1` -> `aspect-square`, `16/9` -> `aspect-video`); other
-ratios use an arbitrary `aspect-[...]` value. Give it a width through `class`
-or a sized container.
+ratios are not generated, so pass the ratio and width through `class`
+(e.g. `class: "aspect-[5/4] w-64"`) or a sized container.
 
 ```heex
 <div class="w-64">

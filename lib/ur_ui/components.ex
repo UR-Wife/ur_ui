@@ -841,26 +841,25 @@ defmodule UrUi.Components do
   so it cannot stretch the frame. `ratio` is a `"width/height"` string: the
   common `"1/1"`, `"16/9"`, `"4/3"` and `"3/4"` map to Tailwind aspect
   utilities; other ratios are not generated, so width and ratio come from
-  `class` (e.g. `class: "aspect-[5/4]"`) or a sized container.
+  `class` (e.g. `class: "aspect-[5/4] w-64"`) or a sized container.
   """
   attr(:ratio, :string, default: "1/1", doc: "aspect ratio as \"width/height\"")
-  attr(:class, :string, default: nil, doc: "extra classes appended to the inner element")
+  attr(:class, :string, default: nil, doc: "extra classes appended to the frame")
   attr(:rest, :global)
   slot(:inner_block, required: true)
 
   def aspect_ratio(assigns) do
     assigns =
       assign(assigns,
-        outer_classes:
-          ["relative w-full", aspect_ratio_class(assigns[:ratio])]
+        classes:
+          ["relative w-full", aspect_ratio_class(assigns[:ratio]), assigns[:class]]
           |> Enum.reject(&is_nil/1)
-          |> Enum.join(" "),
-        inner_classes: part_classes("absolute inset-0", assigns)
+          |> Enum.join(" ")
       )
 
     ~H"""
-    <div class={@outer_classes}>
-      <div class={@inner_classes} data-slot="aspect-ratio" {@rest}>
+    <div class={@classes}>
+      <div class="absolute inset-0" data-slot="aspect-ratio" {@rest}>
         {render_slot(@inner_block)}
       </div>
     </div>
