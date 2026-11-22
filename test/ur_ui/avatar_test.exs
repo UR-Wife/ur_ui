@@ -65,7 +65,7 @@ defmodule UrUi.AvatarTest do
 
   describe "avatar_image" do
     test "renders img with src and alt" do
-      html = render_image(%{src: "/u.png", alt: "Ada"})
+      html = render_image(%{id: "i1", src: "/u.png", alt: "Ada"})
       assert html =~ "<img"
       assert html =~ ~s(src="/u.png")
       assert html =~ ~s(alt="Ada")
@@ -73,23 +73,20 @@ defmodule UrUi.AvatarTest do
     end
 
     test "alt defaults to empty string" do
-      html = render_image(%{src: "/u.png"})
+      html = render_image(%{id: "i1", src: "/u.png"})
       assert html =~ ~s(alt="")
     end
 
-    test "uses the colocated hook with the given id, or a generated one" do
+    test "uses the colocated hook on the caller's stable id" do
       html = render_image(%{src: "/u.png", id: "ada-photo"})
       [img] = html |> Floki.parse_fragment!() |> Floki.find("img")
       assert Floki.attribute(img, "id") == ["ada-photo"]
       assert Floki.attribute(img, "phx-hook") == ["UrUi.Components.AvatarImage"]
       refute html =~ "<script"
-
-      [generated] = render_image(%{src: "/u.png"}) |> Floki.parse_fragment!() |> Floki.find("img")
-      assert [<<"avatar-image-", _::binary>>] = Floki.attribute(generated, "id")
     end
 
     test "class extends base classes" do
-      html = render_image(%{src: "/u.png", class: "grayscale"})
+      html = render_image(%{id: "i1", src: "/u.png", class: "grayscale"})
       assert_classes(html, "avatar-image", @image_base, "grayscale")
     end
   end

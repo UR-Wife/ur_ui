@@ -277,21 +277,17 @@ defmodule UrUi.Components do
   As in Radix, the fallback is hidden once the image is shown, and the
   colocated `.AvatarImage` hook keeps the image hidden (fallback visible)
   while it loads and when it fails. Without the hook registered, the image
-  shows and the fallback stays hidden. Pass `id` for a stable DOM id;
-  otherwise one is generated (hooks need an id).
+  shows and the fallback stays hidden. `id` is required: LiveView hooks need
+  a DOM id that stays the same across renders.
   """
+  attr(:id, :string, required: true, doc: "stable, unique DOM id (the hook needs it)")
   attr(:src, :string, default: nil, doc: "image URL")
   attr(:alt, :string, default: "", doc: "alternative text")
-  attr(:id, :string, default: nil, doc: "DOM id (generated when omitted)")
   attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
   attr(:rest, :global)
 
   def avatar_image(assigns) do
-    assigns =
-      assign(assigns,
-        id: assigns[:id] || "avatar-image-#{System.unique_integer([:positive])}",
-        classes: part_classes("aspect-square size-full", assigns)
-      )
+    assigns = assign(assigns, :classes, part_classes("aspect-square size-full", assigns))
 
     ~H"""
     <img
@@ -308,20 +304,22 @@ defmodule UrUi.Components do
       // if it fails) it stays hidden and the fallback, its next sibling, shows.
       export default {
         mounted() {
+          this.onLoad = () => (this.el.hidden = false)
+          this.onError = () => (this.el.hidden = true)
+          this.el.addEventListener("load", this.onLoad)
+          this.el.addEventListener("error", this.onError)
           this.sync()
         },
         updated() {
           this.sync()
         },
+        destroyed() {
+          this.el.removeEventListener("load", this.onLoad)
+          this.el.removeEventListener("error", this.onError)
+        },
+        // Only sets visibility; the listeners above handle later load/error.
         sync() {
-          const img = this.el
-          if (img.complete) {
-            img.hidden = img.naturalWidth === 0
-            return
-          }
-          img.hidden = true
-          img.addEventListener("load", () => (img.hidden = false), { once: true })
-          img.addEventListener("error", () => (img.hidden = true), { once: true })
+          this.el.hidden = !(this.el.complete && this.el.naturalWidth > 0)
         }
       }
     </script>
