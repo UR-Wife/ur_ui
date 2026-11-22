@@ -356,6 +356,162 @@ defmodule UrUi.Components do
     |> JS.toggle_attribute({"hidden", "hidden"}, to: content)
   end
 
+  @pagination_button_base "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+
+  @doc """
+  Pagination (shadcn `Pagination`) — pagination controls. Compose
+  `pagination_content/1` (the `<ul>`), `pagination_item/1` (one `<li>` per
+  control), `pagination_link/1` for page numbers, `pagination_previous/1`,
+  `pagination_next/1` and `pagination_ellipsis/1`.
+  """
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def pagination(assigns) do
+    assigns =
+      assign(assigns, :classes, part_classes("mx-auto flex w-full justify-center", assigns))
+
+    ~H"""
+    <nav role="navigation" aria-label="pagination" class={@classes} data-slot="pagination" {@rest}>
+      {render_slot(@inner_block)}
+    </nav>
+    """
+  end
+
+  @doc "Pagination content (shadcn `PaginationContent`) — the `<ul>` of controls."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def pagination_content(assigns) do
+    assigns = assign(assigns, :classes, part_classes("flex flex-row items-center gap-1", assigns))
+
+    ~H"""
+    <ul class={@classes} data-slot="pagination-content" {@rest}>
+      {render_slot(@inner_block)}
+    </ul>
+    """
+  end
+
+  @doc "Pagination item (shadcn `PaginationItem`) — one `<li>` control."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def pagination_item(assigns) do
+    ~H"""
+    <li class={@class} data-slot="pagination-item" {@rest}>
+      {render_slot(@inner_block)}
+    </li>
+    """
+  end
+
+  @doc "Pagination link (shadcn `PaginationLink`) — a page number."
+  attr(:href, :string, default: nil)
+  attr(:is_active, :boolean, default: false)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def pagination_link(assigns) do
+    assigns = assign(assigns, :classes, pagination_link_classes(assigns))
+
+    ~H"""
+    <a
+      href={@href}
+      aria-current={@is_active && "page"}
+      data-active={@is_active && ""}
+      class={@classes}
+      data-slot="pagination-link"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </a>
+    """
+  end
+
+  @doc "Pagination previous (shadcn `PaginationPrevious`)."
+  attr(:href, :string, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+
+  def pagination_previous(assigns) do
+    assigns = assign(assigns, :classes, pagination_arrow_classes(assigns, "sm:pl-2.5"))
+
+    ~H"""
+    <a href={@href} aria-label="Go to previous page" class={@classes} data-slot="pagination-link" {@rest}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6" />
+      </svg>
+      <span class="hidden sm:block">Previous</span>
+    </a>
+    """
+  end
+
+  @doc "Pagination next (shadcn `PaginationNext`)."
+  attr(:href, :string, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+
+  def pagination_next(assigns) do
+    assigns = assign(assigns, :classes, pagination_arrow_classes(assigns, "sm:pr-2.5"))
+
+    ~H"""
+    <a href={@href} aria-label="Go to next page" class={@classes} data-slot="pagination-link" {@rest}>
+      <span class="hidden sm:block">Next</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m9 18 6-6-6-6" />
+      </svg>
+    </a>
+    """
+  end
+
+  @doc "Pagination ellipsis (shadcn `PaginationEllipsis`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+
+  def pagination_ellipsis(assigns) do
+    assigns =
+      assign(assigns, :classes, part_classes("flex size-9 items-center justify-center", assigns))
+
+    ~H"""
+    <span aria-hidden="true" class={@classes} data-slot="pagination-ellipsis" {@rest}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
+        <circle cx="12" cy="12" r="1" />
+        <circle cx="19" cy="12" r="1" />
+        <circle cx="5" cy="12" r="1" />
+      </svg>
+      <span class="sr-only">More pages</span>
+    </span>
+    """
+  end
+
+  defp pagination_link_classes(assigns) do
+    variant = if assigns[:is_active], do: :outline, else: :ghost
+
+    [
+      @button_base,
+      @button_variants[variant],
+      @button_sizes[:icon],
+      assigns[:class]
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
+  defp pagination_arrow_classes(assigns, side_padding) do
+    [
+      @pagination_button_base,
+      @button_variants[:ghost],
+      "h-9 py-2 has-[>svg]:px-3 px-2.5",
+      side_padding,
+      assigns[:class]
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
   @radio_item_classes "aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40"
 
   @doc """

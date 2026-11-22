@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, checkbox, collapsible, kbd, breadcrumb, progress, radio-group, spinner, switch, toggle, tabs, accordion).
+textarea, checkbox, collapsible, kbd, breadcrumb, pagination, progress, radio-group, spinner, switch, toggle, tabs, accordion).
 
 ### button
 
@@ -192,6 +192,29 @@ The fill position is applied by the `UrUiProgress` hook (see **LiveView
 hooks** above): it sets the indicator's `translateX` transform through the
 CSSOM, so the markup carries no inline style and works under a strict
 Content-Security-Policy. Size it through `class` (e.g. `class: "w-64"`).
+
+### pagination
+
+`UrUi.Components.pagination/1` — pagination controls (shadcn `Pagination`).
+Compose `pagination_content/1` (the `<ul>`), `pagination_item/1` (one `<li>`),
+`pagination_link/1` (page numbers; `is_active` renders the outline variant and
+`aria-current="page"`), `pagination_previous/1`, `pagination_next/1` and
+`pagination_ellipsis/1`.
+
+```heex
+<.pagination>
+  <.pagination_content>
+    <.pagination_item><.pagination_previous href="#" /></.pagination_item>
+    <.pagination_item><.pagination_link href="#" is_active>1</.pagination_link></.pagination_item>
+    <.pagination_item><.pagination_link href="#">2</.pagination_link></.pagination_item>
+    <.pagination_item><.pagination_ellipsis /></.pagination_item>
+    <.pagination_item><.pagination_next href="#" /></.pagination_item>
+  </.pagination_content>
+</.pagination>
+```
+
+Each part accepts `class`, `rest` and (except ellipsis) an optional
+`:inner_block`. The root `<nav>` carries `aria-label="pagination"`.
 
 ### label
 
