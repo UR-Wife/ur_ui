@@ -22,6 +22,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
 import {
   Card,
   CardAction,
@@ -418,6 +419,18 @@ function TabsDemo({ variant }: { variant: string }) {
   )
 }
 
+function EmptyDemo() {
+  return (
+    <div className="w-80">
+      <Empty>
+        <EmptyMedia variant="icon"><span>UR</span></EmptyMedia>
+        <EmptyTitle>No results</EmptyTitle>
+        <EmptyDescription>Try adjusting your search.</EmptyDescription>
+      </Empty>
+    </div>
+  )
+}
+
 function CollapsibleDemo({ variant }: { variant: string }) {
   return (
     <Collapsible defaultOpen={variant === 'default_open'}>
@@ -455,6 +468,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'badge': return <Badge variant={variant === 'custom_class' ? 'default' : variant as 'default'} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : variant[0].toUpperCase() + variant.slice(1)}</Badge>
     case 'button': return <ButtonDemo variation={variation} />
     case 'card': return <CardDemo variant={variant} />
+    case 'empty': return <EmptyDemo />
     case 'collapsible': return <CollapsibleDemo variant={variant} />
     case 'checkbox': return <CheckboxDemo variant={variant} />
     case 'input': return <InputDemo variant={variant} />

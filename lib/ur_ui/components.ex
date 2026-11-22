@@ -872,6 +872,146 @@ defmodule UrUi.Components do
   defp aspect_ratio_class("3/4"), do: "aspect-[3/4]"
   defp aspect_ratio_class(_ratio), do: nil
 
+  @empty_media_variants %{
+    default: "bg-transparent",
+    icon:
+      "flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground [&_svg:not([class*='size-'])]:size-6"
+  }
+
+  @doc """
+  Empty (shadcn `Empty`) — an empty-state placeholder. Compose `empty_header/1`,
+  `empty_media/1`, `empty_title/1`, `empty_description/1` and `empty_content/1`
+  inside the root.
+  """
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def empty(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg border-dashed p-6 text-center text-balance md:p-12",
+          assigns
+        )
+      )
+
+    ~H"""
+    <div class={@classes} data-slot="empty" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Empty header (shadcn `EmptyHeader`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def empty_header(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes("flex max-w-sm flex-col items-center gap-2 text-center", assigns)
+      )
+
+    ~H"""
+    <div class={@classes} data-slot="empty-header" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Empty media (shadcn `EmptyMedia`)."
+  attr(:variant, :atom, default: :default, values: [:default, :icon])
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def empty_media(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0 " <>
+            @empty_media_variants[assigns[:variant] || :default],
+          assigns
+        )
+      )
+
+    ~H"""
+    <div class={@classes} data-slot="empty-icon" data-variant={@variant} {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Empty title (shadcn `EmptyTitle`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def empty_title(assigns) do
+    assigns =
+      assign(assigns, :classes, part_classes("text-lg font-medium tracking-tight", assigns))
+
+    ~H"""
+    <div class={@classes} data-slot="empty-title" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Empty description (shadcn `EmptyDescription`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def empty_description(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "text-sm/relaxed text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
+          assigns
+        )
+      )
+
+    ~H"""
+    <div class={@classes} data-slot="empty-description" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc "Empty content (shadcn `EmptyContent`)."
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+  slot(:inner_block)
+
+  def empty_content(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :classes,
+        part_classes(
+          "flex w-full max-w-sm min-w-0 flex-col items-center gap-4 text-sm text-balance",
+          assigns
+        )
+      )
+
+    ~H"""
+    <div class={@classes} data-slot="empty-content" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
   @doc """
   Breadcrumb (shadcn `Breadcrumb`) — a page-path breadcrumb. Compose the parts
   inside the root: `breadcrumb_list/1` (an `<ol>`), one `breadcrumb_item/1`
