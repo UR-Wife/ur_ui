@@ -626,6 +626,60 @@ defmodule UrUi.Components do
   end
 
   @doc """
+  Progress (shadcn `Progress`) — a determinate progress bar. The fill position
+  is set by the `UrUiProgress` hook (from `UrUiHooks`, see USAGE.md), which
+  applies the translate transform through the CSSOM to keep the markup free of
+  inline styles under a strict Content-Security-Policy. `id` is required: the
+  hook needs a stable DOM id.
+  """
+  attr(:id, :string, required: true, doc: "stable, unique DOM id (the hook needs it)")
+  attr(:value, :integer, default: 0, doc: "completion value")
+  attr(:max, :integer, default: 100, doc: "maximum value")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+
+  def progress(assigns) do
+    assigns =
+      assign(assigns,
+        classes:
+          part_classes("relative h-2 w-full overflow-hidden rounded-full bg-primary/20", assigns),
+        state: progress_state(assigns[:value], assigns[:max]),
+        label: "#{round(assigns[:value] / assigns[:max] * 100)}%"
+      )
+
+    ~H"""
+    <div
+      id={@id}
+      role="progressbar"
+      aria-valuemax={@max}
+      aria-valuemin="0"
+      aria-valuenow={@value}
+      aria-valuetext={@label}
+      data-state={@state}
+      data-value={@value}
+      data-max={@max}
+      data-slot="progress"
+      class={@classes}
+      {@rest}
+    >
+      <div
+        id={"#{@id}-indicator"}
+        data-slot="progress-indicator"
+        data-state={@state}
+        data-value={@value}
+        data-max={@max}
+        class="h-full w-full flex-1 bg-primary transition-all"
+        phx-hook="UrUiProgress"
+      >
+      </div>
+    </div>
+    """
+  end
+
+  defp progress_state(value, max) when value == max, do: "complete"
+  defp progress_state(_value, _max), do: "loading"
+
+  @doc """
   Breadcrumb (shadcn `Breadcrumb`) — a page-path breadcrumb. Compose the parts
   inside the root: `breadcrumb_list/1` (an `<ol>`), one `breadcrumb_item/1`
   per crumb, `breadcrumb_link/1` for links and `breadcrumb_page/1` for the

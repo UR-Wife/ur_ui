@@ -34,6 +34,7 @@ import { Input } from '@/components/ui/input'
 import { Kbd } from '@/components/ui/kbd'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { Progress } from '@/components/ui/progress'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
@@ -269,6 +270,11 @@ function ToggleDemo({ variant }: { variant: string }) {
   return <Toggle>Bold</Toggle>
 }
 
+function ProgressDemo({ variant }: { variant: string }) {
+  const value = { default: 60, complete: 100, quarter: 25 }[variant] ?? 60
+  return <div className="w-64"><Progress aria-label="Progress" value={value} /></div>
+}
+
 function RadioGroupDemo({ variant }: { variant: string }) {
   const defaultValue = variant === 'default_value' ? 'comfortable' : 'default'
   const items: [string, string, boolean][] = variant === 'disabled'
@@ -426,6 +432,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'kbd': return <KbdDemo variant={variant} />
     case 'label': return <Label htmlFor={variant === 'with_for' ? 'email' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : 'Email'}</Label>
     case 'radio-group': return <RadioGroupDemo variant={variant} />
+    case 'progress': return <ProgressDemo variant={variant} />
     case 'separator': return <SeparatorDemo variant={variant} />
     case 'switch': return <SwitchDemo variant={variant} />
     case 'spinner': return <SpinnerDemo variant={variant} />
