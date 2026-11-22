@@ -1,6 +1,7 @@
 export const components = [
   'accordion',
   'alert',
+  'aspect-ratio',
   'avatar',
   'badge',
   'breadcrumb',
@@ -76,6 +77,7 @@ export const variations: Variation[] = [
   ...grouped('accordion', 'variants', []),
   ...single('accordion', ['single', 'multiple', 'disabled']),
   ...single('alert', ['default', 'destructive', 'with_icon', 'title_only']),
+  ...single('aspect-ratio', ['default', 'square']),
   ...grouped('avatar', 'sizes', ['default', 'sm', 'lg']),
   ...single('avatar', ['with_image', 'with_badge']),
   ...grouped('badge', 'variants', ['default', 'secondary', 'destructive', 'outline', 'ghost', 'link']),

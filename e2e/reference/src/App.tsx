@@ -7,6 +7,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { AspectRatio } from '@/components/ui/aspect-ratio'
 import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -237,6 +238,17 @@ function TextareaDemo({ variant }: { variant: string }) {
 
 // Mirrors the shadcn docs separator demo: a horizontal separator under a
 // heading block, and a vertical one inside a sized (h-5) flex row.
+function AspectRatioDemo({ variant }: { variant: string }) {
+  const ratio = variant === 'square' ? 1 / 1 : 16 / 9
+  return (
+    <div className="w-64">
+      <AspectRatio ratio={ratio}>
+        <div className="h-full w-full bg-muted" />
+      </AspectRatio>
+    </div>
+  )
+}
+
 function BreadcrumbDemo({ variant }: { variant: string }) {
   const list = (
     <BreadcrumbList>
@@ -439,6 +451,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'alert': return <AlertDemo variant={variant} />
     case 'avatar': return <AvatarDemo variant={variant} />
     case 'breadcrumb': return <BreadcrumbDemo variant={variant} />
+    case 'aspect-ratio': return <AspectRatioDemo variant={variant} />
     case 'badge': return <Badge variant={variant === 'custom_class' ? 'default' : variant as 'default'} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : variant[0].toUpperCase() + variant.slice(1)}</Badge>
     case 'button': return <ButtonDemo variation={variation} />
     case 'card': return <CardDemo variant={variant} />

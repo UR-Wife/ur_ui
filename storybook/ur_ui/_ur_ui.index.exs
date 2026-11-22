@@ -14,6 +14,7 @@ defmodule Storybook.UrUi do
   def entry("avatar"), do: [icon: {:fa, "circle-user", :thin}]
   def entry("card"), do: [icon: {:fa, "square", :thin}]
   def entry("alert"), do: [icon: {:fa, "bell", :thin}]
+  def entry("aspect-ratio"), do: [icon: {:fa, "up-right-and-down-left-from-center", :thin}]
   def entry("table"), do: [icon: {:fa, "table", :thin}]
   def entry("input"), do: [icon: {:fa, "keyboard", :thin}]
   def entry("kbd"), do: [icon: {:fa, "keyboard", :thin}]

@@ -836,6 +836,39 @@ defmodule UrUi.Components do
   defp progress_state(_value, _max), do: "loading"
 
   @doc """
+  Aspect ratio (shadcn `AspectRatio`) — keeps its content at a fixed width/height
+  ratio. `ratio` is a `"width/height"` string (default `"1/1"`); common ratios
+  map to Tailwind's built-in aspect utilities and the rest use an arbitrary
+  value. Size it through `class` or a sized container.
+  """
+  attr(:ratio, :string, default: "1/1", doc: "aspect ratio as \"width/height\"")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
+
+  def aspect_ratio(assigns) do
+    assigns =
+      assign(assigns,
+        classes:
+          [aspect_ratio_class(assigns[:ratio]), "w-full", assigns[:class]]
+          |> Enum.reject(&is_nil/1)
+          |> Enum.join(" ")
+      )
+
+    ~H"""
+    <div class={@classes} data-slot="aspect-ratio" {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  defp aspect_ratio_class("1/1"), do: "aspect-square"
+  defp aspect_ratio_class("16/9"), do: "aspect-video"
+  defp aspect_ratio_class("4/3"), do: "aspect-[4/3]"
+  defp aspect_ratio_class("3/4"), do: "aspect-[3/4]"
+  defp aspect_ratio_class(ratio), do: "aspect-[#{ratio}]"
+
+  @doc """
   Breadcrumb (shadcn `Breadcrumb`) — a page-path breadcrumb. Compose the parts
   inside the root: `breadcrumb_list/1` (an `<ol>`), one `breadcrumb_item/1`
   per crumb, `breadcrumb_link/1` for links and `breadcrumb_page/1` for the
