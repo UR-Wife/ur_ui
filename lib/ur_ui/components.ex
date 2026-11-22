@@ -194,6 +194,91 @@ defmodule UrUi.Components do
     |> JS.toggle_attribute({"data-state", "on", "off"})
   end
 
+  @switch_base "peer group/switch inline-flex shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-[1.15rem] data-[size=default]:w-8 data-[size=sm]:h-3.5 data-[size=sm]:w-6 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input dark:data-[state=unchecked]:bg-input/80"
+  @switch_thumb_classes "pointer-events-none block rounded-full bg-background ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0 dark:data-[state=checked]:bg-primary-foreground dark:data-[state=unchecked]:bg-foreground"
+
+  @doc """
+  Switch (shadcn `Switch`) — an on/off switch matching Radix's DOM and ARIA
+  (`role="switch"`, `aria-checked`, `data-state`) with a sliding thumb.
+  Toggling runs client-side through `Phoenix.LiveView.JS` commands, so no
+  server round trip is needed. When `name` is given it also renders a hidden
+  `<input type="checkbox">` so the value submits with a form.
+
+  ## Sizes
+
+  `:default`, `:sm`
+  """
+  attr(:id, :string, required: true, doc: "stable, unique DOM id (the toggle JS needs it)")
+  attr(:name, :string, default: nil, doc: "renders a hidden input for form submission when given")
+  attr(:value, :string, default: "on", doc: "submitted value")
+  attr(:size, :atom, default: :default, values: [:default, :sm], doc: "switch size")
+  attr(:checked, :boolean, default: false, doc: "initial checked state")
+  attr(:disabled, :boolean, default: false, doc: "disables the switch")
+  attr(:required, :boolean, default: false, doc: "marks the switch required")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+
+  def switch(assigns) do
+    assigns =
+      assign(assigns,
+        classes: switch_classes(assigns),
+        thumb_classes: @switch_thumb_classes
+      )
+
+    ~H"""
+    <button
+      type="button"
+      role="switch"
+      id={@id}
+      aria-checked={to_string(@checked)}
+      aria-required={@required && "true"}
+      data-state={if @checked, do: "checked", else: "unchecked"}
+      data-disabled={@disabled && ""}
+      data-size={@size}
+      disabled={@disabled}
+      value={@value}
+      class={@classes}
+      data-slot="switch"
+      phx-click={if @disabled, do: nil, else: switch_toggle_js(@id)}
+      {@rest}
+    >
+      <span data-slot="switch-thumb" data-state={if @checked, do: "checked", else: "unchecked"} class={@thumb_classes}></span>
+    </button>
+    <input
+      :if={@name}
+      id={"#{@id}-input"}
+      type="checkbox"
+      aria-hidden="true"
+      tabindex="-1"
+      name={@name}
+      value={@value}
+      checked={@checked}
+      required={@required}
+      disabled={@disabled}
+      class="absolute pointer-events-none opacity-0 m-0 -translate-x-full"
+    />
+    """
+  end
+
+  defp switch_classes(assigns) do
+    [@switch_base, assigns[:class]]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
+  defp switch_toggle_js(id) do
+    input = "##{Phoenix.HTML.css_escape("#{id}-input")}"
+
+    %JS{}
+    |> JS.toggle_attribute({"aria-checked", "true", "false"})
+    |> JS.toggle_attribute({"data-state", "checked", "unchecked"})
+    |> JS.toggle_attribute({"data-state", "checked", "unchecked"},
+      to: {:inner, "[data-slot=switch-thumb]"}
+    )
+    |> JS.toggle_attribute({"checked", "checked"}, to: input)
+    |> JS.dispatch("change", to: input)
+  end
+
   @doc """
   Badge (shadcn `Badge`) — a small status descriptor.
 

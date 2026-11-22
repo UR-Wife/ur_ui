@@ -35,6 +35,7 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
+import { Switch } from '@/components/ui/switch'
 import {
   Table,
   TableBody,
@@ -290,6 +291,33 @@ function SeparatorDemo({ variant }: { variant: string }) {
   )
 }
 
+function SwitchDemo({ variant }: { variant: string }) {
+  const checked = variant === 'checked'
+  const disabled = variant === 'disabled'
+  const size = variant === 'sm' ? 'sm' : 'default'
+  const label = {
+    default: 'Strict mode',
+    checked: 'Email notifications',
+    disabled: 'Disabled',
+    sm: 'Compact',
+  }[variant]
+  const desc = {
+    default: 'Enforce additional checks',
+    checked: 'Receive product updates',
+    disabled: 'Currently unavailable',
+    sm: 'Smaller control',
+  }[variant]
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div className="grid gap-1.5 leading-none">
+        <label htmlFor="terms" className="text-sm font-medium">{label}</label>
+        <p className="text-sm text-muted-foreground">{desc}</p>
+      </div>
+      <Switch id="terms" size={size} checked={checked} disabled={disabled} />
+    </div>
+  )
+}
+
 function SpinnerDemo({ variant }: { variant: string }) {
   return <Spinner className={variant === 'custom_class' ? 'size-8' : undefined} />
 }
@@ -367,6 +395,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'kbd': return <KbdDemo variant={variant} />
     case 'label': return <Label htmlFor={variant === 'with_for' ? 'email' : undefined} className={variant === 'custom_class' ? 'opacity-80' : undefined}>{variant === 'custom_class' ? 'With extra class' : 'Email'}</Label>
     case 'separator': return <SeparatorDemo variant={variant} />
+    case 'switch': return <SwitchDemo variant={variant} />
     case 'spinner': return <SpinnerDemo variant={variant} />
     case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'h-4 w-[250px] opacity-80' : 'h-4 w-[250px]'} />
     case 'table': return <TableDemo variant={variant} />
