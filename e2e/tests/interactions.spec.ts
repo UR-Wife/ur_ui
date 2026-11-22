@@ -101,6 +101,14 @@ async function checkTabs(page: Page, root: Locator, variation: Variation) {
   await page.keyboard.press('ArrowLeft')
   await expect(tabs.nth(left)).toHaveAttribute('aria-selected', 'true')
   await expect(tabs.nth(left)).toBeFocused()
+
+  // Home/End jump to the first/last enabled tab (Radix automatic activation).
+  for (const [key, index] of [['End', enabled[enabled.length - 1]], ['Home', enabled[0]]] as const) {
+    await page.keyboard.press(key)
+    await expect(tabs.nth(index)).toHaveAttribute('aria-selected', 'true')
+    await expect(tabs.nth(index)).toBeFocused()
+    await expect(byId(page, (await tabs.nth(index).getAttribute('aria-controls'))!)).toBeVisible()
+  }
   await assertExpectedOrder()
 }
 

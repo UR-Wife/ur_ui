@@ -276,7 +276,15 @@ defmodule UrUi.Components do
 
   @doc """
   Avatar image (shadcn `AvatarImage`) — the user photo, inside `avatar/1`.
+
+  As in Radix, the fallback is hidden once the image is shown, and the
+  `UrUiAvatarImage` hook (from `UrUiHooks`, see USAGE.md) keeps the image
+  hidden (fallback visible)
+  while it loads and when it fails. Without the hook registered, the image
+  shows and the fallback stays hidden. `id` is required: LiveView hooks need
+  a DOM id that stays the same across renders.
   """
+  attr(:id, :string, required: true, doc: "stable, unique DOM id (the hook needs it)")
   attr(:src, :string, default: nil, doc: "image URL")
   attr(:alt, :string, default: "", doc: "alternative text")
   attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
@@ -286,7 +294,15 @@ defmodule UrUi.Components do
     assigns = assign(assigns, :classes, part_classes("aspect-square size-full", assigns))
 
     ~H"""
-    <img src={@src} alt={@alt} class={@classes} data-slot="avatar-image" {@rest} />
+    <img
+      id={@id}
+      src={@src}
+      alt={@alt}
+      class={@classes}
+      data-slot="avatar-image"
+      phx-hook="UrUiAvatarImage"
+      {@rest}
+    />
     """
   end
 
@@ -304,7 +320,7 @@ defmodule UrUi.Components do
         assigns,
         :classes,
         part_classes(
-          "bg-muted flex size-full items-center justify-center rounded-full text-sm group-data-[size=sm]/avatar:text-xs",
+          "flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs [[data-slot=avatar-image]:not([hidden])~&]:hidden",
           assigns
         )
       )
@@ -329,7 +345,7 @@ defmodule UrUi.Components do
         assigns,
         :classes,
         part_classes(
-          "bg-primary text-primary-foreground ring-background absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full ring-2 select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2 [&>svg]:size-2.5",
+          "absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2",
           assigns
         )
       )
@@ -354,7 +370,7 @@ defmodule UrUi.Components do
         assigns,
         :classes,
         part_classes(
-          "[--avatar-group-spacing:0.5rem] group/avatar-group -space-x-[var(--avatar-group-spacing)] flex items-center [&_[data-slot=avatar]]:ring-background [&_[data-slot=avatar]]:ring-2",
+          "group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background",
           assigns
         )
       )
@@ -379,7 +395,7 @@ defmodule UrUi.Components do
         assigns,
         :classes,
         part_classes(
-          "bg-muted text-muted-foreground ring-background relative flex size-8 shrink-0 items-center justify-center rounded-full text-sm ring-2 group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
+          "relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
           assigns
         )
       )
@@ -824,9 +840,10 @@ defmodule UrUi.Components do
 
   Selection runs on the client with `Phoenix.LiveView.JS` commands, so no
   server round trip is needed. Arrow Left/Right, Home and End move focus and
-  selection between enabled tabs (wrapping, skipping disabled ones) through a
-  small inline `onkeydown` handler on the tablist, which needs no hook
-  registration in the host app.
+  selection between enabled tabs (wrapping, skipping disabled ones) through the
+  `UrUiTabs` hook from ur_ui's JS module (`import {UrUiHooks} from "ur_ui"`,
+  see USAGE.md). No inline script, so it works under a strict
+  Content-Security-Policy.
   """
   attr(:id, :string, required: true)
   attr(:default_value, :string, default: nil)
@@ -853,13 +870,14 @@ defmodule UrUi.Components do
     ~H"""
     <div id={@id} class={@classes} data-slot="tabs" data-orientation="horizontal" {@rest}>
       <div
+        id={"#{@id}-list"}
         role="tablist"
         aria-orientation="horizontal"
         class={tabs_list_classes()}
         data-slot="tabs-list"
         data-variant="default"
         data-orientation="horizontal"
-        onkeydown={tabs_keydown_handler()}
+        phx-hook="UrUiTabs"
       >
         <button
           :for={{trigger, index} <- Enum.with_index(@trigger)}
@@ -909,16 +927,6 @@ defmodule UrUi.Components do
 
   defp tabs_content_index(contents, value),
     do: Enum.find_index(contents, &(&1.value == value))
-
-  # Roving focus with automatic activation, as in Radix Tabs: the next enabled
-  # tab is focused and clicked, and its phx-click JS performs the selection.
-  defp tabs_keydown_handler do
-    "var tab=event.target.closest('[role=tab]');if(!tab||tab.parentElement!==this)return;" <>
-      "var tabs=Array.prototype.filter.call(this.children,function(el){return el.getAttribute('role')==='tab'&&!el.disabled});" <>
-      "var i=tabs.indexOf(tab),n=tabs.length,k=event.key;" <>
-      "var j=k==='ArrowRight'?(i+1)%n:k==='ArrowLeft'?(i-1+n)%n:k==='Home'?0:k==='End'?n-1:-1;" <>
-      "if(i<0||j<0)return;event.preventDefault();tabs[j].focus();tabs[j].click();"
-  end
 
   defp tabs_list_classes do
     "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col data-[variant=line]:rounded-none bg-muted"

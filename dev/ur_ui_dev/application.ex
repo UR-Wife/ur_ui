@@ -4,6 +4,9 @@ defmodule UrUiDev.Application do
 
   @impl true
   def start(_type, _args) do
+    # Bundle ur_ui's LiveView hooks before Storybook serves its first page.
+    0 = Esbuild.install_and_run(:ur_ui_dev, [])
+
     children = [
       {Phoenix.PubSub, name: UrUiDev.PubSub},
       UrUiDev.Endpoint
