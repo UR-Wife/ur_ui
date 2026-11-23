@@ -24,6 +24,7 @@ export const components = [
   'table',
   'tabs',
   'toggle',
+  'toggle-group',
   'textarea',
 ] as const
 
@@ -106,6 +107,7 @@ export const variations: Variation[] = [
   ...single('table', ['default', 'with_footer', 'selected_row', 'empty']),
   ...single('tabs', ['default', 'default_value', 'disabled']),
   ...single('toggle', ['default', 'pressed', 'outline', 'disabled']),
+  ...single('toggle-group', ['single', 'multiple']),
   ...single('textarea', ['default', 'disabled', 'changeset_error', 'interpolated_error']),
 ]
 

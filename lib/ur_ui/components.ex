@@ -194,6 +194,156 @@ defmodule UrUi.Components do
     |> JS.toggle_attribute({"data-state", "on", "off"})
   end
 
+  @toggle_group_item_heights %{default: "h-9", sm: "h-8", lg: "h-10"}
+
+  @doc """
+  Toggle group (shadcn `ToggleGroup`) — a group of toggle buttons. `type:
+  :single` (the default) behaves like a radio group (`role="radiogroup"`,
+  items `role="radio" aria-checked`); `:multiple` renders a toolbar where every
+  item toggles independently (`aria-pressed`). Selection runs client-side
+  through `Phoenix.LiveView.JS`; arrow keys move focus through the
+  `UrUiToggleGroup` hook (from `UrUiHooks`, see USAGE.md).
+
+  ## Variants
+
+  `:default`, `:outline` — Sizes: `:default`, `:sm`, `:lg`
+  """
+  attr(:id, :string, required: true)
+  attr(:type, :atom, default: :single, values: [:single, :multiple])
+  attr(:variant, :atom, default: :default, values: [:default, :outline])
+  attr(:size, :atom, default: :default, values: [:default, :sm, :lg])
+  attr(:spacing, :integer, default: 0)
+  attr(:default_value, :any, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+
+  slot :item do
+    attr(:value, :string, required: true)
+    attr(:disabled, :boolean)
+  end
+
+  def toggle_group(assigns) do
+    items = assigns[:item] || []
+    selected_values = toggle_group_selected(assigns)
+
+    items =
+      items
+      |> Enum.with_index()
+      |> Enum.map(fn {item, index} ->
+        value = item[:value]
+
+        item
+        |> Map.put_new(:disabled, nil)
+        |> Map.put(:index, index)
+        |> Map.put(:id, "#{assigns.id}-item-#{index}")
+        |> Map.put(:checked, value in selected_values)
+        |> Map.put(
+          :tabindex,
+          toggle_group_tabindex(assigns[:type], index, value in selected_values)
+        )
+      end)
+
+    assigns =
+      assign(assigns,
+        items: items,
+        classes: toggle_group_classes(assigns),
+        item_classes: toggle_group_item_classes(assigns)
+      )
+
+    ~H"""
+    <div
+      id={@id}
+      role={if @type == :single, do: "radiogroup", else: "toolbar"}
+      data-type={@type}
+      data-slot="toggle-group"
+      data-variant={@variant}
+      data-size={@size}
+      data-spacing={@spacing}
+      class={@classes}
+      phx-hook="UrUiToggleGroup"
+      {@rest}
+    >
+      <button
+        :for={item <- @items}
+        type="button"
+        id={item.id}
+        value={item.value}
+        role={if @type == :single, do: "radio"}
+        aria-checked={if @type == :single, do: to_string(item.checked)}
+        aria-pressed={if @type == :multiple, do: to_string(item.checked)}
+        data-state={if item.checked, do: "on", else: "off"}
+        data-disabled={item.disabled && ""}
+        data-variant={@variant}
+        data-size={@size}
+        data-spacing={@spacing}
+        disabled={item.disabled}
+        tabindex={item.tabindex}
+        data-slot="toggle-group-item"
+        class={@item_classes}
+        phx-click={if item.disabled, do: nil, else: toggle_group_select_js(@type, @items, item.index)}
+      >
+        {render_slot(item)}
+      </button>
+    </div>
+    """
+  end
+
+  defp toggle_group_selected(%{type: :multiple} = assigns) do
+    assigns[:default_value] |> List.wrap()
+  end
+
+  defp toggle_group_selected(assigns) do
+    values = Enum.map(assigns[:item] || [], & &1[:value])
+
+    case assigns[:default_value] do
+      nil -> if values == [], do: [], else: [hd(values)]
+      value -> if value in values, do: [value], else: if(values == [], do: [], else: [hd(values)])
+    end
+  end
+
+  defp toggle_group_tabindex(:single, _index, checked), do: if(checked, do: "0", else: "-1")
+  defp toggle_group_tabindex(:multiple, index, _checked), do: if(index == 0, do: "0", else: "-1")
+
+  defp toggle_group_classes(assigns) do
+    [
+      "group/toggle-group flex w-fit items-center gap-#{assigns[:spacing]} rounded-md data-[spacing=default]:data-[variant=outline]:shadow-xs",
+      assigns[:class]
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
+  defp toggle_group_item_classes(assigns) do
+    [
+      @toggle_base,
+      @toggle_variants[assigns[:variant]],
+      @toggle_group_item_heights[assigns[:size]],
+      "w-auto min-w-0 shrink-0 px-3 focus:z-10 focus-visible:z-10",
+      "data-[spacing=0]:rounded-none data-[spacing=0]:shadow-none data-[spacing=0]:first:rounded-l-md data-[spacing=0]:last:rounded-r-md data-[spacing=0]:data-[variant=outline]:border-l-0 data-[spacing=0]:data-[variant=outline]:first:border-l"
+    ]
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.join(" ")
+  end
+
+  defp toggle_group_select_js(:single, items, selected_index) do
+    Enum.reduce(items, %JS{}, fn item, js ->
+      checked = item.index == selected_index
+      target = "##{Phoenix.HTML.css_escape(item.id)}"
+      state = if(checked, do: "on", else: "off")
+
+      js
+      |> JS.set_attribute({"aria-checked", to_string(checked)}, to: target)
+      |> JS.set_attribute({"data-state", state}, to: target)
+      |> JS.set_attribute({"tabindex", if(checked, do: "0", else: "-1")}, to: target)
+    end)
+  end
+
+  defp toggle_group_select_js(:multiple, _items, _selected_index) do
+    %JS{}
+    |> JS.toggle_attribute({"aria-pressed", "true", "false"})
+    |> JS.toggle_attribute({"data-state", "on", "off"})
+  end
+
   @switch_base "peer group/switch inline-flex shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-[1.15rem] data-[size=default]:w-8 data-[size=sm]:h-3.5 data-[size=sm]:w-6 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input dark:data-[state=unchecked]:bg-input/80"
   @switch_thumb_classes "pointer-events-none block rounded-full bg-background ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0 dark:data-[state=checked]:bg-primary-foreground dark:data-[state=unchecked]:bg-foreground"
 
