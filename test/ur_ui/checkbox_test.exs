@@ -120,4 +120,16 @@ defmodule UrUi.CheckboxTest do
     refute html =~ "<script"
     refute html =~ ~r/\son[a-z]+=/
   end
+
+  test "the UrUiCheckbox hook resets checked and ARIA state when its form resets" do
+    js = File.read!(Path.expand("../../assets/js/ur_ui_hooks.js", __DIR__))
+
+    assert js =~ ~S|this.el.closest("form")|
+    assert js =~ ~S|addEventListener("reset", this.onReset)|
+    assert js =~ ~S|setAttribute("aria-checked", checked ? "true" : "false")|
+    assert js =~ ~S|setAttribute("data-state", checked ? "checked" : "unchecked")|
+    assert js =~ ~S|indicator.removeAttribute("hidden")|
+    assert js =~ ~S|indicator.setAttribute("hidden", "hidden")|
+    assert js =~ ~S|defaultChecked|
+  end
 end

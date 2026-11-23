@@ -63,16 +63,59 @@ const UrUiAvatarImage = {
 }
 
 // checkbox/1: as in Radix Checkbox, Enter does not toggle the checkbox (only
-// Space does); prevent the native button's Enter click.
+// Space does); prevent the native button's Enter click. The checkbox toggles
+// client-side, so when it sits inside a <form> the hook also observes that
+// form's reset event and restores the button's checked visual and ARIA state —
+// and the hidden input — to the initial `checked` value, which a native
+// form.reset() would otherwise leave stale.
 const UrUiCheckbox = {
   mounted() {
     this.onKeyDown = (event) => {
       if (event.key === "Enter") event.preventDefault()
     }
     this.el.addEventListener("keydown", this.onKeyDown)
+
+    this.form = this.el.closest("form")
+    this.onReset = () => this.restore()
+    if (this.form) this.form.addEventListener("reset", this.onReset)
+    this.snapshot()
+  },
+  updated() {
+    this.snapshot()
   },
   destroyed() {
     this.el.removeEventListener("keydown", this.onKeyDown)
+    if (this.form) this.form.removeEventListener("reset", this.onReset)
+  },
+  // The hidden input (rendered only when `name` is given) is the source of
+  // truth for the checkbox's default/initial value.
+  inputRef() {
+    return document.getElementById(this.el.id + "-input")
+  },
+  snapshot() {
+    const input = this.inputRef()
+    this.initialChecked = input
+      ? input.defaultChecked
+      : this.el.getAttribute("aria-checked") === "true"
+  },
+  restore() {
+    const checked = this.initialChecked
+    this.el.setAttribute("aria-checked", checked ? "true" : "false")
+    this.el.setAttribute("data-state", checked ? "checked" : "unchecked")
+    const indicator = this.el.querySelector("[data-slot=checkbox-indicator]")
+    if (indicator) {
+      indicator.setAttribute("data-state", checked ? "checked" : "unchecked")
+      if (checked) {
+        indicator.removeAttribute("hidden")
+      } else {
+        indicator.setAttribute("hidden", "hidden")
+      }
+    }
+    const input = this.inputRef()
+    if (input) {
+      input.checked = checked
+      input.defaultChecked = checked
+    }
   }
 }
 

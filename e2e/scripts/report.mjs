@@ -6,7 +6,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const resultsDir = resolve(root, 'results')
 const resultsPath = resolve(resultsDir, 'results.json')
 const componentNames = [
-  'accordion', 'alert', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'card',
+  'accordion', 'alert', 'aspect-ratio', 'avatar', 'avatar-group', 'badge', 'breadcrumb', 'button', 'card',
   'checkbox', 'collapsible', 'empty', 'field', 'input', 'kbd', 'label', 'pagination', 'progress', 'radio-group', 'separator', 'skeleton', 'spinner', 'switch', 'table', 'tabs', 'toggle', 'textarea',
 ]
 mkdirSync(resultsDir, { recursive: true })
