@@ -986,6 +986,108 @@ defmodule UrUi.Components do
   defp progress_state(_value, _max), do: "loading"
 
   @doc """
+  Slider (shadcn `Slider`) — a single-thumb range slider matching Radix's DOM
+  and ARIA: a `data-slot="slider"` root with `data-orientation`/`data-disabled`,
+  plus a `role="slider"` thumb carrying `aria-valuemin`, `aria-valuemax`,
+  `aria-valuenow` and `aria-orientation`. The range and thumb positions are
+  applied by the `UrUiSlider` hook (from `UrUiHooks`, see USAGE.md) through the
+  CSSOM — no inline styles in the markup — and the hook implements Radix's
+  keyboard behavior (Arrow Left/Right/Up/Down, Home, End, PageUp/PageDown).
+  Pass `aria-label` (a global attr) to name the thumb for assistive tech.
+  """
+  attr(:default_value, :integer, default: 50, doc: "initial value")
+  attr(:min, :integer, default: 0, doc: "minimum value")
+  attr(:max, :integer, default: 100, doc: "maximum value")
+  attr(:step, :integer, default: 1, doc: "step increment")
+  attr(:orientation, :atom,
+    default: :horizontal,
+    values: [:horizontal, :vertical],
+    doc: "slider orientation"
+  )
+
+  attr(:disabled, :boolean, default: false, doc: "disables the slider")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+
+  def slider(assigns) do
+    rest = assigns[:rest] || %{}
+
+    {aria_label, rest} =
+      cond do
+        Map.has_key?(rest, "aria-label") ->
+          {Map.get(rest, "aria-label"), Map.delete(rest, "aria-label")}
+
+        Map.has_key?(rest, :"aria-label") ->
+          {Map.get(rest, :"aria-label"), Map.delete(rest, :"aria-label")}
+
+        true ->
+          {nil, rest}
+      end
+
+    assigns =
+      assign(assigns,
+        orientation: if(assigns[:orientation] == :vertical, do: "vertical", else: "horizontal"),
+        aria_label: aria_label,
+        rest: rest,
+        classes: slider_classes(assigns)
+      )
+
+    ~H"""
+    <span
+      data-slot="slider"
+      data-orientation={@orientation}
+      data-disabled={@disabled && ""}
+      data-value={@default_value}
+      data-min={@min}
+      data-max={@max}
+      data-step={@step}
+      aria-disabled={@disabled && "true"}
+      class={@classes}
+      phx-hook="UrUiSlider"
+      {@rest}
+    >
+      <span
+        data-slot="slider-track"
+        data-orientation={@orientation}
+        data-disabled={@disabled && ""}
+        class="relative grow overflow-hidden rounded-full bg-muted data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5"
+      >
+        <span
+          data-slot="slider-range"
+          data-orientation={@orientation}
+          data-disabled={@disabled && ""}
+          class="absolute bg-primary data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
+        >
+        </span>
+      </span>
+      <span
+        data-slot="slider-thumb"
+        role="slider"
+        aria-label={@aria_label}
+        aria-valuemin={@min}
+        aria-valuenow={@default_value}
+        aria-valuemax={@max}
+        aria-orientation={@orientation}
+        data-orientation={@orientation}
+        data-disabled={@disabled && ""}
+        tabindex={if @disabled, do: nil, else: "0"}
+        class="block size-4 shrink-0 rounded-full border border-primary bg-white shadow-sm ring-ring/50 transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+      >
+      </span>
+    </span>
+    """
+  end
+
+  defp slider_classes(assigns) do
+    [
+      "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
+      assigns[:class]
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
+  @doc """
   Aspect ratio (shadcn `AspectRatio`) — a wrapper that holds its content at a
   fixed width/height ratio and, like Radix, positions the content absolutely
   so it cannot stretch the frame. `ratio` is a `"width/height"` string: the

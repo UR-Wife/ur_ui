@@ -176,6 +176,105 @@ const UrUiProgress = {
   }
 }
 
+// slider/1: single-thumb slider as in Radix Slider. Arrow Left/Right (or
+// Up/Down for vertical) move the value by `step`, Home/End jump to min/max and
+// PageUp/PageDown move by 10x step. The range and thumb positions — including
+// Radix's "in-bounds" thumb offset — are applied through the CSSOM (el.style),
+// so the markup carries no inline style and works under a strict CSP.
+const UrUiSlider = {
+  mounted() {
+    this.onKeyDown = (event) => {
+      const thumb = event.target.closest('[data-slot="slider-thumb"]')
+      if (!thumb || !this.el.contains(thumb)) return
+      if (this.el.dataset.disabled !== undefined) return
+
+      const min = Number(this.el.dataset.min ?? 0)
+      const max = Number(this.el.dataset.max ?? 100)
+      const step = Number(this.el.dataset.step ?? 1)
+      const horizontal = this.el.dataset.orientation !== "vertical"
+
+      let next
+      if (event.key === "Home") {
+        next = min
+      } else if (event.key === "End") {
+        next = max
+      } else {
+        const increment =
+          event.key === (horizontal ? "ArrowRight" : "ArrowUp") ? 1 :
+          event.key === (horizontal ? "ArrowLeft" : "ArrowDown") ? -1 :
+          event.key === "PageUp" ? 10 :
+          event.key === "PageDown" ? -10 :
+          0
+        if (increment === 0) return
+        next = this.currentValue() + increment * step
+      }
+      event.preventDefault()
+      this.setValue(Math.min(max, Math.max(min, next)))
+    }
+    this.el.addEventListener("keydown", this.onKeyDown)
+    this.sync()
+  },
+  updated() {
+    this.sync()
+  },
+  destroyed() {
+    this.el.removeEventListener("keydown", this.onKeyDown)
+  },
+  currentValue() {
+    return Number(this.el.dataset.value ?? 0)
+  },
+  setValue(value) {
+    this.el.dataset.value = String(value)
+    const thumb = this.el.querySelector('[data-slot="slider-thumb"]')
+    if (thumb) thumb.setAttribute("aria-valuenow", String(value))
+    this.sync()
+  },
+  sync() {
+    const thumb = this.el.querySelector('[data-slot="slider-thumb"]')
+    const range = this.el.querySelector('[data-slot="slider-range"]')
+    if (!thumb || !range) return
+
+    const min = Number(this.el.dataset.min ?? 0)
+    const max = Number(this.el.dataset.max ?? 100)
+    const value = Number(this.el.dataset.value ?? 0)
+    const horizontal = this.el.dataset.orientation !== "vertical"
+    const ratio = (value - min) / (max - min)
+    const percent = Math.min(100, Math.max(0, ratio * 100))
+
+    if (horizontal) {
+      range.style.left = "0%"
+      range.style.right = `${100 - percent}%`
+      range.style.top = ""
+      range.style.bottom = ""
+    } else {
+      range.style.top = `${100 - percent}%`
+      range.style.bottom = "0%"
+      range.style.left = ""
+      range.style.right = ""
+    }
+
+    const thumbSize = horizontal ? thumb.offsetWidth : thumb.offsetHeight
+    const halfWidth = thumbSize > 0 ? thumbSize / 2 : 8
+    // linearScale([0, 50], [0, halfWidth]) without clamping, then the in-bounds
+    // offset Radix applies so the thumb never overflows the track.
+    const scaled = (halfWidth / 50) * percent
+    const offset = halfWidth - scaled
+
+    thumb.style.position = "absolute"
+    if (horizontal) {
+      thumb.style.transform = "translateX(-50%)"
+      thumb.style.left = `calc(${percent}% + ${offset}px)`
+      thumb.style.bottom = ""
+      thumb.style.top = ""
+    } else {
+      thumb.style.transform = "translateY(50%)"
+      thumb.style.bottom = `calc(${percent}% + ${offset}px)`
+      thumb.style.left = ""
+      thumb.style.right = ""
+    }
+  }
+}
+
 // toggle_group/1: roving focus as in Radix ToggleGroup. Arrow keys move focus
 // to the next/previous enabled item (wrapping), Home/End to the first/last; in
 // single mode the focused item is also clicked (selected). Enter is prevented
@@ -216,5 +315,5 @@ const UrUiToggleGroup = {
   }
 }
 
-export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox, UrUiRadioGroup, UrUiProgress, UrUiToggleGroup }
+export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox, UrUiRadioGroup, UrUiProgress, UrUiSlider, UrUiToggleGroup }
 export default UrUiHooks

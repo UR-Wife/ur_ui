@@ -169,7 +169,44 @@ async function checkRadioGroup(page: Page, root: Locator, variation: Variation) 
   await expect(target).toHaveAttribute('aria-checked', 'true')
 }
 
-for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible', 'radio-group'] as const) {
+async function checkSlider(page: Page, root: Locator, variation: Variation) {
+  const thumb = root.locator('[data-slot="slider-thumb"]').first()
+  await expect(thumb).toHaveRole('slider')
+  await expect(thumb).toHaveAttribute('aria-valuemin', /.+/)
+  await expect(thumb).toHaveAttribute('aria-valuemax', /.+/)
+  await expect(thumb).toHaveAttribute('aria-valuenow', /.+/)
+  await expect(thumb).toHaveAttribute('aria-orientation', /.+/)
+  await expect(thumb).toHaveAttribute('data-orientation', /.+/)
+
+  if (variation.variant === 'disabled') {
+    await expect(thumb).not.toHaveAttribute('tabindex', '0')
+    await expect(thumb).toHaveAttribute('data-disabled', '')
+    return
+  }
+
+  const horizontal = variation.variant !== 'vertical'
+  const forward = horizontal ? 'ArrowRight' : 'ArrowUp'
+  const backward = horizontal ? 'ArrowLeft' : 'ArrowDown'
+
+  await thumb.focus()
+  const min = Number(await thumb.getAttribute('aria-valuemin'))
+  const max = Number(await thumb.getAttribute('aria-valuemax'))
+
+  await page.keyboard.press('Home')
+  await expect(thumb).toHaveAttribute('aria-valuenow', String(min))
+
+  await page.keyboard.press('End')
+  await expect(thumb).toHaveAttribute('aria-valuenow', String(max))
+
+  await page.keyboard.press(backward)
+  await expect(thumb).not.toHaveAttribute('aria-valuenow', String(max))
+
+  await page.keyboard.press('Home')
+  await page.keyboard.press(forward)
+  await expect(thumb).toHaveAttribute('aria-valuenow', String(min + 1))
+}
+
+for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible', 'radio-group', 'slider'] as const) {
   test.describe(`${component} keyboard and ARIA`, () => {
     for (const variation of variations.filter((entry) => entry.component === component)) {
       for (const theme of ['light', 'dark'] as Theme[]) {
@@ -217,6 +254,12 @@ for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible', 'radio-
                   )
                 } else if (component === 'radio-group') {
                   await checkRadioGroup(
+                    side === 'reference' ? referencePage : page,
+                    side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
+                    variation,
+                  )
+                } else if (component === 'slider') {
+                  await checkSlider(
                     side === 'reference' ? referencePage : page,
                     side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
                     variation,

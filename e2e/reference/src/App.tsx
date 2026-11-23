@@ -40,6 +40,7 @@ import { Separator } from '@/components/ui/separator'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/ui/pagination'
 import { Progress } from '@/components/ui/progress'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Slider } from '@/components/ui/slider'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
@@ -390,6 +391,28 @@ function SwitchDemo({ variant }: { variant: string }) {
   )
 }
 
+function SliderDemo({ variant }: { variant: string }) {
+  if (variant === 'vertical') {
+    return (
+      <div className="h-44">
+        <Slider defaultValue={[50]} max={100} step={1} orientation="vertical" aria-label="Volume" />
+      </div>
+    )
+  }
+  if (variant === 'disabled') {
+    return (
+      <div className="w-64">
+        <Slider defaultValue={[50]} max={100} step={1} disabled aria-label="Volume" />
+      </div>
+    )
+  }
+  return (
+    <div className="w-64">
+      <Slider defaultValue={[50]} max={100} step={1} aria-label="Volume" />
+    </div>
+  )
+}
+
 function SpinnerDemo({ variant }: { variant: string }) {
   return <Spinner className={variant === 'custom_class' ? 'size-8' : undefined} />
 }
@@ -509,6 +532,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'pagination': return <PaginationDemo />
     case 'progress': return <ProgressDemo variant={variant} />
     case 'separator': return <SeparatorDemo variant={variant} />
+    case 'slider': return <SliderDemo variant={variant} />
     case 'switch': return <SwitchDemo variant={variant} />
     case 'spinner': return <SpinnerDemo variant={variant} />
     case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'h-4 w-[250px] opacity-80' : 'h-4 w-[250px]'} />
