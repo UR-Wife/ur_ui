@@ -442,5 +442,122 @@ const UrUiToggleGroup = {
   }
 }
 
-export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox, UrUiRadioGroup, UrUiProgress, UrUiSlider, UrUiToggleGroup }
+// tooltip/1: as in Radix Tooltip, hovering or focusing the trigger opens the
+// content after the configured delay (hover is delayed; focus opens instantly)
+// and Escape, blur, mouseleave or clicking the trigger closes it. The content
+// is shown beside the trigger per `side`/`side-offset`; positioned through the
+// CSSOM (el.style) so the markup carries no inline style and works under a
+// strict Content-Security-Policy. While open, `data-state` is
+// "delayed-open"/"instant-open" and the trigger gets `aria-describedby`
+// pointing at the content.
+const UrUiTooltip = {
+  mounted() {
+    this.trigger = this.el.querySelector('[data-slot="tooltip-trigger"]')
+    this.content = this.el.querySelector('[data-slot="tooltip-content"]')
+    this.delay = Number(
+      this.el.dataset.delayDuration ??
+        this.el.closest('[data-slot="tooltip-provider"]')?.dataset.delayDuration ??
+        0
+    )
+    this.openTimerRef = 0
+
+    this.onTriggerEnter = () => {
+      if (this.delay > 0) {
+        window.clearTimeout(this.openTimerRef)
+        this.openTimerRef = window.setTimeout(() => this.open("delayed-open"), this.delay)
+      } else {
+        this.open("instant-open")
+      }
+    }
+    this.onTriggerLeave = () => this.close()
+    this.onFocus = () => this.open("instant-open")
+    this.onBlur = () => this.close()
+    this.onClick = () => this.close()
+    this.onKeyDown = (event) => {
+      if (event.key === "Escape" && this.isOpen()) this.close()
+    }
+
+    if (this.trigger) {
+      this.trigger.addEventListener("mouseenter", this.onTriggerEnter)
+      this.trigger.addEventListener("focus", this.onFocus)
+      this.trigger.addEventListener("mouseleave", this.onTriggerLeave)
+      this.trigger.addEventListener("blur", this.onBlur)
+      this.trigger.addEventListener("click", this.onClick)
+      this.el.addEventListener("keydown", this.onKeyDown)
+    }
+  },
+  updated() {
+    this.trigger = this.el.querySelector('[data-slot="tooltip-trigger"]')
+    this.content = this.el.querySelector('[data-slot="tooltip-content"]')
+  },
+  destroyed() {
+    if (this.trigger) {
+      this.trigger.removeEventListener("mouseenter", this.onTriggerEnter)
+      this.trigger.removeEventListener("focus", this.onFocus)
+      this.trigger.removeEventListener("mouseleave", this.onTriggerLeave)
+      this.trigger.removeEventListener("blur", this.onBlur)
+      this.trigger.removeEventListener("click", this.onClick)
+    }
+    this.el.removeEventListener("keydown", this.onKeyDown)
+    window.clearTimeout(this.openTimerRef)
+  },
+  isOpen() {
+    return this.content && !this.content.hidden
+  },
+  setState(state) {
+    this.el.setAttribute("data-state", state)
+    if (this.trigger) this.trigger.setAttribute("data-state", state)
+    if (this.content) this.content.setAttribute("data-state", state)
+  },
+  open(state) {
+    if (!this.trigger || !this.content) return
+    window.clearTimeout(this.openTimerRef)
+    // Take the content out of flow and measure it before it becomes visible.
+    this.content.style.position = "fixed"
+    this.content.style.visibility = "hidden"
+    this.content.hidden = false
+    const triggerRect = this.trigger.getBoundingClientRect()
+    const contentRect = this.content.getBoundingClientRect()
+    const side = this.content.dataset.side || "top"
+    const offset = Number(this.content.dataset.sideOffset || 0)
+    let left
+    let top
+    switch (side) {
+      case "bottom":
+        left = triggerRect.left + triggerRect.width / 2 - contentRect.width / 2
+        top = triggerRect.bottom + offset
+        break
+      case "left":
+        left = triggerRect.left - contentRect.width - offset
+        top = triggerRect.top + triggerRect.height / 2 - contentRect.height / 2
+        break
+      case "right":
+        left = triggerRect.right + offset
+        top = triggerRect.top + triggerRect.height / 2 - contentRect.height / 2
+        break
+      default:
+        left = triggerRect.left + triggerRect.width / 2 - contentRect.width / 2
+        top = triggerRect.top - contentRect.height - offset
+    }
+    this.content.style.left = `${left}px`
+    this.content.style.top = `${top}px`
+    this.content.style.visibility = ""
+    this.content.setAttribute("data-side", side)
+    this.setState(state)
+    this.trigger.setAttribute("aria-describedby", this.content.id)
+  },
+  close() {
+    if (!this.content) return
+    window.clearTimeout(this.openTimerRef)
+    this.content.hidden = true
+    this.content.style.position = ""
+    this.content.style.left = ""
+    this.content.style.top = ""
+    this.content.style.visibility = ""
+    this.setState("closed")
+    if (this.trigger) this.trigger.removeAttribute("aria-describedby")
+  }
+}
+
+export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox, UrUiRadioGroup, UrUiProgress, UrUiSlider, UrUiToggleGroup, UrUiTooltip }
 export default UrUiHooks

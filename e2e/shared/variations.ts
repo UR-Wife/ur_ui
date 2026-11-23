@@ -27,6 +27,7 @@ export const components = [
   'toggle',
   'toggle-group',
   'textarea',
+  'tooltip',
 ] as const
 
 export type ComponentName = (typeof components)[number]
@@ -111,6 +112,7 @@ export const variations: Variation[] = [
   ...single('toggle', ['default', 'pressed', 'outline', 'disabled']),
   ...single('toggle-group', ['single', 'multiple']),
   ...single('textarea', ['default', 'disabled', 'changeset_error', 'interpolated_error']),
+  ...single('tooltip', ['default', 'delayed', 'bottom']),
 ]
 
 export function variationKey(variation: Variation): string {

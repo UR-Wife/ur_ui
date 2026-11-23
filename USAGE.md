@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, aspect-ratio, checkbox, collapsible, empty, field, kbd, breadcrumb, pagination, progress, radio-group, slider, spinner, switch, toggle, toggle-group, tabs, accordion).
+textarea, aspect-ratio, checkbox, collapsible, empty, field, kbd, breadcrumb, pagination, progress, radio-group, slider, spinner, switch, toggle, toggle-group, tabs, accordion, tooltip).
 
 ### button
 
@@ -716,3 +716,31 @@ The trigger carries `aria-expanded` and `aria-controls`; the content is
 `hidden` while closed and carries a matching `data-state` (`open`/`closed`).
 The root exposes `data-slot="collapsible"` and `data-state` as in Radix. Add
 shadcn's animation classes through `class` if you want the animated collapse.
+
+### tooltip
+
+`UrUi.Components.tooltip/1` — a hover/focus tooltip (shadcn `Tooltip`), a
+`[data-slot="tooltip"]` wrapper holding a `tooltip_trigger/1` and a
+`tooltip_content/1`. `tooltip_provider/1` wraps the tooltips in a tree and
+carries the default hover `delay_duration` in milliseconds (default `0`); a
+`tooltip/1`'s own `delay_duration` overrides it.
+
+```heex
+<.tooltip_provider delay_duration={700}>
+  <.tooltip id="save-tooltip">
+    <.tooltip_trigger><.button size={:icon}>★</.button></.tooltip_trigger>
+    <.tooltip_content id="save-tooltip-content"><.kbd>⌘S</.kbd> Save</.tooltip_content>
+  </.tooltip>
+</.tooltip_provider>
+```
+
+`tooltip_content/1` requires `id` (the `aria-describedby` target the hook writes
+onto the trigger), and takes `side` (`:top`, `:bottom`, `:left`, `:right`;
+default `:top`) and `side_offset` (pixel gap, default `0`). Show/hide runs
+client-side through the `UrUiTooltip` hook (see **LiveView hooks** above):
+hovering or focusing the trigger opens it (hover is delayed by
+`delay_duration`, focus is instant), and Escape, blur, mouseleave or clicking
+the trigger closes it. While open, `data-state` is `delayed-open` or
+`instant-open` and the trigger carries `aria-describedby`; the content is
+`role="tooltip"` with `data-side` matching `side`. Without the hook the content
+stays hidden, so register the hooks for tooltips to work.
