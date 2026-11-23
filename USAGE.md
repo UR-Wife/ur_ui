@@ -520,10 +520,9 @@ globals pass through it. As in the shadcn docs, pair it with a `label` whose
 uses the `UrUiCheckbox` hook (see **LiveView hooks** above). Without it,
 clicking and Space still work; only Enter would also toggle.
 
-The hidden input's `checked` state is toggled through its `checked` attribute,
-so a native `form.reset()` restores the toggled state rather than the initial
-`checked` value. Use a LiveView re-render (the usual Phoenix flow) to reset a
-checkbox to its initial state.
+The `UrUiCheckbox` hook (see **LiveView hooks** above) also observes the
+containing form's `reset` event, so a native `form.reset()` restores both the
+button's visual/ARIA state and the hidden input to the initial `checked` value.
 
 ### switch
 
