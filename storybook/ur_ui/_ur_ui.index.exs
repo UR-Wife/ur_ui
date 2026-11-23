@@ -31,4 +31,5 @@ defmodule Storybook.UrUi do
   def entry("toggle"), do: [icon: {:fa, "toggle-on", :thin}]
   def entry("toggle-group"), do: [icon: {:fa, "objects-column", :thin}]
   def entry("accordion"), do: [icon: {:fa, "square-caret-down", :thin}]
+  def entry("tooltip"), do: [icon: {:fa, "comment", :thin}]
 end

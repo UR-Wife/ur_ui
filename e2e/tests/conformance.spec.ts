@@ -5,6 +5,7 @@ import {
   checkAxe,
   checkComputedStyles,
   checkScreenshots,
+  checkTooltipBubble,
   mainLocator,
   matchReferenceParentWidth,
   openReference,
@@ -17,9 +18,9 @@ import {
   type CaseResult,
 } from './helpers'
 
-test('manifest covers only the 28 components with unique routes and story IDs', () => {
-  test.expect(components).toHaveLength(28)
-  test.expect(variations).toHaveLength(103)
+test('manifest covers only the 29 components with unique routes and story IDs', () => {
+  test.expect(components).toHaveLength(29)
+  test.expect(variations).toHaveLength(106)
   test.expect(new Set(variations.map((variation) => variation.route)).size).toBe(variations.length)
   test.expect(new Set(variations.map((variation) => variation.storyId)).size).toBe(variations.length)
   test.expect(new Set(variations.map((variation) => variation.component))).toEqual(new Set(components))
@@ -81,6 +82,9 @@ test.describe('shadcn conformance', () => {
             testInfo,
             result,
           ))
+          if (variation.component === 'tooltip') {
+            await test.step('open bubble', () => checkTooltipBubble(page, referencePage, variation, result, testInfo))
+          }
           const slot = variation.screenshotSlot ?? variation.component
           await test.step('reference axe', () => checkAxe(referencePage, `[data-slot="${slot}"]`, 'reference', result))
           await test.step('ur_ui axe', () => checkAxe(page, `#${variation.storyId}`, 'storybook', result))

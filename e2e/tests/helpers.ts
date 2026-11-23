@@ -235,6 +235,94 @@ export async function checkScreenshots(
   expect.soft(dimensionsMatch, 'screenshot dimensions must match').toBe(true)
 }
 
+export async function checkTooltipBubble(
+  page: Page,
+  referencePage: Page,
+  variation: Variation,
+  result: CaseResult,
+  testInfo: TestInfo,
+) {
+  const expectedSide = variation.variant === 'bottom' ? 'bottom' : 'top'
+  const referenceMain = mainLocator(referencePage, variation)
+  const storybookMain = storybookMainLocator(page, variation)
+  const referenceTrigger = referenceMain.locator('[data-slot="tooltip-trigger"]').first()
+  const storybookTrigger = storybookMain.locator('[data-slot="tooltip-trigger"]').first()
+  // Radix portals the reference content to <body>; ur_ui keeps it inside the
+  // tooltip root, so locate them separately.
+  const referenceContent = referencePage.locator('[data-slot="tooltip-content"]').first()
+  const storybookContent = storybookMain.locator('[data-slot="tooltip-content"]').first()
+
+  // Focus opens instantly on both Radix and ur_ui, avoiding the racy hover delay.
+  await referenceTrigger.focus()
+  await storybookTrigger.focus()
+  await expect(referenceContent).toBeVisible()
+  await expect(storybookContent).toBeVisible()
+  await expect(storybookContent).toHaveRole('tooltip')
+  await expect(storybookContent).toHaveAttribute('data-side', expectedSide)
+
+  await checkComputedStyles(referenceContent, storybookContent, result)
+  await checkTooltipText(referenceContent, storybookContent, result)
+  await checkTooltipArrow(referenceContent, storybookContent, result)
+}
+
+async function checkTooltipText(referenceContent: Locator, storybookContent: Locator, result: CaseResult) {
+  const [referenceText, storybookText] = await Promise.all([
+    referenceContent.textContent(),
+    storybookContent.textContent(),
+  ])
+  const normalize = (text: string | null) => (text ?? '').trim().replace(/\s+/g, ' ')
+  const expected = normalize(referenceText)
+  const actual = normalize(storybookText)
+  if (expected !== actual) {
+    result.failures.push({ check: 'styles', message: `tooltip content text ${JSON.stringify(actual)} != ${JSON.stringify(expected)}`, details: { reference: expected, storybook: actual } })
+  }
+  expect.soft(actual, 'tooltip content text must match shadcn').toBe(expected)
+}
+
+async function checkTooltipArrow(
+  referenceContent: Locator,
+  storybookContent: Locator,
+  result: CaseResult,
+) {
+  // shadcn renders the arrow as an <svg> (no data-slot); ur_ui renders a
+  // <span data-slot="tooltip-arrow">.
+  const referenceArrow = referenceContent.locator('svg').first()
+  const storybookArrow = storybookContent.locator('[data-slot="tooltip-arrow"]').first()
+  await expect(referenceArrow).toBeVisible()
+  await expect(storybookArrow).toBeVisible()
+
+  const measure = async (content: Locator, arrow: Locator) => {
+    const [c, a] = await Promise.all([content.boundingBox(), arrow.boundingBox()])
+    if (!c || !a) throw new Error('cannot measure tooltip content/arrow')
+    const style = await arrow.evaluate((el) => {
+      const s = getComputedStyle(el)
+      return { width: s.width, height: s.height, background: s.backgroundColor }
+    })
+    return {
+      centerX: a.x + a.width / 2 - c.x,
+      centerY: a.y + a.height / 2 - c.y,
+      ...style,
+    }
+  }
+  const [reference, storybook] = await Promise.all([
+    measure(referenceContent, referenceArrow),
+    measure(storybookContent, storybookArrow),
+  ])
+
+  const mismatches: string[] = []
+  const differs = (a: number, b: number, tolerance = 1.5) => Math.abs(a - b) > tolerance
+  if (differs(reference.centerX, storybook.centerX)) mismatches.push(`arrow centerX ${storybook.centerX.toFixed(2)} != ${reference.centerX.toFixed(2)}`)
+  if (differs(reference.centerY, storybook.centerY)) mismatches.push(`arrow centerY ${storybook.centerY.toFixed(2)} != ${reference.centerY.toFixed(2)}`)
+  if (reference.background !== storybook.background) mismatches.push(`arrow background ${storybook.background} != ${reference.background}`)
+  for (const side of ['width', 'height'] as const) {
+    if (reference[side] !== storybook[side]) mismatches.push(`arrow ${side} ${storybook[side]} != ${reference[side]}`)
+  }
+  if (mismatches.length) {
+    result.failures.push({ check: 'styles', message: mismatches.join('; '), details: { reference, storybook } })
+  }
+  expect.soft(mismatches, 'tooltip arrow must match shadcn').toEqual([])
+}
+
 export async function checkAxe(
   page: Page,
   selector: string,

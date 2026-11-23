@@ -2864,6 +2864,122 @@ defmodule UrUi.Components do
     |> Enum.join(" ")
   end
 
+  @tooltip_content_base "group relative z-50 w-fit origin-(--radix-tooltip-content-transform-origin) rounded-md bg-foreground px-3 py-1.5 text-xs text-balance text-background animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
+  # A filled diamond centred on the trigger-facing edge (2px inside it), so it
+  # matches Radix's arrow. `group` on the content above keys the per-side
+  # placement off `data-side`, which the hook flips on collisions.
+  @tooltip_arrow_classes "absolute left-1/2 top-full z-50 size-2.5 -translate-x-1/2 -translate-y-[calc(50%+2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground group-data-[side=bottom]:top-0 group-data-[side=bottom]:-translate-y-[calc(50%-2px)] group-data-[side=left]:left-auto group-data-[side=left]:right-0 group-data-[side=left]:top-1/2 group-data-[side=left]:translate-x-[calc(50%-2px)] group-data-[side=left]:-translate-y-1/2 group-data-[side=right]:left-0 group-data-[side=right]:top-1/2 group-data-[side=right]:-translate-x-[calc(50%-2px)] group-data-[side=right]:-translate-y-1/2"
+
+  @doc """
+  Tooltip provider (shadcn `TooltipProvider`) — wraps the tooltips in a tree and
+  carries the default hover `delay_duration` (milliseconds). A `tooltip/1`'s
+  own `delay_duration` overrides it.
+  """
+  attr(:delay_duration, :integer, default: 0, doc: "milliseconds before hover reveals a tooltip")
+  attr(:class, :string, default: nil, doc: "extra classes appended to the provider wrapper")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
+
+  def tooltip_provider(assigns) do
+    ~H"""
+    <div
+      data-slot="tooltip-provider"
+      data-delay-duration={@delay_duration}
+      class={@class}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc """
+  Tooltip (shadcn `Tooltip`) — a `[data-slot="tooltip"]` wrapper that holds a
+  `tooltip_trigger/1` and a `tooltip_content/1`. Show/hide runs on the client
+  through the `UrUiTooltip` hook (from `UrUiHooks`, see USAGE.md): hover and
+  focus open it (after `delay_duration` on hover), Escape/blur/mouseleave close
+  it, and the content is positioned against the trigger by `side`/`side_offset`.
+  `id` is required — the hook needs a stable DOM id.
+  """
+  attr(:id, :string, required: true, doc: "stable, unique DOM id (the hook needs it)")
+  attr(:delay_duration, :integer, default: nil, doc: "overrides the provider's delay")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
+
+  def tooltip(assigns) do
+    assigns = assign(assigns, :classes, part_classes("inline-block", assigns))
+
+    ~H"""
+    <div
+      id={@id}
+      data-slot="tooltip"
+      data-state="closed"
+      data-delay-duration={@delay_duration}
+      class={@classes}
+      phx-hook="UrUiTooltip"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc """
+  Tooltip trigger (shadcn `TooltipTrigger`) — the hoverable/focusable button
+  that reveals the tooltip. As in Radix, `aria-describedby` is set by the hook
+  only while the tooltip is open.
+  """
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
+
+  def tooltip_trigger(assigns) do
+    ~H"""
+    <button type="button" data-slot="tooltip-trigger" data-state="closed" class={@class} {@rest}>
+      {render_slot(@inner_block)}
+    </button>
+    """
+  end
+
+  @doc """
+  Tooltip content (shadcn `TooltipContent`) — the `role="tooltip"` bubble
+  shown next to the trigger. `id` is required: it is the `aria-describedby`
+  target the hook writes onto the trigger. `side` (`:top`, `:bottom`, `:left`,
+  `:right`) and `side_offset` control where it lands.
+  """
+  attr(:id, :string, required: true, doc: "stable DOM id (the aria-describedby target)")
+  attr(:side, :atom, default: :top, values: [:top, :bottom, :left, :right], doc: "preferred side")
+  attr(:side_offset, :integer, default: 0, doc: "pixel gap between trigger and content")
+  attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
+
+  def tooltip_content(assigns) do
+    assigns =
+      assign(assigns,
+        classes: part_classes(@tooltip_content_base, assigns),
+        arrow_classes: @tooltip_arrow_classes
+      )
+
+    ~H"""
+    <div
+      id={@id}
+      data-slot="tooltip-content"
+      role="tooltip"
+      data-state="closed"
+      data-side={@side}
+      data-side-offset={@side_offset}
+      hidden
+      class={@classes}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+      <span data-slot="tooltip-arrow" class={@arrow_classes} aria-hidden="true"></span>
+    </div>
+    """
+  end
+
   defp part_classes(base, assigns) do
     [base, assigns[:class]]
     |> Enum.reject(&is_nil/1)

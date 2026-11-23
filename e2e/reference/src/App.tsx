@@ -58,6 +58,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Toggle } from '@/components/ui/toggle'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Textarea } from '@/components/ui/textarea'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 function AccordionDemo({ variant }: { variant: string }) {
   const items = variant === 'multiple'
@@ -500,6 +501,24 @@ function CollapsibleDemo({ variant }: { variant: string }) {
   )
 }
 
+function TooltipDemo({ variant }: { variant: string }) {
+  const delayDuration = variant === 'delayed' ? 100 : 0
+  const side = variant === 'bottom' ? 'bottom' : 'top'
+  const sideOffset = variant === 'bottom' ? 4 : 0
+  return (
+    <TooltipProvider delayDuration={delayDuration}>
+      <span data-slot="tooltip" className="inline-block">
+        <Tooltip>
+          <TooltipTrigger>Hover</TooltipTrigger>
+          <TooltipContent side={side} sideOffset={sideOffset}>
+            {variant === 'bottom' ? 'Information' : 'Add to library'}
+          </TooltipContent>
+        </Tooltip>
+      </span>
+    </TooltipProvider>
+  )
+}
+
 function CheckboxDemo({ variant }: { variant: string }) {
   const defaultChecked = variant === 'checked'
   const disabled = variant === 'disabled'
@@ -548,6 +567,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'toggle': return <ToggleDemo variant={variant} />
     case 'tabs': return <TabsDemo variant={variant} />
     case 'textarea': return <TextareaDemo variant={variant} />
+    case 'tooltip': return <TooltipDemo variant={variant} />
   }
 }
 

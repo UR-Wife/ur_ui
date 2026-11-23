@@ -231,7 +231,65 @@ async function checkSlider(page: Page, root: Locator, variation: Variation) {
   await expect(thumb).toHaveAttribute('aria-valuenow', String(snap(0.24 * (max - min) + min)))
 }
 
-for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible', 'radio-group', 'slider'] as const) {
+async function checkTooltip(page: Page, root: Locator, variation: Variation, side: 'reference' | 'storybook') {
+  const trigger = root.locator('[data-slot="tooltip-trigger"]')
+  await expect(trigger).toHaveRole('button')
+  await expect(trigger).toHaveAttribute('data-state', 'closed')
+  await expect(trigger).not.toHaveAttribute('aria-describedby', /.+/)
+
+  // Radix portals the content to <body>; in ur_ui it stays inside the root. On
+  // the storybook page all three variations render at once, so scope the
+  // ur_ui content locator to this variation's root; the reference only ever
+  // renders one variation per route, so a page-wide locator is unambiguous
+  // there.
+  const content = side === 'storybook'
+    ? root.locator('[data-slot="tooltip-content"]')
+    : page.locator('[data-slot="tooltip-content"]')
+  const expectedSide = variation.variant === 'bottom' ? 'bottom' : 'top'
+
+  // Focus opens instantly, on both Radix and ur_ui — the one deterministic
+  // "instant-open" path shared by the two.
+  await trigger.focus()
+  await expect(trigger).toHaveAttribute('data-state', 'instant-open')
+  await expect(content).toBeVisible()
+  await expect(content).toHaveRole('tooltip')
+  await expect(content).toHaveAttribute('data-side', expectedSide)
+  const describedBy = await trigger.getAttribute('aria-describedby')
+  expect(describedBy, 'open trigger needs aria-describedby').toBeTruthy()
+  await expect(page.locator(`[id=${JSON.stringify(describedBy)}]`)).toHaveRole('tooltip')
+
+  // Escape closes.
+  await page.keyboard.press('Escape')
+  await expect(trigger).toHaveAttribute('data-state', 'closed')
+  await expect(trigger).not.toHaveAttribute('aria-describedby', /.+/)
+
+  // Radix keeps the trigger focused after Escape, so the tooltip stays open on
+  // focus alone; blur it so the following hover/pointer round-trip only
+  // exercises pointer-open/close, not focus.
+  await trigger.blur()
+
+  // Hover opens. Radix's skip-delay resets make the exact open state racy on
+  // the reference, so only ur_ui asserts the precise "delayed-open" vs
+  // "instant-open" value; the reference just needs a non-closed state.
+  await trigger.hover()
+  if (side === 'storybook') {
+    const expected = variation.variant === 'delayed' ? 'delayed-open' : 'instant-open'
+    await expect(trigger).toHaveAttribute('data-state', expected)
+  } else {
+    await expect(trigger).not.toHaveAttribute('data-state', 'closed')
+  }
+  await expect(content).toBeVisible()
+
+  // Moving the pointer off the trigger closes it. Radix keeps a "grace area"
+  // between the trigger and its hoverable content: the first pointermove only
+  // arms that area, then a follow-up move outside it closes, so teleport away
+  // in two steps. ur_ui closes on the first leave and stays shut.
+  await page.mouse.move(600, 450)
+  await page.mouse.move(0, 0)
+  await expect(trigger).toHaveAttribute('data-state', 'closed')
+}
+
+for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible', 'radio-group', 'slider', 'tooltip'] as const) {
   test.describe(`${component} keyboard and ARIA`, () => {
     for (const variation of variations.filter((entry) => entry.component === component)) {
       for (const theme of ['light', 'dark'] as Theme[]) {
@@ -288,6 +346,13 @@ for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible', 'radio-
                     side === 'reference' ? referencePage : page,
                     side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
                     variation,
+                  )
+                } else if (component === 'tooltip') {
+                  await checkTooltip(
+                    side === 'reference' ? referencePage : page,
+                    side === 'reference' ? mainLocator(referencePage, variation) : storybookMainLocator(page, variation),
+                    variation,
+                    side,
                   )
                 } else {
                   await checkCheckbox(
