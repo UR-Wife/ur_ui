@@ -2864,8 +2864,11 @@ defmodule UrUi.Components do
     |> Enum.join(" ")
   end
 
-  @tooltip_content_base "z-50 w-fit origin-(--radix-tooltip-content-transform-origin) rounded-md bg-foreground px-3 py-1.5 text-xs text-balance text-background animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
-  @tooltip_arrow_classes "z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground"
+  @tooltip_content_base "group relative z-50 w-fit origin-(--radix-tooltip-content-transform-origin) rounded-md bg-foreground px-3 py-1.5 text-xs text-balance text-background animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
+  # A filled diamond centred on the trigger-facing edge (2px inside it), so it
+  # matches Radix's arrow. `group` on the content above keys the per-side
+  # placement off `data-side`, which the hook flips on collisions.
+  @tooltip_arrow_classes "absolute left-1/2 top-full z-50 size-2.5 -translate-x-1/2 -translate-y-[calc(50%+2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground group-data-[side=bottom]:top-0 group-data-[side=bottom]:-translate-y-[calc(50%-2px)] group-data-[side=left]:left-auto group-data-[side=left]:right-0 group-data-[side=left]:top-1/2 group-data-[side=left]:translate-x-[calc(50%-2px)] group-data-[side=left]:-translate-y-1/2 group-data-[side=right]:left-0 group-data-[side=right]:top-1/2 group-data-[side=right]:-translate-x-[calc(50%-2px)] group-data-[side=right]:-translate-y-1/2"
 
   @doc """
   Tooltip provider (shadcn `TooltipProvider`) — wraps the tooltips in a tree and

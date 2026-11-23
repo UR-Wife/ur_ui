@@ -444,27 +444,29 @@ const UrUiToggleGroup = {
 
 // tooltip/1: as in Radix Tooltip, hovering or focusing the trigger opens the
 // content after the configured delay (hover is delayed; focus opens instantly)
-// and Escape, blur, mouseleave or clicking the trigger closes it. The content
-// is shown beside the trigger per `side`/`side-offset`; positioned through the
-// CSSOM (el.style) so the markup carries no inline style and works under a
-// strict Content-Security-Policy. While open, `data-state` is
+// and Escape, blur, mouseleave, clicking the trigger or scrolling closes it.
+// The content is shown beside the trigger per `side`/`side-offset`; when the
+// preferred side would clip it at the viewport edge it is flipped to the
+// opposite side and clamped back on screen. Positioning runs through the CSSOM
+// (el.style) so the markup carries no inline style and works under a strict
+// Content-Security-Policy. While open, `data-state` is
 // "delayed-open"/"instant-open" and the trigger gets `aria-describedby`
-// pointing at the content.
+// pointing at the content; the exit animation finishes before the content is
+// hidden.
 const UrUiTooltip = {
   mounted() {
-    this.trigger = this.el.querySelector('[data-slot="tooltip-trigger"]')
+    this.trigger = null
     this.content = this.el.querySelector('[data-slot="tooltip-content"]')
-    this.delay = Number(
-      this.el.dataset.delayDuration ??
-        this.el.closest('[data-slot="tooltip-provider"]')?.dataset.delayDuration ??
-        0
-    )
     this.openTimerRef = 0
+    this.closeTimerRef = 0
+    this.repositionFrame = 0
+    this.globalAttached = false
 
     this.onTriggerEnter = () => {
-      if (this.delay > 0) {
+      const delay = this.delayDuration()
+      if (delay > 0) {
         window.clearTimeout(this.openTimerRef)
-        this.openTimerRef = window.setTimeout(() => this.open("delayed-open"), this.delay)
+        this.openTimerRef = window.setTimeout(() => this.open("delayed-open"), delay)
       } else {
         this.open("instant-open")
       }
@@ -473,33 +475,70 @@ const UrUiTooltip = {
     this.onFocus = () => this.open("instant-open")
     this.onBlur = () => this.close()
     this.onClick = () => this.close()
-    this.onKeyDown = (event) => {
+    this.onDocumentKeyDown = (event) => {
       if (event.key === "Escape" && this.isOpen()) this.close()
     }
+    this.onScroll = () => this.requestReposition()
+    this.onResize = () => this.requestReposition()
 
-    if (this.trigger) {
-      this.trigger.addEventListener("mouseenter", this.onTriggerEnter)
-      this.trigger.addEventListener("focus", this.onFocus)
-      this.trigger.addEventListener("mouseleave", this.onTriggerLeave)
-      this.trigger.addEventListener("blur", this.onBlur)
-      this.trigger.addEventListener("click", this.onClick)
-      this.el.addEventListener("keydown", this.onKeyDown)
-    }
+    this.bindTrigger()
   },
   updated() {
-    this.trigger = this.el.querySelector('[data-slot="tooltip-trigger"]')
     this.content = this.el.querySelector('[data-slot="tooltip-content"]')
+    this.bindTrigger()
   },
   destroyed() {
-    if (this.trigger) {
-      this.trigger.removeEventListener("mouseenter", this.onTriggerEnter)
-      this.trigger.removeEventListener("focus", this.onFocus)
-      this.trigger.removeEventListener("mouseleave", this.onTriggerLeave)
-      this.trigger.removeEventListener("blur", this.onBlur)
-      this.trigger.removeEventListener("click", this.onClick)
-    }
-    this.el.removeEventListener("keydown", this.onKeyDown)
+    this.detachTrigger()
+    this.detachGlobalListeners()
     window.clearTimeout(this.openTimerRef)
+    window.clearTimeout(this.closeTimerRef)
+    if (this.repositionFrame) window.cancelAnimationFrame(this.repositionFrame)
+  },
+  // Rebind listeners when a LiveView update replaces the trigger element (or
+  // swaps in a new one under a different id).
+  bindTrigger() {
+    const next = this.el.querySelector('[data-slot="tooltip-trigger"]')
+    if (next === this.trigger) return
+    this.detachTrigger()
+    this.trigger = next
+    if (!this.trigger) return
+    this.trigger.addEventListener("mouseenter", this.onTriggerEnter)
+    this.trigger.addEventListener("focus", this.onFocus)
+    this.trigger.addEventListener("mouseleave", this.onTriggerLeave)
+    this.trigger.addEventListener("blur", this.onBlur)
+    this.trigger.addEventListener("click", this.onClick)
+  },
+  detachTrigger() {
+    if (!this.trigger) return
+    this.trigger.removeEventListener("mouseenter", this.onTriggerEnter)
+    this.trigger.removeEventListener("focus", this.onFocus)
+    this.trigger.removeEventListener("mouseleave", this.onTriggerLeave)
+    this.trigger.removeEventListener("blur", this.onBlur)
+    this.trigger.removeEventListener("click", this.onClick)
+    this.trigger = null
+  },
+  attachGlobalListeners() {
+    if (this.globalAttached) return
+    this.globalAttached = true
+    document.addEventListener("keydown", this.onDocumentKeyDown)
+    window.addEventListener("resize", this.onResize)
+    window.addEventListener("scroll", this.onScroll, true)
+  },
+  detachGlobalListeners() {
+    if (!this.globalAttached) return
+    this.globalAttached = false
+    document.removeEventListener("keydown", this.onDocumentKeyDown)
+    window.removeEventListener("resize", this.onResize)
+    window.removeEventListener("scroll", this.onScroll, true)
+  },
+  // The hover delay is read on every hover so a LiveView-assigned
+  // `delay_duration` change takes effect without a remount.
+  delayDuration() {
+    return Number(
+      this.el.dataset.delayDuration ??
+        this.el.closest('[data-slot="tooltip-provider"]')?.dataset.delayDuration ??
+        0
+    )
   },
   isOpen() {
     return this.content && !this.content.hidden
@@ -512,50 +551,114 @@ const UrUiTooltip = {
   open(state) {
     if (!this.trigger || !this.content) return
     window.clearTimeout(this.openTimerRef)
+    window.clearTimeout(this.closeTimerRef)
+    this.attachGlobalListeners()
     // Take the content out of flow and measure it before it becomes visible.
     this.content.style.position = "fixed"
     this.content.style.visibility = "hidden"
     this.content.hidden = false
-    const triggerRect = this.trigger.getBoundingClientRect()
-    const contentRect = this.content.getBoundingClientRect()
-    const side = this.content.dataset.side || "top"
-    const offset = Number(this.content.dataset.sideOffset || 0)
-    let left
-    let top
-    switch (side) {
-      case "bottom":
-        left = triggerRect.left + triggerRect.width / 2 - contentRect.width / 2
-        top = triggerRect.bottom + offset
-        break
-      case "left":
-        left = triggerRect.left - contentRect.width - offset
-        top = triggerRect.top + triggerRect.height / 2 - contentRect.height / 2
-        break
-      case "right":
-        left = triggerRect.right + offset
-        top = triggerRect.top + triggerRect.height / 2 - contentRect.height / 2
-        break
-      default:
-        left = triggerRect.left + triggerRect.width / 2 - contentRect.width / 2
-        top = triggerRect.top - contentRect.height - offset
-    }
-    this.content.style.left = `${left}px`
-    this.content.style.top = `${top}px`
+    this.place()
     this.content.style.visibility = ""
-    this.content.setAttribute("data-side", side)
     this.setState(state)
     this.trigger.setAttribute("aria-describedby", this.content.id)
+  },
+  // Position (and, if needed, flip and clamp) the content against the viewport.
+  place() {
+    if (!this.trigger || !this.content) return
+    const triggerRect = this.trigger.getBoundingClientRect()
+    const contentRect = this.content.getBoundingClientRect()
+    const preferred = this.content.dataset.side || "top"
+    const offset = Number(this.content.dataset.sideOffset || 0)
+    const margin = 8
+    const viewportWidth = document.documentElement.clientWidth
+    const viewportHeight = document.documentElement.clientHeight
+    const opposite = { top: "bottom", bottom: "top", left: "right", right: "left" }
+
+    const position = (side) => {
+      switch (side) {
+        case "bottom":
+          return {
+            side,
+            left: triggerRect.left + triggerRect.width / 2 - contentRect.width / 2,
+            top: triggerRect.bottom + offset
+          }
+        case "left":
+          return {
+            side,
+            left: triggerRect.left - contentRect.width - offset,
+            top: triggerRect.top + triggerRect.height / 2 - contentRect.height / 2
+          }
+        case "right":
+          return {
+            side,
+            left: triggerRect.right + offset,
+            top: triggerRect.top + triggerRect.height / 2 - contentRect.height / 2
+          }
+        case "top":
+        default:
+          return {
+            side: "top",
+            left: triggerRect.left + triggerRect.width / 2 - contentRect.width / 2,
+            top: triggerRect.top - contentRect.height - offset
+          }
+      }
+    }
+
+    const fits = (candidate) =>
+      candidate.left >= margin &&
+      candidate.top >= margin &&
+      candidate.left + contentRect.width <= viewportWidth - margin &&
+      candidate.top + contentRect.height <= viewportHeight - margin
+
+    let chosen = position(preferred)
+    if (!fits(chosen)) {
+      const flipped = position(opposite[preferred] ?? "top")
+      if (fits(flipped)) chosen = flipped
+    }
+
+    const left = Math.min(Math.max(chosen.left, margin), viewportWidth - contentRect.width - margin)
+    const top = Math.min(Math.max(chosen.top, margin), viewportHeight - contentRect.height - margin)
+
+    this.content.style.left = `${left}px`
+    this.content.style.top = `${top}px`
+    this.content.setAttribute("data-side", chosen.side)
+  },
+  // Coalesce scroll/resize into one reposition per animation frame, so the
+  // bubble follows the trigger (as Radix's auto-update does) without a layout
+  // storm while the user scrolls.
+  requestReposition() {
+    if (this.repositionFrame) return
+    this.repositionFrame = window.requestAnimationFrame(() => {
+      this.repositionFrame = 0
+      if (this.isOpen()) this.place()
+    })
   },
   close() {
     if (!this.content) return
     window.clearTimeout(this.openTimerRef)
+    this.detachGlobalListeners()
+    this.setState("closed")
+    if (this.trigger) this.trigger.removeAttribute("aria-describedby")
+    if (this.content.hidden) return
+    // Let the `data-[state=closed]:animate-out` exit animation finish before
+    // the bubble is hidden.
+    window.clearTimeout(this.closeTimerRef)
+    this.closeTimerRef = window.setTimeout(() => this.hide(), this.closeDuration())
+  },
+  hide() {
+    if (!this.content) return
+    // A re-open may have landed while the exit animation was running.
+    if (this.el.getAttribute("data-state") !== "closed") return
     this.content.hidden = true
     this.content.style.position = ""
     this.content.style.left = ""
     this.content.style.top = ""
     this.content.style.visibility = ""
-    this.setState("closed")
-    if (this.trigger) this.trigger.removeAttribute("aria-describedby")
+  },
+  closeDuration() {
+    if (!this.content) return 0
+    const value = parseFloat(window.getComputedStyle(this.content).animationDuration)
+    return Number.isFinite(value) ? Math.ceil(value * 1000) : 0
   }
 }
 

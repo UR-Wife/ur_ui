@@ -728,11 +728,16 @@ carries the default hover `delay_duration` in milliseconds (default `0`); a
 ```heex
 <.tooltip_provider delay_duration={700}>
   <.tooltip id="save-tooltip">
-    <.tooltip_trigger><.button size={:icon}>★</.button></.tooltip_trigger>
+    <.tooltip_trigger class="inline-flex size-9 items-center justify-center rounded-md border bg-background text-sm font-medium hover:bg-accent hover:text-accent-foreground">★</.tooltip_trigger>
     <.tooltip_content id="save-tooltip-content"><.kbd>⌘S</.kbd> Save</.tooltip_content>
   </.tooltip>
 </.tooltip_provider>
 ```
+
+`tooltip_trigger/1` already renders its own `type="button"` button, so don't
+nest another button (such as `button/1`) inside it — the browser would split
+the nested buttons and the tooltip listeners would end up on the wrong element.
+Style the trigger directly instead.
 
 `tooltip_content/1` requires `id` (the `aria-describedby` target the hook writes
 onto the trigger), and takes `side` (`:top`, `:bottom`, `:left`, `:right`;

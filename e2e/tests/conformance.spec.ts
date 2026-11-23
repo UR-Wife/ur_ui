@@ -5,6 +5,7 @@ import {
   checkAxe,
   checkComputedStyles,
   checkScreenshots,
+  checkTooltipBubble,
   mainLocator,
   matchReferenceParentWidth,
   openReference,
@@ -81,6 +82,9 @@ test.describe('shadcn conformance', () => {
             testInfo,
             result,
           ))
+          if (variation.component === 'tooltip') {
+            await test.step('open bubble', () => checkTooltipBubble(page, referencePage, variation, result, testInfo))
+          }
           const slot = variation.screenshotSlot ?? variation.component
           await test.step('reference axe', () => checkAxe(referencePage, `[data-slot="${slot}"]`, 'reference', result))
           await test.step('ur_ui axe', () => checkAxe(page, `#${variation.storyId}`, 'storybook', result))
