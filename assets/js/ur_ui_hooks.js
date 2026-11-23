@@ -176,11 +176,13 @@ const UrUiProgress = {
   }
 }
 
-// slider/1: single-thumb slider as in Radix Slider. Arrow Left/Right (or
-// Up/Down for vertical) move the value by `step`, Home/End jump to min/max and
-// PageUp/PageDown move by 10x step. The range and thumb positions — including
-// Radix's "in-bounds" thumb offset — are applied through the CSSOM (el.style),
-// so the markup carries no inline style and works under a strict CSP.
+// slider/1: single-thumb slider as in Radix Slider. Keyboard (Arrow
+// Left/Right or Up/Down for vertical move by `step`, Home/End jump to min/max,
+// PageUp/PageDown move by 10x step) and pointer (click/track and thumb drag via
+// mouse/touch/pen) update the value; all changes snap to `step` relative to
+// `min` before being clamped to [min, max]. The range and thumb positions —
+// including Radix's "in-bounds" thumb offset — are applied through the CSSOM
+// (el.style), so the markup carries no inline style and works under a CSP.
 const UrUiSlider = {
   mounted() {
     this.onKeyDown = (event) => {
@@ -188,30 +190,76 @@ const UrUiSlider = {
       if (!thumb || !this.el.contains(thumb)) return
       if (this.el.dataset.disabled !== undefined) return
 
-      const min = Number(this.el.dataset.min ?? 0)
-      const max = Number(this.el.dataset.max ?? 100)
-      const step = Number(this.el.dataset.step ?? 1)
       const horizontal = this.el.dataset.orientation !== "vertical"
 
-      let next
       if (event.key === "Home") {
-        next = min
+        event.preventDefault()
+        this.updateValues(this.min())
       } else if (event.key === "End") {
-        next = max
+        event.preventDefault()
+        this.updateValues(this.max())
       } else {
-        const increment =
-          event.key === (horizontal ? "ArrowRight" : "ArrowUp") ? 1 :
-          event.key === (horizontal ? "ArrowLeft" : "ArrowDown") ? -1 :
-          event.key === "PageUp" ? 10 :
-          event.key === "PageDown" ? -10 :
-          0
-        if (increment === 0) return
-        next = this.currentValue() + increment * step
+        let direction = 0
+        let multiplier = 1
+        if (event.key === (horizontal ? "ArrowRight" : "ArrowUp")) {
+          direction = 1
+        } else if (event.key === (horizontal ? "ArrowLeft" : "ArrowDown")) {
+          direction = -1
+        } else if (event.key === "PageUp") {
+          direction = 1
+          multiplier = 10
+        } else if (event.key === "PageDown") {
+          direction = -1
+          multiplier = 10
+        } else {
+          return
+        }
+        event.preventDefault()
+        this.updateValues(this.nextStepValue(this.currentValue(), direction, multiplier))
       }
-      event.preventDefault()
-      this.setValue(Math.min(max, Math.max(min, next)))
     }
+
+    this.onPointerDown = (event) => {
+      if (this.el.dataset.disabled !== undefined) return
+      const target = event.target
+      if (target.setPointerCapture) {
+        try {
+          target.setPointerCapture(event.pointerId)
+        } catch (_) {}
+      }
+      if (event.cancelable) event.preventDefault()
+      const thumb = this.thumb()
+      if (thumb && target === thumb) {
+        thumb.focus({ preventScroll: true, focusVisible: false })
+      } else {
+        this.slide(event)
+      }
+    }
+
+    this.onPointerMove = (event) => {
+      if (this.el.dataset.disabled !== undefined) return
+      const target = event.target
+      if (target.hasPointerCapture && target.hasPointerCapture(event.pointerId)) {
+        this.slide(event)
+      }
+    }
+
+    this.onPointerUp = (event) => {
+      const target = event.target
+      if (target.hasPointerCapture && target.hasPointerCapture(event.pointerId)) {
+        if (target.releasePointerCapture) {
+          try {
+            target.releasePointerCapture(event.pointerId)
+          } catch (_) {}
+        }
+      }
+    }
+
     this.el.addEventListener("keydown", this.onKeyDown)
+    this.el.addEventListener("pointerdown", this.onPointerDown)
+    this.el.addEventListener("pointermove", this.onPointerMove)
+    this.el.addEventListener("pointerup", this.onPointerUp)
+    this.el.addEventListener("pointercancel", this.onPointerUp)
     this.sync()
   },
   updated() {
@@ -219,15 +267,94 @@ const UrUiSlider = {
   },
   destroyed() {
     this.el.removeEventListener("keydown", this.onKeyDown)
+    this.el.removeEventListener("pointerdown", this.onPointerDown)
+    this.el.removeEventListener("pointermove", this.onPointerMove)
+    this.el.removeEventListener("pointerup", this.onPointerUp)
+    this.el.removeEventListener("pointercancel", this.onPointerUp)
+  },
+  min() {
+    return Number(this.el.dataset.min ?? 0)
+  },
+  max() {
+    return Number(this.el.dataset.max ?? 100)
+  },
+  step() {
+    return Number(this.el.dataset.step ?? 1)
+  },
+  thumb() {
+    return this.el.querySelector('[data-slot="slider-thumb"]')
   },
   currentValue() {
     return Number(this.el.dataset.value ?? 0)
   },
   setValue(value) {
     this.el.dataset.value = String(value)
-    const thumb = this.el.querySelector('[data-slot="slider-thumb"]')
+    const thumb = this.thumb()
     if (thumb) thumb.setAttribute("aria-valuenow", String(value))
     this.sync()
+  },
+  // Snap `value` to the nearest multiple of `step` relative to `min`, then
+  // clamp to [min, max]. This keeps pointer jumps and keyboard changes on-step
+  // even when (max - min) is not divisible by `step`.
+  updateValues(value) {
+    const min = this.min()
+    const max = this.max()
+    const step = this.step()
+    const decimalCount = this.decimalCount(step)
+    const snapped = this.roundValue(Math.round((value - min) / step) * step + min, decimalCount)
+    this.setValue(Math.min(max, Math.max(min, snapped)))
+  },
+  // Radix's getNextStepValue: align the current value to the nearest step
+  // before stepping, so ArrowLeft after End (an unaligned max) lands on a valid
+  // step rather than `max - step`.
+  nextStepValue(value, direction, multiplier) {
+    const min = this.min()
+    const step = this.step()
+    const decimalCount = this.decimalCount(step)
+    const stepsFromMin = (value - min) / step
+    const nearestSteps = Math.round(stepsFromMin)
+    const isAligned =
+      this.roundValue(nearestSteps * step + min, decimalCount) ===
+      this.roundValue(value, decimalCount)
+    let nextSteps
+    if (isAligned) {
+      nextSteps = nearestSteps + multiplier * direction
+    } else if (direction > 0) {
+      nextSteps = Math.ceil(stepsFromMin)
+    } else {
+      nextSteps = Math.floor(stepsFromMin)
+    }
+    return this.roundValue(nextSteps * step + min, decimalCount)
+  },
+  slide(event) {
+    const rect = this.el.getBoundingClientRect()
+    if (this.el.dataset.orientation !== "vertical") {
+      this.updateValues(this.linearScale([0, rect.width], [this.min(), this.max()])(event.clientX - rect.left))
+    } else {
+      this.updateValues(this.linearScale([0, rect.height], [this.max(), this.min()])(event.clientY - rect.top))
+    }
+  },
+  linearScale(input, output) {
+    return (value) => {
+      if (input[0] === input[1] || output[0] === output[1]) return output[0]
+      const ratio = (output[1] - output[0]) / (input[1] - input[0])
+      return output[0] + ratio * (value - input[0])
+    }
+  },
+  decimalCount(value) {
+    if (!Number.isFinite(value)) return 0
+    const str = value.toString()
+    if (str.includes("e")) {
+      const [coefficient, exponent] = str.split("e")
+      const decimalPart = coefficient.split(".")[1] || ""
+      return Math.max(0, decimalPart.length - Number(exponent))
+    }
+    const decimalPart = str.split(".")[1]
+    return decimalPart ? decimalPart.length : 0
+  },
+  roundValue(value, decimalCount) {
+    const rounder = Math.pow(10, decimalCount)
+    return Math.round(value * rounder) / rounder
   },
   sync() {
     const thumb = this.el.querySelector('[data-slot="slider-thumb"]')

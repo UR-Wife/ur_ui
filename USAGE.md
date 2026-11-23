@@ -198,34 +198,48 @@ Content-Security-Policy. Size it through `class` (e.g. `class: "w-64"`).
 `UrUi.Components.slider/1` — a single-thumb range slider (shadcn `Slider`):
 a `data-slot="slider"` root carrying `data-orientation` (and `data-disabled`
 when disabled), plus a `role="slider"` thumb with `aria-valuemin`,
-`aria-valuemax`, `aria-valuenow` and `aria-orientation`. Attrs:
-`default_value` (default `50`), `min` (default `0`), `max` (default `100`),
-`step` (default `1`), `orientation` (`:horizontal` default, `:vertical`),
-`disabled`, `class` and `rest`.
+`aria-valuemax`, `aria-valuenow` and `aria-orientation`. Attrs: `id` (required —
+the hook needs a stable DOM id), `default_value` (default `50`), `min`
+(default `0`), `max` (default `100`), `step` (default `1`), `orientation`
+(`:horizontal` default, `:vertical`), `disabled`, `class` and `rest`.
 
 ```heex
 <div class="w-64">
-  <.slider default_value={50} aria-label="Volume" />
+  <.slider id="volume" default_value={50} aria-label="Volume" />
 </div>
 ```
 
 Pass `aria-label` (a global attr) to name the thumb for assistive tech — it is
-applied to the thumb, not the root. For a vertical slider, wrap it in a sized
-container (`h-44` works like the shadcn docs):
+applied to the thumb, not the root. `aria-labelledby`, `aria-valuetext` and
+`aria-describedby` are forwarded to the thumb the same way, so an externally
+labelled slider reads correctly:
 
 ```heex
-<div class="h-44">
-  <.slider orientation={:vertical} aria-label="Volume" />
+<span id="volume-label">Volume</span>
+<div class="w-64">
+  <.slider id="volume" aria-labelledby="volume-label" aria-valuetext="loud" />
 </div>
 ```
 
-**Keyboard.** Arrow Left/Right (or Up/Down for vertical) move the value by
+For a vertical slider, wrap it in a sized container (`h-44` works like the
+shadcn docs):
+
+```heex
+<div class="h-44">
+  <.slider id="volume" orientation={:vertical} aria-label="Volume" />
+</div>
+```
+
+**Interaction.** Arrow Left/Right (or Up/Down for vertical) move the value by
 `step`, Home/End jump to `min`/`max`, and PageUp/PageDown move by `10 × step`.
-The `UrUiSlider` hook (see **LiveView hooks** above) implements this and applies
-the range/thumb positions — including Radix's in-bounds thumb offset — through
-the CSSOM, so the markup carries no inline styles and works under a strict
-Content-Security-Policy. Without the hook, the slider still renders but the
-thumb/range sit at the minimum and keyboard navigation is inert.
+Clicking the track or dragging the thumb (mouse, touch or pen) positions the
+thumb; every change snaps to a multiple of `step` from `min` before being
+clamped to `[min, max]`. The `UrUiSlider` hook (see **LiveView hooks** above)
+implements this and applies the range/thumb positions — including Radix's
+in-bounds thumb offset — through the CSSOM, so the markup carries no inline
+styles and works under a strict Content-Security-Policy. Without the hook, the
+slider still renders but the thumb/range sit at the minimum and interaction is
+inert.
 
 ### pagination
 

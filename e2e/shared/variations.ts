@@ -103,7 +103,7 @@ export const variations: Variation[] = [
   ...single('radio-group', ['default', 'default_value', 'disabled']),
   ...single('separator', ['horizontal', 'vertical', 'semantic', 'custom_class']),
   ...single('skeleton', ['default', 'custom_class']),
-  ...single('slider', ['default', 'vertical', 'disabled']),
+  ...single('slider', ['default', 'vertical', 'step', 'disabled']),
   ...single('spinner', ['default', 'custom_class']),
   ...single('switch', ['default', 'checked', 'disabled', 'sm']),
   ...single('table', ['default', 'with_footer', 'selected_row', 'empty']),

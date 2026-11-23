@@ -8,13 +8,14 @@ defmodule UrUi.SliderTest do
   @base "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col"
 
   defp render_slider(assigns \\ %{}) do
-    render_component(&Components.slider/1, Map.merge(%{"aria-label": "Volume"}, Map.new(assigns)))
+    render_component(&Components.slider/1, Map.merge(%{"aria-label": "Volume", id: "volume"}, Map.new(assigns)))
   end
 
   test "slider renders a named role=slider thumb with shadcn's classes" do
     html = render_slider()
 
     [root] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=slider]")
+    assert Floki.attribute(root, "id") == ["volume"]
     assert Floki.attribute(root, "data-orientation") == ["horizontal"]
     assert Floki.attribute(root, "class") == [@base]
     assert Floki.attribute(root, "phx-hook") == ["UrUiSlider"]
@@ -68,21 +69,41 @@ defmodule UrUi.SliderTest do
   end
 
   test "slider extends classes and passes global attrs" do
-    html = render_slider(%{class: "w-64", id: "vol"})
+    html = render_slider(%{class: "w-64", id: "vol", "data-volume": "loud"})
 
-    assert Floki.parse_fragment!(html)
-           |> Floki.find("[data-slot=slider]")
-           |> Floki.attribute("class") == ["#{@base} w-64"]
-
-    assert html =~ ~s(id="vol")
+    [root] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=slider]")
+    assert Floki.attribute(root, "class") == ["#{@base} w-64"]
+    assert Floki.attribute(root, "id") == ["vol"]
+    assert Floki.attribute(root, "data-volume") == ["loud"]
   end
 
   test "slider omits the aria-label on the thumb when none is given" do
-    html = render_component(&Components.slider/1, %{})
+    html = render_component(&Components.slider/1, %{id: "volume"})
 
     assert html =~ ~s(role="slider")
 
     [thumb] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=slider-thumb]")
     assert Floki.attribute(thumb, "aria-label") == []
+  end
+
+  test "slider requires a stable id" do
+    assert_raise KeyError, ~r/key :id not found/, fn ->
+      render_component(&Components.slider/1, %{})
+    end
+  end
+
+  test "slider forwards aria-labelledby and aria-valuetext to the thumb" do
+    html =
+      render_slider(%{"aria-labelledby": "volume-label", "aria-valuetext": "loud", "aria-describedby": "volume-hint"})
+
+    [root] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=slider]")
+    refute Floki.attribute(root, "aria-labelledby") |> List.first()
+    refute Floki.attribute(root, "aria-valuetext") |> List.first()
+    refute Floki.attribute(root, "aria-describedby") |> List.first()
+
+    [thumb] = Floki.parse_fragment!(html) |> Floki.find("[data-slot=slider-thumb]")
+    assert Floki.attribute(thumb, "aria-labelledby") == ["volume-label"]
+    assert Floki.attribute(thumb, "aria-valuetext") == ["loud"]
+    assert Floki.attribute(thumb, "aria-describedby") == ["volume-hint"]
   end
 end

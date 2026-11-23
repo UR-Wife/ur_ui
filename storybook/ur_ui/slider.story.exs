@@ -29,19 +29,25 @@ defmodule Storybook.UrUi.Slider do
         id: :default,
         description: "Fifty percent",
         template: sized(),
-        attributes: %{"aria-label": "Volume"}
+        attributes: %{id: "slider-default", "aria-label": "Volume"}
       },
       %Variation{
         id: :vertical,
         description: "Vertical orientation",
         template: vertical(),
-        attributes: %{orientation: :vertical, "aria-label": "Volume"}
+        attributes: %{id: "slider-vertical", orientation: :vertical, "aria-label": "Volume"}
+      },
+      %Variation{
+        id: :step,
+        description: "Range not divisible by step",
+        template: sized(),
+        attributes: %{id: "slider-step", default_value: 0, min: 0, max: 100, step: 3, "aria-label": "Volume"}
       },
       %Variation{
         id: :disabled,
         description: "Disabled",
         template: sized(),
-        attributes: %{disabled: true, "aria-label": "Volume"}
+        attributes: %{id: "slider-disabled", disabled: true, "aria-label": "Volume"}
       }
     ]
   end

@@ -187,23 +187,48 @@ async function checkSlider(page: Page, root: Locator, variation: Variation) {
   const horizontal = variation.variant !== 'vertical'
   const forward = horizontal ? 'ArrowRight' : 'ArrowUp'
   const backward = horizontal ? 'ArrowLeft' : 'ArrowDown'
+  const step = variation.variant === 'step' ? 3 : 1
 
   await thumb.focus()
   const min = Number(await thumb.getAttribute('aria-valuemin'))
   const max = Number(await thumb.getAttribute('aria-valuemax'))
+  const snap = (value: number) => min + Math.round((value - min) / step) * step
+  const endValue = snap(max)
 
   await page.keyboard.press('Home')
   await expect(thumb).toHaveAttribute('aria-valuenow', String(min))
 
   await page.keyboard.press('End')
-  await expect(thumb).toHaveAttribute('aria-valuenow', String(max))
+  await expect(thumb).toHaveAttribute('aria-valuenow', String(endValue))
 
   await page.keyboard.press(backward)
-  await expect(thumb).not.toHaveAttribute('aria-valuenow', String(max))
+  await expect(thumb).not.toHaveAttribute('aria-valuenow', String(endValue))
 
   await page.keyboard.press('Home')
   await page.keyboard.press(forward)
-  await expect(thumb).toHaveAttribute('aria-valuenow', String(min + 1))
+  await expect(thumb).toHaveAttribute('aria-valuenow', String(min + step))
+
+  // pointer: clicking the track jumps the thumb to a step-aligned value.
+  await page.keyboard.press('Home')
+  const bounds = await root.boundingBox()
+  if (!bounds) throw new Error('slider root has no bounding box')
+  const point = (fraction: number) =>
+    horizontal
+      ? { x: bounds.width * fraction, y: bounds.height / 2 }
+      : { x: bounds.width / 2, y: bounds.height * (1 - fraction) }
+  const click = point(0.75)
+  await root.click({ position: click })
+  await expect(thumb).toHaveAttribute('aria-valuenow', String(snap(0.75 * (max - min) + min)))
+
+  // pointer: dragging the thumb (mouse) to a step-aligned value. Both of the
+  // pointer steps above exercise the Pointer Events code path, which is the
+  // same path touch and pen use.
+  const drag = point(0.24)
+  await thumb.hover()
+  await page.mouse.down()
+  await page.mouse.move(bounds.x + drag.x, bounds.y + drag.y, { steps: 4 })
+  await page.mouse.up()
+  await expect(thumb).toHaveAttribute('aria-valuenow', String(snap(0.24 * (max - min) + min)))
 }
 
 for (const component of ['accordion', 'tabs', 'checkbox', 'collapsible', 'radio-group', 'slider'] as const) {

@@ -992,9 +992,13 @@ defmodule UrUi.Components do
   `aria-valuenow` and `aria-orientation`. The range and thumb positions are
   applied by the `UrUiSlider` hook (from `UrUiHooks`, see USAGE.md) through the
   CSSOM — no inline styles in the markup — and the hook implements Radix's
-  keyboard behavior (Arrow Left/Right/Up/Down, Home, End, PageUp/PageDown).
-  Pass `aria-label` (a global attr) to name the thumb for assistive tech.
+  keyboard, click/track and pointer drag behavior (Arrow Left/Right/Up/Down,
+  Home, End, PageUp/PageDown, plus mouse/touch/pen). `id` is required: LiveView
+  hooks need a stable DOM id. Pass `aria-label` to name the thumb for assistive
+  tech; `aria-labelledby`, `aria-valuetext` and `aria-describedby` are likewise
+  forwarded to the thumb, never left stranded on the root.
   """
+  attr(:id, :string, required: true, doc: "stable, unique DOM id (the hook needs it)")
   attr(:default_value, :integer, default: 50, doc: "initial value")
   attr(:min, :integer, default: 0, doc: "minimum value")
   attr(:max, :integer, default: 100, doc: "maximum value")
@@ -1009,31 +1013,40 @@ defmodule UrUi.Components do
   attr(:class, :string, default: nil, doc: "extra classes appended to base classes")
   attr(:rest, :global)
 
+  # aria attributes that describe the slider's focusable thumb; they are moved
+  # off the root and onto the `role="slider"` span so assistive tech reads a
+  # properly named, fully described slider.
+  @thumb_aria_attrs ~w(aria-label aria-labelledby aria-valuetext aria-describedby)
+
   def slider(assigns) do
     rest = assigns[:rest] || %{}
 
-    {aria_label, rest} =
-      cond do
-        Map.has_key?(rest, "aria-label") ->
-          {Map.get(rest, "aria-label"), Map.delete(rest, "aria-label")}
+    {thumb_aria, rest} =
+      Enum.reduce(@thumb_aria_attrs, {%{}, rest}, fn name, {thumb_aria, rest} ->
+        cond do
+          Map.has_key?(rest, name) ->
+            {Map.put(thumb_aria, name, Map.get(rest, name)), Map.delete(rest, name)}
 
-        Map.has_key?(rest, :"aria-label") ->
-          {Map.get(rest, :"aria-label"), Map.delete(rest, :"aria-label")}
+          Map.has_key?(rest, String.to_atom(name)) ->
+            {Map.put(thumb_aria, name, Map.get(rest, String.to_atom(name))),
+             Map.delete(rest, String.to_atom(name))}
 
-        true ->
-          {nil, rest}
-      end
+          true ->
+            {thumb_aria, rest}
+        end
+      end)
 
     assigns =
       assign(assigns,
         orientation: if(assigns[:orientation] == :vertical, do: "vertical", else: "horizontal"),
-        aria_label: aria_label,
+        thumb_aria: thumb_aria,
         rest: rest,
         classes: slider_classes(assigns)
       )
 
     ~H"""
     <span
+      id={@id}
       data-slot="slider"
       data-orientation={@orientation}
       data-disabled={@disabled && ""}
@@ -1063,7 +1076,7 @@ defmodule UrUi.Components do
       <span
         data-slot="slider-thumb"
         role="slider"
-        aria-label={@aria_label}
+        {@thumb_aria}
         aria-valuemin={@min}
         aria-valuenow={@default_value}
         aria-valuemax={@max}

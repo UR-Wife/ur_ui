@@ -399,6 +399,13 @@ function SliderDemo({ variant }: { variant: string }) {
       </div>
     )
   }
+  if (variant === 'step') {
+    return (
+      <div className="w-64">
+        <Slider defaultValue={[0]} min={0} max={100} step={3} aria-label="Volume" />
+      </div>
+    )
+  }
   if (variant === 'disabled') {
     return (
       <div className="w-64">
