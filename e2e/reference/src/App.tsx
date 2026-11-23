@@ -55,6 +55,7 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Toggle } from '@/components/ui/toggle'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Textarea } from '@/components/ui/textarea'
 
 function AccordionDemo({ variant }: { variant: string }) {
@@ -278,6 +279,20 @@ function KbdDemo({ variant }: { variant: string }) {
   return <Kbd>K</Kbd>
 }
 
+function ToggleGroupDemo({ variant }: { variant: string }) {
+  const items = (
+    <>
+      <ToggleGroupItem value="bold">Bold</ToggleGroupItem>
+      <ToggleGroupItem value="italic">Italic</ToggleGroupItem>
+      <ToggleGroupItem value="underline">Underline</ToggleGroupItem>
+    </>
+  )
+  if (variant === 'multiple') {
+    return <ToggleGroup type="multiple" variant="outline" defaultValue={['bold', 'italic']}>{items}</ToggleGroup>
+  }
+  return <ToggleGroup type="single" variant="outline" defaultValue="bold">{items}</ToggleGroup>
+}
+
 function ToggleDemo({ variant }: { variant: string }) {
   if (variant === 'pressed') return <Toggle pressed>Italic</Toggle>
   if (variant === 'outline') return <Toggle variant="outline">Underline</Toggle>
@@ -498,6 +513,7 @@ function Demo({ variation }: { variation: Variation }): ReactNode {
     case 'spinner': return <SpinnerDemo variant={variant} />
     case 'skeleton': return <Skeleton className={variant === 'custom_class' ? 'h-4 w-[250px] opacity-80' : 'h-4 w-[250px]'} />
     case 'table': return <TableDemo variant={variant} />
+    case 'toggle-group': return <ToggleGroupDemo variant={variant} />
     case 'toggle': return <ToggleDemo variant={variant} />
     case 'tabs': return <TabsDemo variant={variant} />
     case 'textarea': return <TextareaDemo variant={variant} />

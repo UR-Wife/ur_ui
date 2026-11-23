@@ -176,5 +176,45 @@ const UrUiProgress = {
   }
 }
 
-export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox, UrUiRadioGroup, UrUiProgress }
+// toggle_group/1: roving focus as in Radix ToggleGroup. Arrow keys move focus
+// to the next/previous enabled item (wrapping), Home/End to the first/last; in
+// single mode the focused item is also clicked (selected). Enter is prevented
+// in single mode (selection is via Space/click), as in Radix RadioGroup.
+const UrUiToggleGroup = {
+  mounted() {
+    this.onKeyDown = (event) => {
+      const item = event.target.closest('[data-slot="toggle-group-item"]')
+      if (!item || !this.el.contains(item)) return
+      const type = this.el.dataset.type || "single"
+      const items = Array.from(this.el.querySelectorAll('[data-slot="toggle-group-item"]')).filter(
+        (el) => !el.disabled
+      )
+      const index = items.indexOf(item)
+      if (index < 0) return
+      if (event.key === "Enter" && type === "single") {
+        event.preventDefault()
+        return
+      }
+      const count = items.length
+      const next = {
+        ArrowRight: (index + 1) % count,
+        ArrowDown: (index + 1) % count,
+        ArrowLeft: (index - 1 + count) % count,
+        ArrowUp: (index - 1 + count) % count,
+        Home: 0,
+        End: count - 1
+      }[event.key]
+      if (next === undefined) return
+      event.preventDefault()
+      items[next].focus()
+      if (type === "single") items[next].click()
+    }
+    this.el.addEventListener("keydown", this.onKeyDown)
+  },
+  destroyed() {
+    this.el.removeEventListener("keydown", this.onKeyDown)
+  }
+}
+
+export const UrUiHooks = { UrUiTabs, UrUiAvatarImage, UrUiCheckbox, UrUiRadioGroup, UrUiProgress, UrUiToggleGroup }
 export default UrUiHooks

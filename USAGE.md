@@ -57,7 +57,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 Component entries are added as each component lands (batch 1: button,
 badge, label, separator, skeleton, avatar, card, alert, table, input,
-textarea, aspect-ratio, checkbox, collapsible, empty, field, kbd, breadcrumb, pagination, progress, radio-group, spinner, switch, toggle, tabs, accordion).
+textarea, aspect-ratio, checkbox, collapsible, empty, field, kbd, breadcrumb, pagination, progress, radio-group, spinner, switch, toggle, toggle-group, tabs, accordion).
 
 ### button
 
@@ -572,6 +572,25 @@ When `name` is given a hidden `<input type="radio">` is rendered per item, with
 previous/next enabled item (wrapping); Home and End jump to the first/last, as
 in Radix. This uses the `UrUiRadioGroup` hook (see **LiveView hooks** above).
 Without it, clicking still works; only arrow-key navigation is missing.
+
+### toggle-group
+
+`UrUi.Components.toggle_group/1` — a group of toggle buttons (shadcn
+`ToggleGroup`). Attrs: `id` (required), `type` (`:single` renders a
+`role="radiogroup"` of `role="radio"` items; `:multiple` a `role="toolbar"` of
+`aria-pressed` buttons), `variant`, `size`, `spacing`, `default_value`, `class`
+and `rest`. Each `:item` slot carries a `value` (required) and optional
+`disabled`; its content is the button label.
+
+```heex
+<.toggle_group id="format" type="single" variant="outline" default_value="bold">
+  <:item value="bold">Bold</:item>
+  <:item value="italic">Italic</:item>
+</.toggle_group>
+```
+
+Selection runs client-side through `Phoenix.LiveView.JS`; arrow keys move focus
+through the `UrUiToggleGroup` hook (see **LiveView hooks** above).
 
 ### tabs
 
