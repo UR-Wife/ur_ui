@@ -461,7 +461,7 @@ const UrUiTooltip = {
   mounted() {
     this.trigger = null
     this.content = this.el.querySelector('[data-slot="tooltip-content"]')
-    this.side = this.content?.dataset.side || "top"
+    this.requestedSide = this.content?.dataset.side || "top"
     this.openTimerRef = 0
     this.closeTimerRef = 0
     this.leaveTimerRef = 0
@@ -470,6 +470,7 @@ const UrUiTooltip = {
     this.contentBound = null
 
     this.onTriggerEnter = () => {
+      window.clearTimeout(this.leaveTimerRef)
       const delay = this.delayDuration()
       if (delay > 0) {
         window.clearTimeout(this.openTimerRef)
@@ -503,8 +504,8 @@ const UrUiTooltip = {
     const next = this.el.querySelector('[data-slot="tooltip-content"]')
     if (next !== this.content) {
       this.content = next
-      this.side = next?.dataset.side || "top"
     }
+    this.requestedSide = next?.dataset.side || "top"
     this.bindTrigger()
     this.bindContent()
   },
@@ -593,6 +594,7 @@ const UrUiTooltip = {
     if (!this.trigger || !this.content) return
     window.clearTimeout(this.openTimerRef)
     window.clearTimeout(this.closeTimerRef)
+    window.clearTimeout(this.leaveTimerRef)
     this.stateName = state
     this.attachGlobalListeners()
     // Take the content out of flow and measure it before it becomes visible.
@@ -611,6 +613,7 @@ const UrUiTooltip = {
     window.clearTimeout(this.leaveTimerRef)
     window.clearTimeout(this.closeTimerRef)
     if (this.content && !this.content.hidden && this.el.getAttribute("data-state") === "closed") {
+      this.attachGlobalListeners()
       this.setState(this.stateName || "instant-open")
       if (this.trigger) this.trigger.setAttribute("aria-describedby", this.content.id)
     }
@@ -629,7 +632,7 @@ const UrUiTooltip = {
     // the bubble is animating.
     const contentWidth = this.content.offsetWidth
     const contentHeight = this.content.offsetHeight
-    const preferred = this.side || "top"
+    const preferred = this.requestedSide || "top"
     const offset = Number(this.content.dataset.sideOffset || 0)
     const margin = 8
     const viewportWidth = document.documentElement.clientWidth
@@ -683,14 +686,16 @@ const UrUiTooltip = {
 
     // A transformed ancestor becomes the containing block for the fixed
     // content, so viewport coordinates would be offset (and scaled) again.
-    // Translate them into that ancestor's frame.
-    const context = this.fixedContext()
-    if (context) {
-      const ctxRect = context.getBoundingClientRect()
-      const scaleX = context.offsetWidth ? ctxRect.width / context.offsetWidth : 1
-      const scaleY = context.offsetHeight ? ctxRect.height / context.offsetHeight : 1
-      left = (left - ctxRect.left) / scaleX
-      top = (top - ctxRect.top) / scaleY
+    // Translate them into that ancestor's frame, accounting for its border.
+    const containingBlock = this.fixedContext()
+    if (containingBlock) {
+      const r = containingBlock.getBoundingClientRect()
+      const sx = r.width / containingBlock.offsetWidth || 1
+      const sy = r.height / containingBlock.offsetHeight || 1
+      const viewportX = left
+      const viewportY = top
+      left = (viewportX - r.left) / sx - containingBlock.clientLeft
+      top = (viewportY - r.top) / sy - containingBlock.clientTop
     }
 
     this.content.style.left = `${left}px`
