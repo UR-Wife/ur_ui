@@ -22,6 +22,7 @@ defmodule Storybook.UrUi do
   def entry("radio-group"), do: [icon: {:fa, "circle-dot", :thin}]
   def entry("pagination"), do: [icon: {:fa, "ellipsis", :thin}]
   def entry("progress"), do: [icon: {:fa, "bars-progress", :thin}]
+  def entry("slider"), do: [icon: {:fa, "sliders", :thin}]
   def entry("collapsible"), do: [icon: {:fa, "square-caret-down", :thin}]
   def entry("empty"), do: [icon: {:fa, "inbox", :thin}]
   def entry("field"), do: [icon: {:fa, "input-text", :thin}]
