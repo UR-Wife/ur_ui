@@ -444,12 +444,16 @@ const UrUiToggleGroup = {
 
 // tooltip/1: as in Radix Tooltip, hovering or focusing the trigger opens the
 // content after the configured delay (hover is delayed; focus opens instantly)
-// and Escape, blur, mouseleave, clicking the trigger or scrolling closes it.
+// and Escape, blur, clicking the trigger or scrolling closes it. Leaving the
+// trigger closes after a short grace window and the bubble itself stays
+// hoverable, so the pointer can cross the `side_offset` gap without closing it.
 // The content is shown beside the trigger per `side`/`side-offset`; when the
 // preferred side would clip it at the viewport edge it is flipped to the
-// opposite side and clamped back on screen. Positioning runs through the CSSOM
-// (el.style) so the markup carries no inline style and works under a strict
-// Content-Security-Policy. While open, `data-state` is
+// opposite side and clamped back on screen. Coordinates are measured against the
+// viewport but written in the fixed-position containing block's frame, so a
+// transformed ancestor does not displace the bubble. Positioning runs through
+// the CSSOM (el.style) so the markup carries no inline style and works under a
+// strict Content-Security-Policy. While open, `data-state` is
 // "delayed-open"/"instant-open" and the trigger gets `aria-describedby`
 // pointing at the content; the exit animation finishes before the content is
 // hidden.
@@ -460,8 +464,10 @@ const UrUiTooltip = {
     this.side = this.content?.dataset.side || "top"
     this.openTimerRef = 0
     this.closeTimerRef = 0
+    this.leaveTimerRef = 0
     this.repositionFrame = 0
     this.globalAttached = false
+    this.contentBound = null
 
     this.onTriggerEnter = () => {
       const delay = this.delayDuration()
@@ -472,7 +478,15 @@ const UrUiTooltip = {
         this.open("instant-open")
       }
     }
-    this.onTriggerLeave = () => this.close()
+    // Close after a short grace window so the pointer can cross the
+    // `side_offset` gap onto the (still hoverable) bubble without closing it.
+    this.onTriggerLeave = () => {
+      window.clearTimeout(this.openTimerRef)
+      window.clearTimeout(this.leaveTimerRef)
+      this.leaveTimerRef = window.setTimeout(() => this.close(), this.leaveDuration())
+    }
+    this.onContentEnter = () => this.keepOpen()
+    this.onContentLeave = () => this.close()
     this.onFocus = () => this.open("instant-open")
     this.onBlur = () => this.close()
     this.onClick = () => this.close()
@@ -483,6 +497,7 @@ const UrUiTooltip = {
     this.onResize = () => this.requestReposition()
 
     this.bindTrigger()
+    this.bindContent()
   },
   updated() {
     const next = this.el.querySelector('[data-slot="tooltip-content"]')
@@ -491,12 +506,15 @@ const UrUiTooltip = {
       this.side = next?.dataset.side || "top"
     }
     this.bindTrigger()
+    this.bindContent()
   },
   destroyed() {
     this.detachTrigger()
+    this.detachContent()
     this.detachGlobalListeners()
     window.clearTimeout(this.openTimerRef)
     window.clearTimeout(this.closeTimerRef)
+    window.clearTimeout(this.leaveTimerRef)
     if (this.repositionFrame) window.cancelAnimationFrame(this.repositionFrame)
   },
   // Rebind listeners when a LiveView update replaces the trigger element (or
@@ -521,6 +539,24 @@ const UrUiTooltip = {
     this.trigger.removeEventListener("blur", this.onBlur)
     this.trigger.removeEventListener("click", this.onClick)
     this.trigger = null
+  },
+  // Keep the bubble hoverable: bind enter/leave on the content so a pointer
+  // moving from the trigger onto it does not close it (and rebind when a
+  // LiveView update swaps the content node).
+  bindContent() {
+    const next = this.content
+    if (next === this.contentBound) return
+    this.detachContent()
+    this.contentBound = next
+    if (!this.contentBound) return
+    this.contentBound.addEventListener("mouseenter", this.onContentEnter)
+    this.contentBound.addEventListener("mouseleave", this.onContentLeave)
+  },
+  detachContent() {
+    if (!this.contentBound) return
+    this.contentBound.removeEventListener("mouseenter", this.onContentEnter)
+    this.contentBound.removeEventListener("mouseleave", this.onContentLeave)
+    this.contentBound = null
   },
   attachGlobalListeners() {
     if (this.globalAttached) return
@@ -557,6 +593,7 @@ const UrUiTooltip = {
     if (!this.trigger || !this.content) return
     window.clearTimeout(this.openTimerRef)
     window.clearTimeout(this.closeTimerRef)
+    this.stateName = state
     this.attachGlobalListeners()
     // Take the content out of flow and measure it before it becomes visible.
     this.content.style.position = "fixed"
@@ -566,6 +603,22 @@ const UrUiTooltip = {
     this.content.style.visibility = ""
     this.setState(state)
     this.trigger.setAttribute("aria-describedby", this.content.id)
+  },
+  // The pointer reached the bubble: cancel an imminent close and, if a leave
+  // already started the exit animation, restore the open state.
+  keepOpen() {
+    window.clearTimeout(this.openTimerRef)
+    window.clearTimeout(this.leaveTimerRef)
+    window.clearTimeout(this.closeTimerRef)
+    if (this.content && !this.content.hidden && this.el.getAttribute("data-state") === "closed") {
+      this.setState(this.stateName || "instant-open")
+      if (this.trigger) this.trigger.setAttribute("aria-describedby", this.content.id)
+    }
+  },
+  // Grace period (ms) after a pointer-leave before closing, matching Radix's
+  // hoverable Tooltip content across the side offset.
+  leaveDuration() {
+    return 100
   },
   // Position (and, if needed, flip and clamp) the content against the viewport.
   place() {
@@ -625,12 +678,50 @@ const UrUiTooltip = {
       if (fits(flipped)) chosen = flipped
     }
 
-    const left = Math.min(Math.max(chosen.left, margin), viewportWidth - contentWidth - margin)
-    const top = Math.min(Math.max(chosen.top, margin), viewportHeight - contentHeight - margin)
+    let left = Math.min(Math.max(chosen.left, margin), viewportWidth - contentWidth - margin)
+    let top = Math.min(Math.max(chosen.top, margin), viewportHeight - contentHeight - margin)
+
+    // A transformed ancestor becomes the containing block for the fixed
+    // content, so viewport coordinates would be offset (and scaled) again.
+    // Translate them into that ancestor's frame.
+    const context = this.fixedContext()
+    if (context) {
+      const ctxRect = context.getBoundingClientRect()
+      const scaleX = context.offsetWidth ? ctxRect.width / context.offsetWidth : 1
+      const scaleY = context.offsetHeight ? ctxRect.height / context.offsetHeight : 1
+      left = (left - ctxRect.left) / scaleX
+      top = (top - ctxRect.top) / scaleY
+    }
 
     this.content.style.left = `${left}px`
     this.content.style.top = `${top}px`
     this.content.setAttribute("data-side", chosen.side)
+  },
+  // Walk up from the content to the nearest ancestor that establishes the
+  // containing block for `position: fixed` (transform, perspective, filter,
+  // backdrop-filter, will-change or paint/layout containment). Returns null when
+  // the viewport is the containing block.
+  fixedContext() {
+    let el = this.content?.parentElement
+    while (el && el !== document.body) {
+      const style = window.getComputedStyle(el)
+      if (
+        style.transform !== "none" ||
+        style.perspective !== "none" ||
+        style.filter !== "none" ||
+        style.backdropFilter !== "none" ||
+        style.willChange === "transform" ||
+        style.willChange === "perspective" ||
+        style.willChange === "filter" ||
+        style.contain === "paint" ||
+        style.contain === "strict" ||
+        style.contain === "content"
+      ) {
+        return el
+      }
+      el = el.parentElement
+    }
+    return null
   },
   // Coalesce scroll/resize into one reposition per animation frame, so the
   // bubble follows the trigger (as Radix's auto-update does) without a layout
