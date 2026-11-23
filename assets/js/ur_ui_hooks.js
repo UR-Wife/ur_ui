@@ -457,6 +457,7 @@ const UrUiTooltip = {
   mounted() {
     this.trigger = null
     this.content = this.el.querySelector('[data-slot="tooltip-content"]')
+    this.side = this.content?.dataset.side || "top"
     this.openTimerRef = 0
     this.closeTimerRef = 0
     this.repositionFrame = 0
@@ -484,7 +485,11 @@ const UrUiTooltip = {
     this.bindTrigger()
   },
   updated() {
-    this.content = this.el.querySelector('[data-slot="tooltip-content"]')
+    const next = this.el.querySelector('[data-slot="tooltip-content"]')
+    if (next !== this.content) {
+      this.content = next
+      this.side = next?.dataset.side || "top"
+    }
     this.bindTrigger()
   },
   destroyed() {
@@ -566,8 +571,12 @@ const UrUiTooltip = {
   place() {
     if (!this.trigger || !this.content) return
     const triggerRect = this.trigger.getBoundingClientRect()
-    const contentRect = this.content.getBoundingClientRect()
-    const preferred = this.content.dataset.side || "top"
+    // offsetWidth/offsetHeight are the layout size without transforms, so the
+    // enter animation's zoom/slide cannot skew the coordinates we store while
+    // the bubble is animating.
+    const contentWidth = this.content.offsetWidth
+    const contentHeight = this.content.offsetHeight
+    const preferred = this.side || "top"
     const offset = Number(this.content.dataset.sideOffset || 0)
     const margin = 8
     const viewportWidth = document.documentElement.clientWidth
@@ -579,27 +588,27 @@ const UrUiTooltip = {
         case "bottom":
           return {
             side,
-            left: triggerRect.left + triggerRect.width / 2 - contentRect.width / 2,
+            left: triggerRect.left + triggerRect.width / 2 - contentWidth / 2,
             top: triggerRect.bottom + offset
           }
         case "left":
           return {
             side,
-            left: triggerRect.left - contentRect.width - offset,
-            top: triggerRect.top + triggerRect.height / 2 - contentRect.height / 2
+            left: triggerRect.left - contentWidth - offset,
+            top: triggerRect.top + triggerRect.height / 2 - contentHeight / 2
           }
         case "right":
           return {
             side,
             left: triggerRect.right + offset,
-            top: triggerRect.top + triggerRect.height / 2 - contentRect.height / 2
+            top: triggerRect.top + triggerRect.height / 2 - contentHeight / 2
           }
         case "top":
         default:
           return {
             side: "top",
-            left: triggerRect.left + triggerRect.width / 2 - contentRect.width / 2,
-            top: triggerRect.top - contentRect.height - offset
+            left: triggerRect.left + triggerRect.width / 2 - contentWidth / 2,
+            top: triggerRect.top - contentHeight - offset
           }
       }
     }
@@ -607,8 +616,8 @@ const UrUiTooltip = {
     const fits = (candidate) =>
       candidate.left >= margin &&
       candidate.top >= margin &&
-      candidate.left + contentRect.width <= viewportWidth - margin &&
-      candidate.top + contentRect.height <= viewportHeight - margin
+      candidate.left + contentWidth <= viewportWidth - margin &&
+      candidate.top + contentHeight <= viewportHeight - margin
 
     let chosen = position(preferred)
     if (!fits(chosen)) {
@@ -616,8 +625,8 @@ const UrUiTooltip = {
       if (fits(flipped)) chosen = flipped
     }
 
-    const left = Math.min(Math.max(chosen.left, margin), viewportWidth - contentRect.width - margin)
-    const top = Math.min(Math.max(chosen.top, margin), viewportHeight - contentRect.height - margin)
+    const left = Math.min(Math.max(chosen.left, margin), viewportWidth - contentWidth - margin)
+    const top = Math.min(Math.max(chosen.top, margin), viewportHeight - contentHeight - margin)
 
     this.content.style.left = `${left}px`
     this.content.style.top = `${top}px`
