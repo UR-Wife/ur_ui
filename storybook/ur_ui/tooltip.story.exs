@@ -7,6 +7,14 @@ defmodule Storybook.UrUi.Tooltip do
   def variations do
     [
       %Variation{
+        id: :bottom,
+        description: "Tooltip positioned below the trigger with a small offset",
+        attributes: %{id: "tooltip-bottom"},
+        slots: [
+          "<UrUi.Components.tooltip_trigger>Hover</UrUi.Components.tooltip_trigger><UrUi.Components.tooltip_content id=\"tooltip-bottom-content\" side={:bottom} side_offset={4}>Information</UrUi.Components.tooltip_content>"
+        ]
+      },
+      %Variation{
         id: :default,
         description: "Tooltip shown on the top, revealed instantly",
         attributes: %{id: "tooltip-default"},
@@ -20,14 +28,6 @@ defmodule Storybook.UrUi.Tooltip do
         attributes: %{id: "tooltip-delayed", delay_duration: 100},
         slots: [
           "<UrUi.Components.tooltip_trigger>Hover</UrUi.Components.tooltip_trigger><UrUi.Components.tooltip_content id=\"tooltip-delayed-content\" side={:top}>Add to library</UrUi.Components.tooltip_content>"
-        ]
-      },
-      %Variation{
-        id: :bottom,
-        description: "Tooltip positioned below the trigger with a small offset",
-        attributes: %{id: "tooltip-bottom"},
-        slots: [
-          "<UrUi.Components.tooltip_trigger>Hover</UrUi.Components.tooltip_trigger><UrUi.Components.tooltip_content id=\"tooltip-bottom-content\" side={:bottom} side_offset={4}>Information</UrUi.Components.tooltip_content>"
         ]
       }
     ]
